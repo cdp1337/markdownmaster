@@ -44,9 +44,10 @@ CMS.js supports two website modes, Github and Server. Host your website on Githu
 
 1. Clone the [starter repo](https://github.com/chrisdiana/cms.js-starter): `git clone https://github.com/chrisdiana/cms.js-starter.git` or download the [latest release here](https://github.com/chrisdiana/cms.js/releases/latest)
 2. Configure `js/config.js` to your liking
-3. Make sure to set your Github settings in `js/config.js` if using Github mode
-4. If using Github mode, create a new branch from your master or working branch called `gh-pages` (Github's default branch for hosting)
-5. Visit your site! (which should be located at `https://yourusername.github.io/cms.js-starter`)
+3. Configure `.htaccess` to your web URL path if installed in a subdirectory
+4. Make sure to set your Github settings in `js/config.js` if using Github mode
+5. If using Github mode, create a new branch from your master or working branch called `gh-pages` (Github's default branch for hosting)
+6. Visit your site! (which should be located at `https://yourusername.github.io/cms.js-starter`)
 
 
 ## CDN
@@ -112,3 +113,19 @@ All forms of contribution are welcome: bug reports, bug fixes, pull requests and
 ## List of contributors
 
 You can find the list of contributors [here](https://github.com/chrisdiana/cms.js/graphs/contributors).
+
+
+## Building
+
+### Instructions for Windows
+
+@todo, (I don't have windows, sorry)
+
+### Instructions for Debian/Ubuntu
+
+```bash
+sudo apt install npm
+# from within the cms.js project directory,
+NODE_ENV=dev npm install
+sudo a2enmod include rewrite
+```

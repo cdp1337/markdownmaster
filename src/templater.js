@@ -40,14 +40,16 @@ export function loadTemplate(url, data, callback) {
  * @param {string} layout - Filename of layout.
  * @param {object} data - Data passed to template.
  */
-export function renderLayout(layout, config, data) {
+export function renderLayout(layout, config, data, callback) {
   config.container.innerHTML = '';
-  var url = [config.layoutDirectory, '/', layout, '.html'].join('');
+  var url = [config.webpath, '/', config.layoutDirectory, '/', layout, '.html'].join('');
   loadTemplate(url, data, (success, error) => {
     if (error) {
       handleMessage(msg['LAYOUT_LOAD_ERROR']);
+      callback(null, error);
     } else {
       config.container.innerHTML = success;
+      callback('rendered', null);
     }
   });
 }

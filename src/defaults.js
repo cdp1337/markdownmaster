@@ -20,6 +20,8 @@ const defaults = {
   messageClassName: 'cms-messages',
   onload: () => {},
   onroute: () => {},
+  webpath: '/',
+  titleSearchResults: 'Search Results',
 };
 
 export default defaults;

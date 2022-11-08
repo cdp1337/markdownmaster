@@ -12,7 +12,7 @@
     <% if(data.tags) { %>
       <% data.tags.forEach(function(tag) { %>
         <% if(tag) { %>
-          <a href="#/posts?tag=<%= tag %>" class="post-tag"><%= tag %></a>
+          <a href="<!--#echo var=webpath -->posts.html?tag=<%= tag %>" class="post-tag"><%= tag %></a>
         <% } %>
       <% }) %>
     <% } %>

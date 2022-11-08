@@ -1,5 +1,5 @@
 <!-- Post List Template -->
-<div class="posts-list fade-in">
+<main class="posts-list fade-in">
   <% data.posts.forEach(function(post) { %>
     <% if(!post.draft) { %>
       <article class="post">
@@ -7,6 +7,13 @@
           <a href="<%= post.permalink %>"><%= post.title %></a>
         </h1>
         <time class="post-date"><%= post.date %></time>
+
+        <% if(post.image) { %>
+          <div class="post-image">
+            <img src="<%= post.image %>" alt="<%= post.title %>" style="max-width:200px; max-height:200px;">
+          </div>
+        <% } %>
+
         <div class="post-content">
           <% if(post.excerpt) { %>
             <p><%= post.excerpt %></p>
@@ -15,4 +22,12 @@
       </article>
     <% } %>
   <% }) %>
-</div>
+</main>
+<aside>
+  <input type="search" id="search" data-type="posts" placeholder="Search for Post..."/>
+  <hr/>
+
+  <% data.getTags().forEach(function(tag) { %>
+    <a href="?tag=<%= encodeURIComponent(tag.name) %>" class="post-tag"><%= tag.name %> (<%= tag.count %>)</a>
+  <% }) %>
+</aside>

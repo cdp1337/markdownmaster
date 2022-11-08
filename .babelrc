@@ -3,5 +3,5 @@
     ["@babel/env", {
       "modules": false
     }]
-  ],
+  ]
 }

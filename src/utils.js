@@ -11,9 +11,10 @@ export function get(url, callback) {
   req.onreadystatechange = function() {
     if (req.readyState === 4) {
       if (req.status === 200) {
-        callback(req.response, false);
+        // Add support for returning the Last-Modified header for lazy timestamps
+        callback(req.response, false, req.getResponseHeader('Last-Modified'));
       } else {
-        callback(req, req.statusText);
+        callback(req, req.statusText, null);
       }
     }
   };
@@ -71,20 +72,6 @@ export function isValidFile(fileUrl, extension) {
 }
 
 /**
- * Get URL paths without parameters.
- * @function
- * @returns {string} URL Path
- */
-export function getPathsWithoutParameters() {
-  return window.location.hash.split('/').map((path) => {
-    if (path.indexOf('?') >= 0) {
-      path = path.substring(0, path.indexOf('?'));
-    }
-    return path;
-  }).filter((path) => { return path !== '#'; });
-}
-
-/**
  * Get URL parameter by name.
  * @function
  * @param {string} name - Name of parameter.
@@ -129,5 +116,6 @@ export function getDatetime(dateStr) {
  * @returns {string} filename
  */
 export function getFilenameFromPath(filepath) {
-  return filepath.split('\\').pop().split('/').pop();
+  //return filepath.split('\\').pop().split('/').pop();
+  return filepath.split('\\').pop();
 }

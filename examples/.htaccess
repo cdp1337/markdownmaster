@@ -1,0 +1,24 @@
+<IfModule mod_rewrite.c>
+    Options -Indexes +FollowSymLinks +SymLinksIfOwnerMatch +Includes
+	RewriteEngine On
+
+    # Set these two lines to the value of config.webpath
+    SetEnv webpath /
+	RewriteBase /
+
+    # Required for SEO and crawler access to the source content of the various pages.
+    # will redirect the request to the source file so content can be provided
+    RewriteCond %{HTTP_USER_AGENT} ^.*(craftbot|download|extract|stripper|sucker|ninja|clshttp|webspider|leacher|collector|grabber|webpictures|curl|GoogleBot|bingbot|linkedinbot|mediapartners-google|GoogleImageProxy|ysearch/slurp|Baiduspider).*$ [NC]
+	RewriteCond %{REQUEST_URI} /posts/.+\.html
+	RewriteRule posts/(.+)\.html posts/$1.md [L]
+
+    # Required for path translation,
+    # will resolve /posts/blah.html to the application index
+	RewriteCond %{SCRIPT_FILENAME} !-f
+	RewriteCond %{SCRIPT_FILENAME} !-d
+    RewriteRule ^(.*) index.html?path=%{REQUEST_URI}
+
+    # Not technically required, but makes templates easier to manage by providing the webpath.
+	AddType text/html .html
+	AddOutputFilter INCLUDES .html
+</IfModule>

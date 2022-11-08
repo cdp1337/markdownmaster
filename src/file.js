@@ -12,7 +12,7 @@ import Markdown from './markdown';
 class File {
 
   constructor(url, type, layout, config) {
-    this.url = type === 'SERVER' ? type + '/' + url : url;
+    this.url = url;
     this.type = type;
     this.layout = layout;
     this.config = config;
@@ -21,6 +21,7 @@ class File {
     this.name;
     this.extension;
     this.title;
+    this.seotitle;
     this.excerpt;
     this.date;
     this.datetime;
@@ -28,6 +29,7 @@ class File {
     this.body;
     this.permalink;
     this.tags;
+    this.image;
   }
 
   /**
@@ -40,9 +42,16 @@ class File {
   * attribute to the file content.
   */
   getContent(callback) {
-    get(this.url, (success, error) => {
+    get(this.url, (success, error, lastModified) => {
       if (error) callback(success, error);
       this.content = success;
+
+      // Patch to retrieve the last modified timestamp automatically from the server.
+      // If "datetime" is assigned in the content, it'll override the server header.
+      if (lastModified) {
+        this.datetime = lastModified;
+      }
+
       // check if the response returns a string instead
       // of an response object
       if (typeof this.content === 'string') {
@@ -62,8 +71,17 @@ class File {
     if (yaml) {
       var attributes = {};
       yaml.split(/\n/g).forEach((attributeStr) => {
-        var attribute = attributeStr.split(':');
-        attribute[1] && (attributes[attribute[0].trim()] = attribute[1].trim());
+        // Fix https://github.com/chrisdiana/cms.js/issues/95 by splitting ONLY on the first occurrence of a colon.
+        if ( attributeStr.indexOf(':') !== -1) {
+          let attPos = attributeStr.indexOf(':'),
+            attKey = attributeStr.substr(0, attPos).trim(),
+            attVal = attributeStr.substr(attPos +1).trim();
+
+          if (attVal !== '') {
+            // Only retrieve this key/value if the value is not an empty string.  (false is allowed)
+            attributes[attKey] = attVal;
+          }
+        }
       });
       extend(this, attributes, null);
     }
@@ -78,7 +96,9 @@ class File {
    */
   setListAttributes() {
     this.config.listAttributes.forEach((attribute) => {
-      if (this.hasOwnProperty(attribute) && this[attribute]) {
+      // Keep ESLint from complaining
+      // ref https://ourcodeworld.com/articles/read/1425/how-to-fix-eslint-error-do-not-access-objectprototype-method-hasownproperty-from-target-object-no-prototype-builtins
+      if (Object.getOwnPropertyDescriptor(this, attribute) && this[attribute]) {
         this[attribute] = this[attribute].split(',').map((item) => {
           return item.trim();
         });
@@ -101,7 +121,10 @@ class File {
    * @method
    */
   setPermalink() {
-    this.permalink = ['#', this.type, this.name].join('/');
+    this.permalink = 
+      this.config.mode === 'GITHUB' ? 
+        ['#', this.type, this.name].join('/') : 
+        this.url.substring(0, this.url.length - this.config.extension.length) + '.html';
   }
 
   /**
@@ -114,13 +137,19 @@ class File {
   setDate() {
     var dateRegEx = new RegExp(this.config.dateParser);
     if (this.date) {
+      // Date is set from markdown via the "date" inline header
       this.datetime = getDatetime(this.date);
       this.date = this.config.dateFormat(this.datetime);
     } else if (dateRegEx.test(this.url)) {
-      this.date = dateRegEx.exec(this.url);
+      // Date is retrieved from file URL
+      this.date = dateRegEx.exec(this.url)[0];
       this.datetime = getDatetime(this.date);
       this.date = this.config.dateFormat(this.datetime);
-    }
+    } else if (this.datetime) {
+      // Lastmodified is retrieved from server response headers or set from the front content
+      this.datetime = getDatetime(this.datetime);
+      this.date = this.config.dateFormat(this.datetime);
+    } 
   }
 
   /**
@@ -162,12 +191,43 @@ class File {
   }
 
   /**
+   * Check if this file matches a given query
+   * 
+   * @param {string} query Query to check if this file matches against
+   * @returns {boolean}
+   */
+  matchesSearch(query) {
+    let words = query.toLowerCase().split(' '),
+      found = true;
+    
+    words.forEach(word => {
+      if (
+        this.content.toLowerCase().indexOf(word) === -1 &&
+        this.title.toLowerCase().indexOf(word) === -1
+      ) {
+        // This keyword was not located anywhere, matches need to be complete when multiple words are provided.
+        found = false;
+        return false;
+      }
+    });
+
+    return found;
+  }
+
+  /**
    * Renders file.
    * @method
    * @async
    */
-  render() {
-    return renderLayout(this.layout, this.config, this);
+  render(callback) {
+    if (this.seotitle) {
+      document.title = this.seotitle;
+    } else if (this.title) {
+      document.title = this.title;
+    } else {
+      document.title = 'Page';
+    }
+    return renderLayout(this.layout, this.config, this, callback);
   }
 
 }

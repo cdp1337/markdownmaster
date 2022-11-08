@@ -16,7 +16,19 @@ class FileCollection {
     this.layout = layout;
     this.config = config;
     this.files = [];
+    this.directories = [];
     this[type] = this.files;
+    this.directoriesScanned = 0;
+  }
+
+  /**
+   * Generic function to assist with debug logging without needing if ... everywhere.
+   * @param  {...any} args mixed arguments to pass
+   */
+  debuglog(...args) {
+    if (this.config.debug) {
+      console.log(...args);
+    }
   }
 
   /**
@@ -42,7 +54,7 @@ class FileCollection {
    * @returns {string} URL of file list
    */
   getFileListUrl(type, config) {
-    return (config.mode === 'GITHUB') ? getGithubUrl(type, config.github) : type;
+    return (config.mode === 'GITHUB') ? getGithubUrl(type, config.github) : this.config.webpath + type;
   }
 
   /**
@@ -52,7 +64,24 @@ class FileCollection {
    * @returns {string} File URL
    */
   getFileUrl(file, mode, type) {
-    return (mode === 'GITHUB') ? file['download_url'] : `${type}/${getFilenameFromPath(file.getAttribute('href'))}`;
+    if (mode === 'GITHUB') {
+      return file['download_url'];
+    } else {
+      let href = getFilenameFromPath(file.getAttribute('href'));
+      if (href[0] === '/') {
+        // Absolutely resolved paths should be returned unmodified
+        return href;
+      } else {
+        // Relatively linked URLs get appended to the parent directory
+        if (type[type.length - 1] === '/') {
+          // parent directory ends in a trailing slash
+          return type + href;
+        } else {
+          // No trailing slash, so adjust as necessary
+          return type + '/' + href;
+        }
+      }
+    }
   }
 
   /**
@@ -85,16 +114,44 @@ class FileCollection {
    * @param {function} callback - Callback function
    */
   getFiles(callback) {
-    get(this.getFileListUrl(this.type, this.config), (success, error) => {
+    this.directories = [this.getFileListUrl(this.type, this.config)];
+
+    this.scanDirectory(callback, this.directories[0], true);
+  }
+
+  /**
+   * Perform the underlying directory lookup
+   * @method
+   * @async
+   * @param {function} callback - Callback function
+   * @param {string} directory - Directory URL to scan
+   * @param {boolean} recurse - Set to FALSE to prevent further recursion
+   */
+  scanDirectory(callback, directory, recurse) {
+    this.debuglog('Scanning directory', directory);
+
+    get(directory, (success, error) => {
       if (error) callback(success, error);
+
       // find the file elements that are valid files, exclude others
       this.getFileElements(success).forEach((file) => {
-        var fileUrl = this.getFileUrl(file, this.config.mode, this.type);
+        var fileUrl = this.getFileUrl(file, this.config.mode, directory);
         if (isValidFile(fileUrl, this.config.extension)) {
+          // Regular markdown file
           this.files.push(new File(fileUrl, this.type, this.layout.single, this.config));
+        } else if (recurse && this.config.mode !== 'GITHUB' && fileUrl[fileUrl.length - 1] === '/' && fileUrl !== this.config.webpath) {
+          // in SERVER mode, support recursing ONE directory deep.
+          // Allow this for any directory listing NOT absolutely resolved (they will just point back to the parent directory)
+          this.directories.push(fileUrl);
+          this.scanDirectory(callback, fileUrl, false);
         }
       });
-      callback(success, error);
+
+      this.directoriesScanned++;
+
+      if (this.directoriesScanned === this.directories.length) {
+        callback(success, error);
+      }
     });
   }
 
@@ -123,14 +180,11 @@ class FileCollection {
   /**
    * Search file collection by attribute.
    * @method
-   * @param {string} attribute - Attribue in file to search.
    * @param {string} search - Search query.
-   * @returns {object} File object
    */
-  search(attribute, search) {
+  search(search) {
     this[this.type] = this.files.filter((file) => {
-      var attr = file[attribute].toLowerCase().trim();
-      return attr.indexOf(search.toLowerCase().trim()) >= 0;
+      return file.matchesSearch(search);
     });
   }
 
@@ -146,7 +200,7 @@ class FileCollection {
    * Get files by tag.
    * @method
    * @param {string} query - Search query.
-   * @returns {array} Files array
+   * @returns {File[]} Files array
    */
   getByTag(query) {
     this[this.type] = this.files.filter((file) => {
@@ -159,15 +213,56 @@ class FileCollection {
   }
 
   /**
+   * Get all tags located form this collection
+   * 
+   * Each set will contain the properties `name` and `count`
+   * 
+   * @returns {Object[]}
+   */
+  getTags() {
+    let tags = [],
+      tagNames = [];
+    
+    this.files.forEach(file => {
+      if (file.tags) {
+        file.tags.forEach(tag => {
+          let pos = tagNames.indexOf(tag);
+          if (pos === -1) {
+            // New tag discovered
+            tags.push({name: tag, count: 1});
+            tagNames.push(tag);
+          }
+          else {
+            // Existing tag
+            tags[pos].count ++;
+          }
+        });
+      }
+    });
+
+    return tags;
+  }
+
+  /**
    * Get file by permalink.
    * @method
    * @param {string} permalink - Permalink to search.
    * @returns {object} File object.
    */
   getFileByPermalink(permalink) {
-    return this.files.filter((file) => {
-      return file.permalink === permalink;
-    })[0];
+
+    this.debuglog('Retrieving file by permalink', permalink);
+
+    let foundFiles = this.files.filter((file) => {
+      return file.permalink === permalink || 
+        file.permalink === this.config.webpath + permalink;
+    });
+
+    if (foundFiles.length === 0) {
+      throw 'Requested file could not be located';
+    }
+    
+    return foundFiles[0];
   }
 
   /**
@@ -176,8 +271,13 @@ class FileCollection {
    * @async
    * @returns {string} Rendered layout
    */
-  render() {
-    return renderLayout(this.layout.list, this.config, this);
+  render(callback) {
+    if (this.layout.title) {
+      document.title = this.layout.title;
+    } else {
+      document.title = 'Listing';
+    }
+    return renderLayout(this.layout.list, this.config, this, callback);
   }
 
 }
