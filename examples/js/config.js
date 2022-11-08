@@ -45,7 +45,7 @@ var config = {
   // and single layout template that will determine how the file will be rendered.
   types: [
     {
-    // for example, layouts/post-list.html
+      // for example, layouts/post-list.html
       name: 'posts',
       layout: { 
         list: 'post-list', 
@@ -80,7 +80,7 @@ var site = CMS(config);
  * @method
  */
 site.onload = function() {
-	this.debuglog('CMS initialized and ready to run user-specific code!');
+  this.debuglog('CMS initialized and ready to run user-specific code!');
 }
 
 /**
@@ -99,16 +99,16 @@ site.onload = function() {
  * @param {string} view.type Content type selected
  */
 site.onroute = function(view) {
-	this.debuglog('Page being displayed', view);
+  this.debuglog('Page being displayed', view);
 
   let search = document.getElementById('search');
-	if (search) {
-		search.addEventListener('keyup', e => {
-			if (e.key === 'Enter') {
-				this.search(e.target.dataset.type, e.target.value);
-			}
-		});
-	}
+  if (search) {
+    search.addEventListener('keyup', e => {
+      if (e.key === 'Enter') {
+        this.search(e.target.dataset.type, e.target.value);
+      }
+    });
+  }
 }
 
 site.init();
