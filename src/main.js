@@ -6,5 +6,9 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 import CMS from './cms';
+import PageBodyClass from './addons/pagebodyclass';
+
+// Load addons
+new PageBodyClass();
 
 export default (options) => new CMS(window, options);
