@@ -59,14 +59,23 @@ class CMS {
           // check for hash changes
           this.view.addEventListener('hashchange', this.route.bind(this), false);
           // AND check for location.history changes (for SEO reasons)
-          this.view.addEventListener('popstate', (event) => { console.log('popping', event); this.route(); });
+          this.view.addEventListener('popstate', () => { this.route(); });
           // start router by manually triggering hash change
           //this.view.dispatchEvent(new HashChangeEvent('hashchange'));
+
+          // Backwards compatibility with 2.0.1 events
+          if (this.config.onload && typeof(this.config.onload) === 'function') {
+            document.addEventListener('cms:load', () => { this.config.onload(); });
+          }
+          if (this.config.onroute && typeof(this.config.onroute) === 'function') {
+            document.addEventListener('cms:route', () => { this.config.onroute(); });
+          }
+
           this.route();
           // register plugins and run onload events
           this.ready = true;
           this.registerPlugins();
-          this.onload();
+          document.dispatchEvent(new CustomEvent('cms:load', {detail: {cms: this}}));
         });
       } else {
         handleMessage(this.config.debug, msg['ELEMENT_ID_ERROR']);
@@ -112,28 +121,6 @@ class CMS {
       return false;
     }
 
-    console.log(targetHref);
-    e.preventDefault();
-  }
-
-  /**
-   * Function called automatically upon initialization
-   * by default will just call config.onload to preserve backwards compatibility
-   * 
-   * @method
-   */
-  onload() {
-    this.config.onload();
-  }
-
-  /**
-   * Function called when routing to a new page
-   * by default will just call config.onroute to preserve backwards compatibility
-   * 
-   * @method
-   */
-  onroute() {
-    this.config.onroute();
   }
 
   /**
@@ -210,7 +197,7 @@ class CMS {
       type = paths[0],
       filename = paths.splice(1).join('/'),
       collection = this.collections[type],
-      query = getParameterByName('s') || '',
+      search = getParameterByName('s') || '',
       tag = getParameterByName('tag') || '',
       mode = '',
       file = null;
@@ -232,15 +219,23 @@ class CMS {
           file = collection.getFileByPermalink([type, filename.trim()].join('/'));
           mode = 'single';
           file.render(() => {
-            this.onroute({
-              type, file, mode, query, tag, collection
-            });
+            document.dispatchEvent(
+              new CustomEvent(
+                'cms:route', 
+                {
+                  detail: {
+                    cms: this,
+                    type, file, mode, search, tag, collection
+                  }
+                }
+              )
+            );
           });
         } else if (collection) {
           // List view
-          if (query) {
+          if (search) {
             // Check for queries
-            collection.search(query);
+            collection.search(search);
           } else if (tag) {
             // Check for tags
             collection.getByTag(tag);
@@ -251,22 +246,38 @@ class CMS {
 
           mode = 'listing';
           collection.render(() => {
-            this.onroute({
-              type, file, mode, query, tag, collection
-            });
+            document.dispatchEvent(
+              new CustomEvent(
+                'cms:route', 
+                {
+                  detail: {
+                    cms: this,
+                    type, file, mode, search, tag, collection
+                  }
+                }
+              )
+            );
           });
         } else {
           throw 'Unknown request';
         }
       }
       catch (e) {
+        mode = 'error';
         console.error(e);
         renderLayout(this.config.errorLayout, this.config, {}, () => {
-          this.onroute({
-            type, file, mode, query, tag, collection
-          });
+          document.dispatchEvent(
+            new CustomEvent(
+              'cms:route', 
+              {
+                detail: {
+                  cms: this,
+                  type, file, mode, search, tag, collection
+                }
+              }
+            )
+          );
         });
-        mode = 'error';
       }
     }
     

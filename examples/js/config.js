@@ -73,42 +73,34 @@ var site = CMS(config);
 /**
  * Called immediately upon successful initialization of the CMS
  * 
- * When using function() syntax, 'this' will point to the CMS object,
- * arrow function syntax 'site.onload = () => { ... }' will be anonymous and detached.
- * 
- * Either option is acceptable, just depending on your needs/preferences.
- * @method
+ * @param {CMS} event.detail.cms The CMS object passed for reference
  */
-site.onload = function() {
-  this.debuglog('CMS initialized and ready to run user-specific code!');
-}
+document.addEventListener('cms:load', event => {
+  event.detail.cms.debuglog('CMS initialized and ready to run user-specific code!', event.detail.cms);
+});
 
 /**
  * Called after any page load operation
  * 
- * When using function() syntax, 'this' will point to the CMS object,
- * arrow function syntax 'site.onroute = () => { ... }' will be anonymous and detached.
- * 
- * Either option is acceptable, just depending on your needs/preferences.
- * @method
- * @param {FileCollection[]|null} view.collection Collection of files to view for listing pages
- * @param {File|null} view.file Single file to view when available
- * @param {string} view.mode Type of view, usually either "list", "single", or error.
- * @param {string} view.query Any search query
- * @param {string} view.tag Any tag selected to view
- * @param {string} view.type Content type selected
+ * @param {CMS} event.detail.cms CMS object for reference if needed
+ * @param {FileCollection[]|null} event.detail.collection Collection of files to view for listing pages
+ * @param {File|null} event.detail.file Single file to view when available
+ * @param {string} event.detail.mode Type of view, usually either "list", "single", or error.
+ * @param {string} event.detail.search Any search query
+ * @param {string} event.detail.tag Any tag selected to view
+ * @param {string} event.detail.type Content type selected
  */
-site.onroute = function(view) {
-  this.debuglog('Page being displayed', view);
+document.addEventListener('cms:route', event => {
+  event.detail.cms.debuglog('Page being displayed', event.detail);
 
   let search = document.getElementById('search');
   if (search) {
     search.addEventListener('keyup', e => {
       if (e.key === 'Enter') {
-        this.search(e.target.dataset.type, e.target.value);
+        event.detail.cms.search(e.target.dataset.type, e.target.value);
       }
     });
   }
-}
+});
 
 site.init();
