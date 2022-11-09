@@ -994,17 +994,32 @@ var CMS = (function () {
               // check for hash changes
               _this.view.addEventListener('hashchange', _this.route.bind(_this), false);
               // AND check for location.history changes (for SEO reasons)
-              _this.view.addEventListener('popstate', function (event) {
-                console.log('popping', event);
+              _this.view.addEventListener('popstate', function () {
                 _this.route();
               });
               // start router by manually triggering hash change
               //this.view.dispatchEvent(new HashChangeEvent('hashchange'));
+
+              // Backwards compatibility with 2.0.1 events
+              if (_this.config.onload && typeof _this.config.onload === 'function') {
+                document.addEventListener('cms:load', function () {
+                  _this.config.onload();
+                });
+              }
+              if (_this.config.onroute && typeof _this.config.onroute === 'function') {
+                document.addEventListener('cms:route', function () {
+                  _this.config.onroute();
+                });
+              }
               _this.route();
               // register plugins and run onload events
               _this.ready = true;
               _this.registerPlugins();
-              _this.onload();
+              document.dispatchEvent(new CustomEvent('cms:load', {
+                detail: {
+                  cms: _this
+                }
+              }));
             });
           } else {
             handleMessage(this.config.debug, messages['ELEMENT_ID_ERROR']);
@@ -1047,32 +1062,6 @@ var CMS = (function () {
           e.preventDefault();
           return false;
         }
-        console.log(targetHref);
-        e.preventDefault();
-      }
-
-      /**
-       * Function called automatically upon initialization
-       * by default will just call config.onload to preserve backwards compatibility
-       * 
-       * @method
-       */
-    }, {
-      key: "onload",
-      value: function onload() {
-        this.config.onload();
-      }
-
-      /**
-       * Function called when routing to a new page
-       * by default will just call config.onroute to preserve backwards compatibility
-       * 
-       * @method
-       */
-    }, {
-      key: "onroute",
-      value: function onroute() {
-        this.config.onroute();
       }
 
       /**
@@ -1156,7 +1145,7 @@ var CMS = (function () {
           type = paths[0],
           filename = paths.splice(1).join('/'),
           collection = this.collections[type],
-          query = getParameterByName('s') || '',
+          search = getParameterByName('s') || '',
           tag = getParameterByName('tag') || '',
           mode = '',
           file = null;
@@ -1179,20 +1168,23 @@ var CMS = (function () {
               file = collection.getFileByPermalink([type, filename.trim()].join('/'));
               mode = 'single';
               file.render(function () {
-                _this4.onroute({
-                  type: type,
-                  file: file,
-                  mode: mode,
-                  query: query,
-                  tag: tag,
-                  collection: collection
-                });
+                document.dispatchEvent(new CustomEvent('cms:route', {
+                  detail: {
+                    cms: _this4,
+                    type: type,
+                    file: file,
+                    mode: mode,
+                    search: search,
+                    tag: tag,
+                    collection: collection
+                  }
+                }));
               });
             } else if (collection) {
               // List view
-              if (query) {
+              if (search) {
                 // Check for queries
-                collection.search(query);
+                collection.search(search);
               } else if (tag) {
                 // Check for tags
                 collection.getByTag(tag);
@@ -1202,31 +1194,37 @@ var CMS = (function () {
               }
               mode = 'listing';
               collection.render(function () {
-                _this4.onroute({
-                  type: type,
-                  file: file,
-                  mode: mode,
-                  query: query,
-                  tag: tag,
-                  collection: collection
-                });
+                document.dispatchEvent(new CustomEvent('cms:route', {
+                  detail: {
+                    cms: _this4,
+                    type: type,
+                    file: file,
+                    mode: mode,
+                    search: search,
+                    tag: tag,
+                    collection: collection
+                  }
+                }));
               });
             } else {
               throw 'Unknown request';
             }
           } catch (e) {
+            mode = 'error';
             console.error(e);
             renderLayout(this.config.errorLayout, this.config, {}, function () {
-              _this4.onroute({
-                type: type,
-                file: file,
-                mode: mode,
-                query: query,
-                tag: tag,
-                collection: collection
-              });
+              document.dispatchEvent(new CustomEvent('cms:route', {
+                detail: {
+                  cms: _this4,
+                  type: type,
+                  file: file,
+                  mode: mode,
+                  search: search,
+                  tag: tag,
+                  collection: collection
+                }
+              }));
             });
-            mode = 'error';
           }
         }
       }
@@ -1283,12 +1281,70 @@ var CMS = (function () {
   }();
 
   /**
+   * Automatically manages classes to the body based on the current page being viewed
+   */
+  var PageBodyClass = /*#__PURE__*/_createClass(function PageBodyClass() {
+    var _this = this;
+    _classCallCheck(this, PageBodyClass);
+    // Used to track dynamic classes when browsing between pages
+    this.classes = [];
+    document.addEventListener('cms:route', function (e) {
+      var newClasses = [],
+        remClasses = [];
+      if (e.detail.type && e.detail.mode) {
+        newClasses.push(['page', e.detail.type, e.detail.mode].join('-'));
+        if (e.detail.search) {
+          newClasses.push(['page', e.detail.type, 'search'].join('-'));
+        }
+        if (e.detail.tag) {
+          newClasses.push(['page', e.detail.type, 'tag'].join('-'));
+        }
+        if (e.detail.file) {
+          // Translate the file URL to a valid class name
+          // Omit the web path prefix
+          var fileTag = e.detail.file.permalink.substring(e.detail.cms.config.webpath.length);
+          // Omit the file extension (.html)
+          fileTag = fileTag.substring(0, fileTag.length - 5)
+          // Replace slashes with dashes
+          .replaceAll('/', '-')
+          // Lowercase
+          .toLowerCase();
+          newClasses.push('page-' + fileTag);
+        }
+      }
+
+      // Strip classes which are no longer needed on the body.
+      // These are handled in bulk to minimize the number of CSS rendering required by the engine
+      _this.classes.forEach(function (c) {
+        if (newClasses.indexOf(c) === -1) {
+          remClasses.push(c);
+        }
+      });
+      if (remClasses.length > 0) {
+        var _document$body$classL;
+        (_document$body$classL = document.body.classList).remove.apply(_document$body$classL, remClasses);
+      }
+      if (newClasses.length > 0) {
+        var _document$body$classL2;
+        (_document$body$classL2 = document.body.classList).add.apply(_document$body$classL2, newClasses);
+      }
+
+      // Remember the dynamic classes for the next pageload so they can be removed if necessary
+      // otherwise browsing through different pages will simply keep adding more and more class tags.
+      _this.classes = newClasses;
+    });
+  });
+
+  /**
    * CMS.js v2.0.0
    * Copyright 2018 Chris Diana
    * https://chrisdiana.github.io/cms.js
    * Free to use under the MIT license.
    * http://www.opensource.org/licenses/mit-license.php
    */
+
+  // Load addons
+  new PageBodyClass();
   var main = (function (options) {
     return new CMS(window, options);
   });
