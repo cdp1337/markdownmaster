@@ -1,9 +1,9 @@
 {
-  "name": "@chrisdiana/cmsjs",
-  "version": "2.0.1~cdp1337-20221105",
-  "description": "The JavaScript Site Generator.",
-  "keywords": "client-side, javascript, site-generator, cms, markdown",
-  "homepage": "https://github.com/chrisdiana/cms.js",
+  "name": "@cdp1337/cmsjs",
+  "version": "2.9.9",
+  "description": "The JavaScript Site Generator, forked from Chris Diana's CMS.js",
+  "keywords": ["client-side, javascript, site-generator, cms, markdown"],
+  "homepage": "https://github.com/cdp1337/cms.js",
   "scripts": {
     "compile": "rollup -c",
     "minify": "uglifyjs dist/cms.js -m --comments /^!/ -o dist/cms.min.js",
@@ -27,14 +27,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/chrisdiana/cms.js.git"
+    "url": "git://github.com/cdp1337/cms.js.git"
   },
   "author": {
-    "name": "Chris Diana"
+    "name": "Charlie Powell"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chrisdiana/cms.js/issues"
+    "url": "https://github.com/cdp1337/cms.js/issues"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",

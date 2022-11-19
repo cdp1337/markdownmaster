@@ -76,6 +76,15 @@ class File {
           let attPos = attributeStr.indexOf(':'),
             attKey = attributeStr.substr(0, attPos).trim(),
             attVal = attributeStr.substr(attPos +1).trim();
+          
+          if (attKey === 'image') {
+            // Fix for relatively positioned images
+            // An easy way to specify images in markdown files is to list them relative to the file itself.
+            // Take the permalink (since it's already resolved), and prepend the base to the image.
+            if (attVal.indexOf('://') === -1) {
+              attVal = this.permalink.replace(/\/[^/]+$/, '/') + attVal;
+            }
+          }
 
           if (attVal !== '') {
             // Only retrieve this key/value if the value is not an empty string.  (false is allowed)

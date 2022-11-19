@@ -1,0 +1,41 @@
+NEXT
+
+  * Better debug logging support
+  * Switch to History API for page navigation
+  * Include SEO and crawler support via rewrite rules
+  * Add support for nested directories
+  * Add support for subdirectory web paths
+  * Add support for SEO page titles
+  * Add support for automatic change timestamps
+  * Fix support for images in meta attributes
+  * Add support for full text searching
+  * Add support for retrieving tags for an entire collection
+  * Add support for dynamic body classes
+  * Include marked.js for better markdown support
+  * Better nginx support
+  * Fix image URLs relative to the markdown source file in meta tags
+
+
+2.0.0 - Nov 21, 2018
+chrisdiana
+
+  * Zero dependencies (no more jQuery or Marked)
+  * Abstract types
+  * Boilerplate separated from source code
+  * Custom Templates
+  * Tagging
+  * Filtering
+  * Search
+  * Sorting
+  * Events
+  * Streamlined Config
+  * Updated Github & Server Mode
+  * Extendable Plugins
+  * Extendable Markdown Renderer
+  * Small size footprint
+
+
+1.0.0 Jan 20, 2016
+chrisdiana
+
+  * Initial release

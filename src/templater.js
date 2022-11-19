@@ -41,8 +41,8 @@ export function loadTemplate(url, data, callback) {
  * @param {object} data - Data passed to template.
  */
 export function renderLayout(layout, config, data, callback) {
-  config.container.innerHTML = '';
-  var url = [config.webpath, '/', config.layoutDirectory, '/', layout, '.html'].join('');
+  //config.container.innerHTML = '';
+  var url = [config.webpath, config.layoutDirectory, '/', layout, '.html'].join('');
   loadTemplate(url, data, (success, error) => {
     if (error) {
       handleMessage(msg['LAYOUT_LOAD_ERROR']);

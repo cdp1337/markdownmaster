@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 
 const { name, version, license, author, homepage } = require('./package.json');
 
-const banner = `/*! ${name} v${version} | ${license} (c) ${new Date().getFullYear()} ${author.name} | ${homepage} */`;
+const banner = `/*! ${name} v${version} | ${license} (c) ${new Date().getFullYear()} ${author.name}, (c) 2021 Chris Diana | ${homepage} */`;
 
 const outputs = [];
 

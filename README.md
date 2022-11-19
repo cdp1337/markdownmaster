@@ -3,6 +3,9 @@
 CMS.js is a fully **C**lient-side, JavaScript **M**arkdown **S**ite generator in the spirit of [Jekyll](https://github.com/jekyll/jekyll) that uses plain ol' HTML, CSS and JavaScript to generate your website. CMS.js is like a file-based CMS.
 It takes your content, renders Markdown and delivers a complete website in Single-Page App fashion...without the aid of server-side scripting (no Node.js, PHP, Ruby, etc.).
 
+This fork is a HEAVILY modified copy of [Chris Diana's original](https://github.com/chrisdiana/cms.js) creation with a BUNCH of new features added.  **Warning**, it has a bunch of features added and is significantly larger in filesize, approximately 60kB up from 10Kb.
+
+
 ![CMS.js Screenshot](https://raw.githubusercontent.com/chrisdiana/cms.js/gh-pages/img/screenshot.png)
 
 
@@ -22,15 +25,19 @@ It takes your content, renders Markdown and delivers a complete website in Singl
 [Website](http://chrisdiana.github.io/cms.js/) • [Docs](https://github.com/chrisdiana/cms.js/wiki) • [Newsletter](http://eepurl.com/dN-e3j) • [Demo](http://chrisdiana.github.io/cms.js/demo)
 
 
-## New Features in Version 2
+## Features
 
 * Zero dependencies
-* Abstract types
-* Custom Templates
-* Search, Filtering, Tagging and Sorting
-* Github & Server Mode
-* Extendable Markdown Renderer and Plugins
-* Super small footprint - 10kb minified
+* Abstract content types
+* Custom templates
+* Search, filtering, tagging and sorting
+* Github, Apache, Nginx, Mail-in-a-box, and Nextcloud support
+* Small footprint - about 60kb minified
+* [marked.js](https://github.com/markedjs/marked) embedded
+* Automatic body classes based on page
+* Native JS events
+* Full [History API](https://developer.mozilla.org/en-US/docs/Web/API/History) support
+* Crawler and SEO support for most content
 
 
 ## Demo
@@ -42,38 +49,20 @@ Check out a working [demo here](http://chrisdiana.github.io/cms.js/demo)
 
 CMS.js supports two website modes, Github and Server. Host your website on Github using Github Pages (similar to Jekyll) or use Server mode if you choose to self host your content. Learn more about server mode and setup [here](https://github.com/chrisdiana/cms.js/wiki/Server-Mode).
 
-1. Clone the [starter repo](https://github.com/chrisdiana/cms.js-starter): `git clone https://github.com/chrisdiana/cms.js-starter.git` or download the [latest release here](https://github.com/chrisdiana/cms.js/releases/latest)
-2. Configure `js/config.js` to your liking
-3. Configure `.htaccess` to your web URL path if installed in a subdirectory
-4. Make sure to set your Github settings in `js/config.js` if using Github mode
-5. If using Github mode, create a new branch from your master or working branch called `gh-pages` (Github's default branch for hosting)
-6. Visit your site! (which should be located at `https://yourusername.github.io/cms.js-starter`)
-
-
-## CDN
-
-You can also get started using the CDN:
-```
-<script src="https://unpkg.com/@chrisdiana/cmsjs"></script>
-```
-
-
-## Themes
-
-Try out CMS.js with a variety of popular CSS frameworks such as Bootstrap, Foundation, and Bulma. Check out all the themes [available here](https://chrisdiana.github.io/cms.js-themes).
-
-![CMS.js Themes](./img/themes.png)
+1. Download the [latest release](https://github.com/cdp1337/cms.js/releases/latest)
+2. Setup environment, refer to specific documentation for [Apache2](INSTALL.apache.md) and [Mail-in-a-Box](INSTALL.mailinabox.md)
+3. Configure `js/config.js` to your liking
 
 
 ## Documentation
-Check out the rest of the documentation on how to use configuration settings, options, etc. at the [Wiki](https://github.com/chrisdiana/cms.js/wiki).
+Check out the rest of the documentation on how to use configuration settings, options, etc. at the @TODO
 
 
 ## How it works
 
 **Github Mode**
 
-In Github mode, CMS.js uses the Github API to get the content of your repo and serve them as a full website.
+In Github mode, CMS.js uses the Github API to get the content of your repo and serve them as a full website. (@TODO needs tested on new version)
 
 **Server Mode**
 
@@ -92,17 +81,11 @@ Once CMS.js is installed and running, simply copy all of your posts from your Je
 Copy all of your Markdown pages from your Jekyll projects root folder into your designated CMS.js pages folder.
 
 
-## Coming soon!
-
-* Pagination
-* Template caching
-* Loader
-* CLI Utilities
-
 
 ## Thanks!
 
 * [Poole](https://github.com/poole/poole) (*Default Theme*)
+* [Chris Diana](https://github.com/chrisdiana) maintainer of original version of CMS.js
 
 
 ## Contributing
@@ -117,15 +100,39 @@ You can find the list of contributors [here](https://github.com/chrisdiana/cms.j
 
 ## Building
 
+Below are instructions on how to build this application from source.  **NOTE**, this is NOT required for deploying a production version, but instead for compiling your own version from source.
+
+
 ### Instructions for Windows
 
 @todo, (I don't have windows, sorry)
 
-### Instructions for Debian/Ubuntu
+### Instructions for Ubuntu 22.04 LTS
 
 ```bash
-sudo apt install npm
-# from within the cms.js project directory,
+# Install dependencies
+sudo apt install npm git
+# Retrieve development build
+git clone git@github.com:cdp1337/cms.js.git
+# Switch to the directory where the development build is checked out
+cd cms.js
 NODE_ENV=dev npm install
-sudo a2enmod include rewrite
 ```
+
+### Node Scripts (all environments)
+
+Watch for updates within src and compile dist/cms.js
+
+`npm run watch`
+
+Minify dist/cms.js into minified version (NOT included in watch)
+
+`npm run minify`
+
+Compile code into example site
+
+`npm run example`
+
+Full build: compile, minify, and example (useful for packaging)
+
+`npm run build`

@@ -19,6 +19,9 @@ class CMS {
     this.state;
     this.view = view;
     this.config = Object.assign({}, defaults, options);
+
+    // Link to window for global functions
+    view.CMS = this;
   }
 
   /**

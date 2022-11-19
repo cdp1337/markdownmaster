@@ -136,10 +136,24 @@ class FileCollection {
       // find the file elements that are valid files, exclude others
       this.getFileElements(success).forEach((file) => {
         var fileUrl = this.getFileUrl(file, this.config.mode, directory);
+        this.debuglog('Found link ' + file + ' => ' + fileUrl);
+
         if (isValidFile(fileUrl, this.config.extension)) {
           // Regular markdown file
+          this.debuglog('Adding ' + fileUrl + ' to collection ' + this.type);
           this.files.push(new File(fileUrl, this.type, this.layout.single, this.config));
-        } else if (recurse && this.config.mode !== 'GITHUB' && fileUrl[fileUrl.length - 1] === '/' && fileUrl !== this.config.webpath) {
+        } else if (
+          // Allow recurse to be disabled
+          recurse && 
+          // Only iterate when not in github mode
+          this.config.mode !== 'GITHUB' && 
+          // skip checking '?...' sort option links
+          fileUrl[fileUrl.length - 1] === '/' && 
+          // skip top-level path
+          fileUrl !== this.config.webpath &&
+          // skip parent directory links, we're going DOWN, not UP
+          fileUrl.indexOf('/../') === -1
+        ) {
           // in SERVER mode, support recursing ONE directory deep.
           // Allow this for any directory listing NOT absolutely resolved (they will just point back to the parent directory)
           this.directories.push(fileUrl);
@@ -181,6 +195,8 @@ class FileCollection {
    * Search file collection by attribute.
    * @method
    * @param {string} search - Search query.
+   * 
+   * @todo Support multiple filters
    */
   search(search) {
     this[this.type] = this.files.filter((file) => {
@@ -197,10 +213,12 @@ class FileCollection {
   }
 
   /**
-   * Get files by tag.
+   * Filter content to display by a tag
    * @method
    * @param {string} query - Search query.
-   * @returns {File[]} Files array
+   * 
+   * @todo Refactor to "filterByTag" (nothing is actually returned here)
+   * @todo Support multiple filters
    */
   getByTag(query) {
     this[this.type] = this.files.filter((file) => {
@@ -209,6 +227,20 @@ class FileCollection {
           return tag === query;
         });
       }
+    });
+  }
+
+  /**
+   * Filter results by a URL regex
+   * 
+   * @param {string} url URL fragment/regex to filter against
+   * 
+   * @todo Support multiple filters
+   */
+  filterByPermalink(url) {
+    this[this.type] = this.files.filter((file) => {
+      let fileUrl = file.permalink.substring(this.config.webpath.length);
+      return fileUrl.match(url);
     });
   }
 
