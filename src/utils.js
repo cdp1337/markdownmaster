@@ -46,19 +46,6 @@ export function extend(target, opts, callback) {
 }
 
 /**
- * Utility function for getting a function name.
- * @function
- * @param {function} func - The function to get the name
- * @returns {string} Name of function.
- */
-export function getFunctionName(func) {
-  var ret = func.toString();
-  ret = ret.substr('function '.length);
-  ret = ret.substr(0, ret.indexOf('('));
-  return ret;
-}
-
-/**
  * Checks if the file URL with file extension is a valid file to load.
  * @function
  * @param {string} fileUrl - File URL

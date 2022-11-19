@@ -7,7 +7,7 @@
   "scripts": {
     "compile": "rollup -c",
     "minify": "uglifyjs dist/cms.js -m --comments /^!/ -o dist/cms.min.js",
-    "example": "copyfiles --flat dist/cms.min.js node_modules/marked/marked.min.js examples/js/",
+    "example": "copyfiles --flat dist/cms.min.js examples/js/",
     "build": "npm run compile && npm run minify && npm run example",
     "pack": "npm pack --pack-destination release",
     "watch": "rollup -c -w",

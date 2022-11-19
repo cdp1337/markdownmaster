@@ -14,6 +14,8 @@ NEXT
   * Include marked.js for better markdown support
   * Better nginx support
   * Fix image URLs relative to the markdown source file in meta tags
+  * Retool plugin functionality
+  * Add several plugins to core system
 
 
 2.0.0 - Nov 21, 2018

@@ -3,6 +3,9 @@ import { renderLayout } from '../templater';
 
 export default class PageList {
   constructor() {
+  }
+  
+  init() {
     document.addEventListener('cms:route', (e) => {
       document.querySelectorAll('[data-plugin="cms:pagelist"]').forEach(el => {
         if (el.dataset.loaded !== '1') {

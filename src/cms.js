@@ -1,7 +1,7 @@
 import defaults from './defaults';
 import FileCollection from './filecollection';
 import { messages as msg, createMessageContainer, handleMessage } from './messages';
-import { getFunctionName, getParameterByName } from './utils';
+import { getParameterByName } from './utils';
 import { renderLayout } from './templater';
 
 /**
@@ -11,7 +11,7 @@ import { renderLayout } from './templater';
  */
 class CMS {
 
-  constructor(view, options) {
+  constructor(view, options, plugins) {
     this.ready = false;
     /** @property FileCollection[] */
     this.collections = {};
@@ -19,6 +19,8 @@ class CMS {
     this.state;
     this.view = view;
     this.config = Object.assign({}, defaults, options);
+    this.plugins = plugins;
+    this.pluginsInitialized = [];
 
     // Link to window for global functions
     view.CMS = this;
@@ -77,7 +79,7 @@ class CMS {
           this.route();
           // register plugins and run onload events
           this.ready = true;
-          this.registerPlugins();
+          this.debuglog('System plugins available:', Object.keys(this.plugins));
           document.dispatchEvent(new CustomEvent('cms:load', {detail: {cms: this}}));
         });
       } else {
@@ -287,18 +289,75 @@ class CMS {
   }
 
   /**
-   * Register plugins.
-   * @method
-   * @description
+   * Register and initialize a given plugin.
+   * 
    * Set up plugins based on user configuration.
+   * 
+   * @param {string} name Plugin name to register
+   * @param {Object} plugin Plugin class to initialize
    */
-  registerPlugins() {
-    this.config.plugins.forEach((plugin) => {
-      const name = getFunctionName(plugin);
-      if (!this[name]) {
-        this[name] = plugin;
+  registerPlugins(name, plugin) {
+    if (this.pluginsInitialized.indexOf(name) !== -1) {
+      // Only register a plugin if it has not already been initialized, to prevent unexpected issues
+      console.error('Plugin "' + name + '" already initialized!  Unable to register override');
+    } else {
+      // Plugin not initialized yet, it can be safely loaded.
+      this.plugins[name] = plugin;
+      this.plugins[name].init();
+      this.pluginsInitialized.push(name);
+    }
+  }
+
+  /**
+   * Enable and initialize a plugin
+   * 
+   * @param {string|array} name Name (or names) of plugin to enable and initialize
+   */
+  enablePlugin(name) {
+    if (typeof(name) === 'string') {
+      // Single plugin to enable, (expected behaviour)
+
+      if (typeof(this.plugins[name]) === 'undefined') {
+        // If the plugin is not registered, nothing to enable.
+        console.error('Unable to load plugin "' + name + '", not registered as a valid plugin');
+      } else if(this.pluginsInitialized.indexOf(name) !== -1) {
+        // Plugin already initialized, don't double-init code to prevent unexpected issues
+        console.warn('Plugin "' + name + '" already initialized, skipping init');
+      } else {
+        // Initialize the plugin, it'll handle whatever logic necessary.
+        try {
+          this.plugins[name].init();
+          this.pluginsInitialized.push(name);
+          this.debuglog('Initialized plugin "' + name + '"');
+        } catch(e) {
+          console.error('Unable to load plugin "' + name + '" due to an unhandled exception');
+          this.debuglog(e);
+        }
+        
       }
-    });
+    } else {
+      // Support multiple plugins (just references back on the same method)
+      name.forEach(n => {
+        this.enablePlugin(n);
+      });
+    }
+  }
+
+  /**
+   * Get a registered plugin
+   * 
+   * @param {string} name Plugin name to retrieve
+   * @returns {Object} Registered plugin
+   */
+  getPlugin(name) {
+    if (typeof(this.plugins[name]) === 'undefined') {
+      // If the plugin is not registered, but return an Object so it doesn't completely break.
+      console.error('Unable to retrieve plugin "' + name + '", not registered as a valid plugin');
+      return new Object();
+    } else {
+      // Plugin located, return!
+      return this.plugins[name];
+    }
   }
 
   /**
