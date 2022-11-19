@@ -23,7 +23,8 @@
   "files": [
     "src",
     "dist/*.js",
-    "examples"
+    "examples",
+    "CHANGELOG.md"
   ],
   "repository": {
     "type": "git",

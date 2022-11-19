@@ -28,6 +28,6 @@
   <hr/>
 
   <% data.getTags().forEach(function(tag) { %>
-    <a href="?tag=<%= encodeURIComponent(tag.name) %>" class="post-tag"><%= tag.name %> (<%= tag.count %>)</a>
+    <a href="<%= tag.url %>" class="post-tag"><%= tag.name %> (<%= tag.count %>)</a>
   <% }) %>
 </aside>

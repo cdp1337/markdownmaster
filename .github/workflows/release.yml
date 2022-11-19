@@ -1,0 +1,62 @@
+name: Release Artifacts
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build_release:
+    name: build_release
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          fetch-depth: 0
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      # Install dependencies in a ci mode
+      - run: npm ci
+      # Check for issues and compile the base code
+      - run: npm run compile
+      # Minify the application (to ensure minification works without error)
+      - run: npm run minify
+      # Copy to examples
+      - run: npm run example
+      # Build the deployable tarball
+      - run: npm run pack
+
+      - name: Set Release Version
+        run: |
+          VERSION=${{ github.event.release.tag_name }}
+          echo "VERSION=${VERSION:1}" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          draft: false
+          prerelease: false
+          release_name: CMS.js ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      
+      - name: Upload Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/cdp1337-cmsjs-${VERSION}.tgz
+          asset_name: cdp1337-cmsjs-${VERSION}.tgz
+          asset_content_type: application/gzip

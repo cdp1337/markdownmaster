@@ -7,9 +7,9 @@
     <meta name="description" content="The JavaScript Site Generator">
     <meta name="author" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-    <link rel="stylesheet" href="<!--#echo var=webpath -->css/animations.css">
-    <link rel="stylesheet" href="<!--#echo var=webpath -->css/poole.min.css">
-    <link rel="stylesheet" href="<!--#echo var=webpath -->css/poole.overrides.min.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/poole.min.css">
+    <link rel="stylesheet" href="/css/poole.overrides.min.css">
   </head>
   <body>
     <!-- Main Container -->
@@ -17,7 +17,7 @@
       <!-- Header -->
       <header class="masthead">
         <h3 class="masthead-title">
-        <a href="<!--#echo var=webpath -->" class="sitename" title="Home">
+        <a href="/" class="sitename" title="Home">
           CMS.js
         </a>
         <small class="tagline">
@@ -27,10 +27,10 @@
         <!-- Navigation -->
         <nav class="nav">
           <ul>
-            <li><a href="<!--#echo var=webpath -->posts.html">Posts</a></li>
-            <li><a href="//github.com/chrisdiana/cms.js" target="_blank">Github</a></li>
-            <li><a href="<!--#echo var=webpath -->pages/about.html">About</a></li>
-            <li><a href="<!--#echo var=webpath -->pages/links.html">Links</a></li>
+            <li><a href="/posts.html">Posts</a></li>
+            <li><a href="https://github.com/cdp1337/cms.js" target="_blank">Github</a></li>
+            <li><a href="/pages/about.html">About</a></li>
+            <li><a href="/pages/links.html">Links</a></li>
           </ul>
         </nav>
       </header>
@@ -46,11 +46,9 @@
       </footer>
     </div>
 
-    <!-- Marked markdown formatter, (more powerful than the default embedded) -->
-    <script src="<!--#echo var=webpath -->js/marked.min.js"></script>
     <!-- CMS.js -->
-    <script src="<!--#echo var=webpath -->js/cms.min.js"></script>
+    <script src="/js/cms.min.js"></script>
     <!-- Config -->
-    <script src="<!--#echo var=webpath -->js/config.js"></script>
+    <script src="/js/config.js"></script>
   </body>
 </html>
