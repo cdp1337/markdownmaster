@@ -1,9 +1,8 @@
 <IfModule mod_rewrite.c>
-	Options -Indexes +FollowSymLinks +SymLinksIfOwnerMatch +Includes
+	Options Indexes FollowSymLinks SymLinksIfOwnerMatch
 	RewriteEngine On
 
-	# Set these two lines to the value of config.webpath
-	SetEnv webpath /
+	# Set this line to the value of config.webpath
 	RewriteBase /
 
 	# Required for SEO and crawler access to the source content of the various pages.
@@ -19,8 +18,4 @@
 	RewriteCond %{SCRIPT_FILENAME} !-f
 	RewriteCond %{SCRIPT_FILENAME} !-d
 	RewriteRule ^(.*) index.html?path=%{REQUEST_URI}
-
-	# Not technically required, but makes templates easier to manage by providing the webpath.
-	AddType text/html .html
-	AddOutputFilter INCLUDES .html
 </IfModule>
