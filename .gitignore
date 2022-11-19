@@ -3,4 +3,4 @@ node_modules/*
 release/*.tgz
 *.swp
 npm-debug.log
-
+dist/*.js
