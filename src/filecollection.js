@@ -261,7 +261,11 @@ class FileCollection {
           let pos = tagNames.indexOf(tag);
           if (pos === -1) {
             // New tag discovered
-            tags.push({name: tag, count: 1});
+            tags.push({
+              name: tag,
+              count: 1,
+              url: this.config.webpath + this.type + '.html?tag=' + encodeURIComponent(tag)
+            });
             tagNames.push(tag);
           }
           else {
