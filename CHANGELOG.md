@@ -1,4 +1,4 @@
-First test with github workflows for auto-release creation
+Second test with github workflows for auto-release creation
 
 * Better debug logging support
 * Switch to History API for page navigation
