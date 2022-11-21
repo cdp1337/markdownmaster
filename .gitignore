@@ -4,3 +4,4 @@ release/*.tgz
 *.swp
 npm-debug.log
 dist/*.js
+examples/js/cms.min.js
