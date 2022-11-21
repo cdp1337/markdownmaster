@@ -21,6 +21,7 @@ site.enablePlugin(['pagebodyclass', 'pagelist']);
 ## Plugins Available
 
 | Plugin Key     | Description                                                   |
+|----------------|---------------------------------------------------------------|
 | mastodon_share | Generates share links for Mastodon                            |
 | pagebodyclass  | Dynamically sets classnames on the body based on current page |
 | pagelist       | Provides support for embedding a list of pages                |
@@ -28,7 +29,7 @@ site.enablePlugin(['pagebodyclass', 'pagelist']);
 
 
 
-### mastodon_share
+### Plugin "mastodon_share"
 
 Enables rendering of a mastodon share button on pages.  Will allow the user to enter their instance URL.
 
@@ -54,21 +55,20 @@ At the moment no parameters are configurable
 
 
 
-### pagebodyclass
+### Plugin "pagebodyclass"
 
 Register classes on the body node based on the current page.  Useful for styling page-specific themes.
 Also provides support for updating navigation entries, (as an option).
 
 **Parameters**
 
-navLinks:
-  Navigation link data, if set will be used to update link classes
+Parameters for the pagebodyclass are defined with Javascript and the `getPlugin` method.
 
-navSelector:
-  Navigation target selector, passed to querySelectorAll
-
-navActiveClass:
-  Set to the class name to denote links as "active", defaults to "active"
+| Parameter      | Required | Example                         | Description                                                             |
+|----------------|----------|---------------------------------|-------------------------------------------------------------------------|
+| navLinks       | no       | [/page-pages-/, '.nav-subpage'] | Navigation link data, if set will be used to update link classes        |
+| navSelector    | no       | ".nav"                          | Navigation target selector, passed to querySelectorAll                  |
+| navActiveClass | no       | "active"                        | Set to the class name to denote links as "active", defaults to "active" |
 
 **Example**
 
@@ -92,25 +92,27 @@ N/A (check rendered sourcecode)
 
 
 
-### pagelist
+### Plugin "pagelist"
 
-Generate a list of pages which match given parameters
+Generate a list of pages which match given parameters.
+
+Any block-level HTML node (div, main, article, aside, etc), can be used, the plugin doesn't care.
 
 **Parameters**
 
-type:
-  Type of content to retrieve
-
-layout:
-  Template file to use for rendering content, (useful if you have an embed-specific template)
-
-link:
-  URL fragment to match content against via Javascript string.match()
+| Parameter   | Required | Example                | Description                                                         |
+|-------------|----------|------------------------|---------------------------------------------------------------------|
+| data-plugin | yes      | "cms:pagelist"         | Indicates to the plugin to use this element                         |
+| data-type   | yes      | "posts,pages,etc"      | Any valid content type defined on your site                         |
+| data-layout | no       | "post-list"            | Layout to use for rendering content, useful for controlling UX      |
+| data-link   | no       | "^posts/subproject/.+" | Regex or regular string to match, will only include matchings files |
 
 **Example**
 
 ```.html
-<div data-plugin="cms:pagelist" data-type="pages" data-layout="page-list" data-link="pages/games/">Loading Content...</div>
+<div data-plugin="cms:pagelist" data-type="pages" data-layout="page-list" data-link="pages/games/">
+  Loading Content...
+</div>
 ```
 **Renders (if enabled)**
 
@@ -118,7 +120,7 @@ link:
 
 
 
-### search
+### Plugin "search"
 
 Provides support for a search box on the site
 

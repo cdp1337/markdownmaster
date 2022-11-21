@@ -12,8 +12,7 @@ Dispatched immediately upon successful initialization of the CMS
 
 **Parameters**
 
-event.detail.cms:
-  The CMS object passed for reference
+* event.detail.cms: The CMS object passed for reference
 
 **Example**
 
@@ -35,26 +34,13 @@ Dispatched after any page load operation
 
 **Parameters**
 
-event.detail.cms:
-  The CMS object passed for reference
-
-event.detail.collection:
-  Collection of files to view for listing pages
-
-event.detail.file:
-  Single file to view when available
-
-event.detail.mode:
-  Type of view, usually either "list", "single", or error.
-
-event.detail.search:
-  Any search query
-
-event.detail.tag:
-  Any tag selected to view
-
-event.detail.type:
-  Content type selected
+* event.detail.cms: The CMS object passed for reference
+* event.detail.collection: Collection of files to view for listing pages
+* event.detail.file: Single file to view when available
+* event.detail.mode: Type of view, usually either "list", "single", or error.
+* event.detail.search: Any search query
+* event.detail.tag: Any tag selected to view
+* event.detail.type: Content type selected
 
 **Example**
 

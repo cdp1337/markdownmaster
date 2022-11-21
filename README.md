@@ -51,11 +51,16 @@ CMS.js supports two website modes, Github and Server. Host your website on Githu
 
 1. Download the [latest release](https://github.com/cdp1337/cms.js/releases/latest)
 2. Setup environment, refer to specific documentation for [Apache2](INSTALL.apache.md) and [Mail-in-a-Box](INSTALL.mailinabox.md)
-3. Configure `js/config.js` to your liking
+3. Configure [js/config.js](examples/posts/site-configuration.md) to your liking
 
 
 ## Documentation
-Check out the rest of the documentation on how to use configuration settings, options, etc. at the @TODO
+
+For advanced usage of this framework, take a look through the other [post examples](examples/posts/), notably:
+
+* [Using plugins](examples/posts/plugins-overview.md)
+* [Hooking into native events](examples/posts/document-events.md)
+* [Authoring content](examples/posts/authoring-pages.md)
 
 
 ## How it works

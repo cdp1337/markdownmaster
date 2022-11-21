@@ -6,4 +6,6 @@ author: fabricioanciaes
 image: https://httpcats.com/200.jpg
 ---
 
-This should have an image of a cat
+This should have an image of a cat in both the excerpt and page
+
+![Everything is OK cat](https://httpcats.com/200.jpg)
