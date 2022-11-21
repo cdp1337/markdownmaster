@@ -6,7 +6,6 @@ const defaults = {
   mode: 'SERVER',
   github: null,
   types: [],
-  plugins: [],
   frontMatterSeperator: /^---$/m,
   listAttributes: ['tags'],
   dateParser: /\d{4}-\d{2}(?:-\d{2})?/,
@@ -18,8 +17,6 @@ const defaults = {
   markdownEngine: null,
   debug: false,
   messageClassName: 'cms-messages',
-  onload: () => {},
-  onroute: () => {},
   webpath: '/',
   titleSearchResults: 'Search Results',
 };

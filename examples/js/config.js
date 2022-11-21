@@ -36,19 +36,28 @@ var config = {
   errorLayout: 'error',
 
   // The URL that will be the default view that will initially load
-  // For example, this could a list view or a could be a specific view
-  // like a single page.
+  // Examples:
+  // 'posts' -- Set default view to /posts.html
+  // 'pages/home' -- Set default view to /pages/home.html
   defaultView: 'posts',
 
   // These are the types of content to load. Each type name is a directory or
   // folder where the files, pages or posts are located. Each type has a list
   // and single layout template that will determine how the file will be rendered.
+  // Each type expects the following format:
+  // {
+  //    name: 'posts', // Key name for this content type
+  //    layout: {
+  //      list: 'post-list', // Template file to use for listing this content type
+  //      single: 'post',    // Template file to use for rendering a single page
+  //      title: 'Posts'     // Page title set automatically when browsing the listing page
+  //    },
+  //  },
   types: [
     {
-      // for example, layouts/post-list.html
       name: 'posts',
-      layout: { 
-        list: 'post-list', 
+      layout: {
+        list: 'post-list',
         single: 'post',
         title: 'Posts'
       },
@@ -63,7 +72,7 @@ var config = {
     },
   ],
 
-  // Set to true to enable debug logging, (will log to the console)
+  // Set to true to enable debug logging, (will enable logging events to the console)
   debug: false,
 };
 
@@ -92,15 +101,9 @@ document.addEventListener('cms:load', event => {
  */
 document.addEventListener('cms:route', event => {
   event.detail.cms.debuglog('Page being displayed', event.detail);
-
-  let search = document.getElementById('search');
-  if (search) {
-    search.addEventListener('keyup', e => {
-      if (e.key === 'Enter') {
-        event.detail.cms.search(e.target.dataset.type, e.target.value);
-      }
-    });
-  }
 });
 
 site.init();
+
+// Load some plugins
+site.enablePlugin(['pagebodyclass', 'pagelist']);
