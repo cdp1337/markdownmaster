@@ -1,6 +1,6 @@
 {
   "name": "@cdp1337/cmsjs",
-  "version": "2.9.9",
+  "version": "3.0.0",
   "description": "The JavaScript Site Generator, forked from Chris Diana's CMS.js",
   "keywords": ["client-side, javascript, site-generator, cms, markdown"],
   "homepage": "https://github.com/cdp1337/cms.js",

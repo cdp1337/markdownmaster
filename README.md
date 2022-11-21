@@ -11,9 +11,9 @@ This fork is a HEAVILY modified copy of [Chris Diana's original](https://github.
 
 [![Join the chat at https://discord.gg/A2cHjg3](https://img.shields.io/discourse/https/meta.discourse.org/status.svg)](https://discord.gg/A2cHjg3)
 [![Join the chat at https://gitter.im/cms-js/community](https://badges.gitter.im/cms-js/community.svg)](https://gitter.im/cms-js/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-![Version](https://img.shields.io/github/package-json/v/chrisdiana/cms.js.svg)
-[![npm version](https://badge.fury.io/js/%40chrisdiana%2Fcmsjs.svg)](https://badge.fury.io/js/%40chrisdiana%2Fcmsjs)
-![License](https://img.shields.io/github/license/chrisdiana/cms.js.svg)
+![Version](https://img.shields.io/github/package-json/v/cdp1337/cms.js.svg)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/cdp1337/cms.js/CMS.JS%20CI%20Test)
+![License](https://img.shields.io/github/license/cdp1337/cms.js.svg)
 
 
 <p align="center">
