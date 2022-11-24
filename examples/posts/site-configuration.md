@@ -4,10 +4,12 @@ author: Charlie Powell
 tags: Howto, Configuration
 ---
 
+## Web Application Configuration
+
 The bulk of configuration required is performed within [js/config.js](../js/config.js).  This also is a convenient place to place custom javascript.
 
 
-## List of Parmeters
+### List of Parmeters
 
 | Parameter       | Type   | Description                                  |
 |-----------------|--------|----------------------------------------------|
@@ -26,7 +28,7 @@ The bulk of configuration required is performed within [js/config.js](../js/conf
 | debug           | boolean | Set to true to enable debug messages        |
 
 
-## Notable Configuration Details
+### Notable Configuration Details
 
 **mode**
 
@@ -62,3 +64,19 @@ Template file to use for rendering a single page
 **types.layout.title**
 
 Page title set automatically when browsing the listing page
+
+
+## CGI Application Configuration
+
+The server-side app has a configuration file which will need set too within [config.ini](../cgi-bin/config.ini).  These parameters control the CGI application responsible for assist with crawler access to your site.
+
+```
+[site]
+host = https://yoursite.tld
+webpath = /
+defaultView = pages/home
+types = pages, posts
+debug = false
+```
+
+These values should be similar to the values within `config.js`.  The "`[site]`" at the top of the file is a system-level keyword and must remain.
