@@ -1,6 +1,7 @@
 .DS_Store
 node_modules/*
 release/*.tgz
+release/*.tar.gz
 *.swp
 npm-debug.log
 dist/*.js
