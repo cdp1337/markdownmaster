@@ -27,7 +27,7 @@ getTagVersion() {
 # Create the archive
 TGZ_FILE="cmsjs-$(getTagVersion).tgz"
 echo "Creating tarball ${TGZ_FILE}..."
-tar -czf release/$TGZ_FILE dist/cms.min.js examples/ CHANGELOG.md LICENSE.md README.md INSTALL.apache.md INSTALL.mailinabox.md
+tar -czf release/$TGZ_FILE dist/cms.min.js dist/cms.es.js dist/cms.js examples/ RELEASE.md LICENSE.md README.md INSTALL.apache.md INSTALL.mailinabox.md
 
 if [ $? -eq 0 ]; then
   # archiving was successful
