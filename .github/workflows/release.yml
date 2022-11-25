@@ -46,7 +46,7 @@ jobs:
           prerelease: false
           release_name: CMS.js ${{ github.ref }}
           tag_name: ${{ github.ref }}
-          body_path: CHANGELOG.md
+          body_path: RELEASE.md
         env:
           GITHUB_TOKEN: ${{ github.token }}
       
