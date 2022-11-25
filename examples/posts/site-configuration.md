@@ -11,21 +11,23 @@ The bulk of configuration required is performed within [js/config.js](../js/conf
 
 ### List of Parmeters
 
-| Parameter       | Type   | Description                                  |
-|-----------------|--------|----------------------------------------------|
-| elementId       | string | ID of element to attach CMS.js to            |
-| mode            | string | Operation mode of site, "GITHUB" or "SERVER" |
-| webpath         | string | Webpath of site (part after domain name)     |
-| github.username | string | Github username                              |
-| github.repo     | string | Github repository name                       |
-| github.branch   | string | Branch for code                              |
-| github.host     | string | Github API hostname                          |
-| markdownEngine  | function | Markdown engine to use for processing      |
-| layoutDirectory | string | Name of the layouts directory                |
-| errorLayout     | string | Error layout template name                   |
-| defaultView     | string | Default / home page                          |
-| types           | object | List of types on the site                    |
-| debug           | boolean | Set to true to enable debug messages        |
+| Parameter       | Type     | Description                                  |
+|-----------------|----------|----------------------------------------------|
+| elementId       | string   | ID of element to attach CMS.js to            |
+| mode            | string   | Operation mode of site, "GITHUB" or "SERVER" |
+| webpath         | string   | Webpath of site (part after domain name)     |
+| github.username | string   | Github username                              |
+| github.repo     | string   | Github repository name                       |
+| github.branch   | string   | Branch for code                              |
+| github.host     | string   | Github API hostname                          |
+| markdownEngine  | function | Markdown engine to use for processing        |
+| layoutDirectory | string   | Name of the layouts directory                |
+| errorLayout     | string   | Error layout template name                   |
+| defaultView     | string   | Default / home page                          |
+| types           | list     | List of types on the site                    |
+| listAttributes  | list     | List of attributes with multiple attributes  |
+| urlAttributes   | list     | List of attributes treated as URLs           |
+| debug           | boolean  | Set to true to enable debug messages         |
 
 
 ### Notable Configuration Details
@@ -117,6 +119,22 @@ Page title set automatically when browsing the listing page
 **types.layout.sort**
 
 Default sort mode for this article type
+
+**listAttributes**
+
+List of attributes that expect multiple values that are comma separated
+
+```.js
+listAttributes: ['tags']
+```
+
+**urlAttributes**
+
+List of attributes that get treated as a URL.  These can be resolved based on the source markdown file
+
+```.js
+urlAttributes: ['image', 'banner']
+```
 
 
 ## CGI Application Configuration
