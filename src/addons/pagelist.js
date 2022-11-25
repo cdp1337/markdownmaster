@@ -24,7 +24,8 @@ export default class PageList {
     console.table([
       {attribute: 'data-type', required: true, example: 'posts', description: 'Type of content to retrieve, must match config parameters'},
       {attribute: 'data-layout', required: false, example: 'post-list', description: 'Layout filename to render content'},
-      {attribute: 'data-link', required: false, example: '^posts/subdirectory/.+', description: 'Regex or URL fragment to filter results'}
+      {attribute: 'data-link', required: false, example: '^posts/subdirectory/.+', description: 'Regex or URL fragment to filter results'},
+      {attribute: 'data-sort', required: false, example: 'title', description: 'Sort parameters to view results'}
     ]);
   }
 
@@ -41,6 +42,7 @@ export default class PageList {
     let type = el.dataset.type,
       layout = el.dataset.layout || null,
       filterLink = el.dataset.link || null,
+      filterSort = el.dataset.sort || null,
       collection, config;
 
     if (typeof(type) === 'undefined') {
@@ -68,9 +70,13 @@ export default class PageList {
       layout = collection.layout.list;
     }
 
+    // Reset any filters previously set on this collection
+    collection.resetFilters();
+    collection.filterSort(filterSort);
+
     // Support filters
     if (filterLink !== null) {
-      collection.filterByPermalink(filterLink);
+      collection.filterPermalink(filterLink);
     }
 
     // Setup new config to override rendering of this content

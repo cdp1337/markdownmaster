@@ -53,6 +53,14 @@ At the top of nginx.conf will be listed 2 `set` directives.
 Once set, issue a restart for the changes to take effect, `sudo systemctl restart nginx`.
 
 
+## Ensure Executable
+
+Nextcloud may not preserve the executable bit on files; this is required for them to run as applications to serve content.
+
+```.sh
+sudo chmod +x /home/user-data/www/domain.tld/cgi-bin/{crawler,sitemap}.py
+```
+
 ## Configure Application
 
 Follow steps for configuring the web application and CGI application via [instructions within site-configuration](examples/posts/site-configuration.md).

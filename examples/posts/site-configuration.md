@@ -30,9 +30,19 @@ The bulk of configuration required is performed within [js/config.js](../js/conf
 
 ### Notable Configuration Details
 
+// Set to true to enable debug logging, (will enable logging events to the console)
+debug: false,
+
+
 **mode**
 
 Set to "SERVER" for Apache2 or Nginx and "GITHUB" for github pages
+
+```.js
+// Mode 'GITHUB' for Github Pages, 'SERVER' for Self Hosted
+// Defaults to Server mode if not specified
+mode: 'SERVER',
+```
 
 **webpath**
 
@@ -41,6 +51,14 @@ for example, if your site is located in https://domain.tld/cms/
 your webpath should be '/cms/'
 NOTE, a trailing slash is REQUIRED.
 
+```.js
+// When in SERVER mode, set this to the web path to use for the URL.
+// for example, if your site is located in https://domain.tld/cms/
+// your webpath should be '/cms/'
+// NOTE, a trailing slash is REQUIRED.
+webpath: '/',
+```
+
 **defaultView**
 
 The URL that will be the default view that will initially load
@@ -48,10 +66,41 @@ Examples:
 'posts' -- Set default view to /posts.html
 'pages/home' -- Set default view to /pages/home.html
 
+```.js
+// The URL that will be the default view that will initially load
+// Examples:
+// 'posts' -- Set default view to /posts.html
+// 'pages/home' -- Set default view to /pages/home.html
+defaultView: 'posts',
+```
+
 **types**
 
 Types of content to load, new types can be created for various content
 Each type needs a name and layout attributes
+
+```.js
+types: [
+  {
+    name: 'posts',
+    layout: {
+      list: 'post-list',
+      single: 'post',
+      sort: 'datetime-r',
+      title: 'Posts'
+    },
+  },
+  {
+    name: 'pages',
+    layout: { 
+      list: 'page-list', 
+      single: 'page',
+      sort: 'title',
+      title: 'Pages'
+    },
+  },
+],
+```
 
 **types.layout.list**
 
@@ -64,6 +113,10 @@ Template file to use for rendering a single page
 **types.layout.title**
 
 Page title set automatically when browsing the listing page
+
+**types.layout.sort**
+
+Default sort mode for this article type
 
 
 ## CGI Application Configuration

@@ -59,6 +59,7 @@ var config = {
       layout: {
         list: 'post-list',
         single: 'post',
+        sort: 'datetime-r',
         title: 'Posts'
       },
     },
@@ -67,6 +68,7 @@ var config = {
       layout: { 
         list: 'page-list', 
         single: 'page',
+        sort: 'title',
         title: 'Pages'
       },
     },

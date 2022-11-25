@@ -22,16 +22,6 @@ class FileCollection {
   }
 
   /**
-   * Generic function to assist with debug logging without needing if ... everywhere.
-   * @param  {...any} args mixed arguments to pass
-   */
-  debuglog(...args) {
-    if (this.config.debug) {
-      console.log(...args);
-    }
-  }
-
-  /**
    * Initialize file collection.
    * @method
    * @async
@@ -128,7 +118,7 @@ class FileCollection {
    * @param {boolean} recurse - Set to FALSE to prevent further recursion
    */
   scanDirectory(callback, directory, recurse) {
-    this.debuglog('Scanning directory', directory);
+    window.CMS.debuglog('Scanning directory', directory);
 
     get(directory, (success, error) => {
       if (error) callback(success, error);
@@ -136,11 +126,11 @@ class FileCollection {
       // find the file elements that are valid files, exclude others
       this.getFileElements(success).forEach((file) => {
         var fileUrl = this.getFileUrl(file, this.config.mode, directory);
-        this.debuglog('Found link ' + file + ' => ' + fileUrl);
+        window.CMS.debuglog('Found link ' + file + ' => ' + fileUrl);
 
         if (isValidFile(fileUrl, this.config.extension)) {
           // Regular markdown file
-          this.debuglog('Adding ' + fileUrl + ' to collection ' + this.type);
+          window.CMS.debuglog('Adding ' + fileUrl + ' to collection ' + this.type);
           this.files.push(new File(fileUrl, this.type, this.layout.single, this.config));
         } else if (
           // Allow recurse to be disabled
@@ -179,7 +169,7 @@ class FileCollection {
     var promises = [];
     // Load file content
     this.files.forEach((file, i) => {
-      file.getContent((success, error) => {
+      file.loadContent((success, error) => {
         if (error) callback(success, error);
         promises.push(i);
         file.parseContent();
@@ -192,24 +182,54 @@ class FileCollection {
   }
 
   /**
-   * Search file collection by attribute.
-   * @method
-   * @param {string} search - Search query.
-   * 
-   * @todo Support multiple filters
+   * Reset filters and sorting
    */
-  search(search) {
-    this[this.type] = this.files.filter((file) => {
-      return file.matchesSearch(search);
-    });
+  resetFilters() {
+    this[this.type] = this.files;
   }
 
   /**
-   * Reset file collection files.
-   * @method
+   * Sort results by a given parameter
+   * 
+   * If a function is requested, that is used to sort the results.
+   * If a string is requested, only specific keywords are supported.  Use -r to inverse results.
+   * If NULL is requested, the default sort for this collection type is used.
+   * 
+   * @param {object|string|null} param A function, string, or empty value to sort by
    */
-  resetSearch() {
-    this[this.type] = this.files;
+  filterSort(param) {
+    if (typeof(param) === 'undefined' || param === null) {
+      param = this.layout.sort || 'title';
+    }
+
+    if (typeof(param) === 'object') {
+      this[this.type].sort(param);
+    } else {
+      let direction = 1;
+      if (param.match(/-r$/)) {
+        direction = 0;
+        param = param.substring(0, param.length - 2);
+      }
+
+      this[this.type].sort((a, b) => {
+        if (direction === 1) {
+          return a[param] >= b[param];
+        } else {
+          return a[param] <= b[param];
+        }
+      });
+    }
+  }
+
+  /**
+   * Search file collection by attribute.
+   * @method
+   * @param {string} search - Search query.
+   */
+  filterSearch(search) {
+    this[this.type] = this[this.type].filter((file) => {
+      return file.matchesSearch(search);
+    });
   }
 
   /**
@@ -220,8 +240,8 @@ class FileCollection {
    * @todo Refactor to "filterByTag" (nothing is actually returned here)
    * @todo Support multiple filters
    */
-  getByTag(query) {
-    this[this.type] = this.files.filter((file) => {
+  filterTag(query) {
+    this[this.type] = this[this.type].filter((file) => {
       if (query && file.tags) {
         return file.tags.some((tag) => {
           return tag === query;
@@ -237,8 +257,8 @@ class FileCollection {
    * 
    * @todo Support multiple filters
    */
-  filterByPermalink(url) {
-    this[this.type] = this.files.filter((file) => {
+  filterPermalink(url) {
+    this[this.type] = this[this.type].filter((file) => {
       let fileUrl = file.permalink.substring(this.config.webpath.length);
       return fileUrl.match(url);
     });
@@ -247,7 +267,7 @@ class FileCollection {
   /**
    * Get all tags located form this collection
    * 
-   * Each set will contain the properties `name` and `count`
+   * Each set will contain the properties `name`, `count`, and `url`
    * 
    * @returns {Object[]}
    */
@@ -283,11 +303,11 @@ class FileCollection {
    * Get file by permalink.
    * @method
    * @param {string} permalink - Permalink to search.
-   * @returns {object} File object.
+   * @returns {File} File object.
    */
   getFileByPermalink(permalink) {
 
-    this.debuglog('Retrieving file by permalink', permalink);
+    window.CMS.debuglog('Retrieving file by permalink', permalink);
 
     let foundFiles = this.files.filter((file) => {
       return file.permalink === permalink || 

@@ -6,11 +6,16 @@ import { renderLayout } from './templater';
 
 /**
  * Represents a CMS instance
- * @constructor
- * @param {object} options - Configuration options.
  */
 class CMS {
 
+  /**
+   * Instantiate a new CMS - the main interface for the site
+   * 
+   * @param {window} view Window object
+   * @param {object} options Dictionary of configuration parameters to setup
+   * @param {object} plugins System plugins to provide by default
+   */
   constructor(view, options, plugins) {
     this.ready = false;
     /** @property FileCollection[] */
@@ -44,6 +49,8 @@ class CMS {
    * hash change event listener for router, and loads the content.
    */
   init() {
+    this.debuglog('Initializing CMS.js');
+
     // create message container element if debug mode is enabled
     if (this.config.debug) {
       createMessageContainer(this.config.messageClassName);
@@ -148,10 +155,6 @@ class CMS {
       this.collections[type].init(() => {
         this.debuglog('Initialized collection ' + type);
         promises.push(i);
-        // reverse order to display newest posts first for post types
-        if (type.indexOf('post') === 0) {
-          this.collections[type][type].reverse();
-        }
         // Execute after all content is loaded
         if (types.length == promises.length) {
           callback();
@@ -237,16 +240,17 @@ class CMS {
             );
           });
         } else if (collection) {
-          // List view
+          // List view of some sort
+          // All new page views start with fresh filters and default sorting
+          collection.resetFilters();
+          collection.filterSort();
+
           if (search) {
             // Check for queries
-            collection.search(search);
+            collection.filterSearch(search);
           } else if (tag) {
             // Check for tags
-            collection.getByTag(tag);
-          } else {
-            // Reset search
-            collection.resetSearch();
+            collection.filterTag(tag);
           }
 
           mode = 'listing';

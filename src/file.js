@@ -30,10 +30,12 @@ class File {
     this.permalink;
     this.tags;
     this.image;
+    // System parameter to track if the body has been rendered with markdown, (saves performance for large amounts of files)
+    this.bodyLoaded = false;
   }
 
   /**
-  * Get file content.
+  * Load file content from the server
   * @method
   * @async
   * @param {function} callback - Callback function.
@@ -41,7 +43,7 @@ class File {
   * Get the file's HTML content and set the file object html
   * attribute to the file content.
   */
-  getContent(callback) {
+  loadContent(callback) {
     get(this.url, (success, error, lastModified) => {
       if (error) callback(success, error);
       this.content = success;
@@ -61,15 +63,19 @@ class File {
   }
 
   /**
-   * Parse front matter.
-   * @method
-   * @description
-   * Overrides post attributes if front matter is available.
+   * Parse front matter, the content in the header of the file.
+   * 
+   * Will scan through and retrieve any key:value pair within `---` tags
+   * at the beginning of the file.
+   * 
+   * These values get set directly on the `File` object for use within templates or system use.
    */
   parseFrontMatter() {
-    var yaml = this.content.split(this.config.frontMatterSeperator)[1];
+    let yaml = this.content.split(this.config.frontMatterSeperator)[1],
+      protectedAttributes = ['url', 'type', 'config', 'name', 'extension', 'body', 'permalink', 'bodyLoaded', 'html'];
+
     if (yaml) {
-      var attributes = {};
+      let attributes = {};
       yaml.split(/\n/g).forEach((attributeStr) => {
         // Fix https://github.com/chrisdiana/cms.js/issues/95 by splitting ONLY on the first occurrence of a colon.
         if ( attributeStr.indexOf(':') !== -1) {
@@ -77,7 +83,20 @@ class File {
             attKey = attributeStr.substr(0, attPos).trim(),
             attVal = attributeStr.substr(attPos +1).trim();
           
-          if (attKey === 'image') {
+          if (protectedAttributes.indexOf(attKey) !== -1) {
+            // To prevent the user from messing with important parameters, skip a few.
+            // These are calculated and used internally and really shouldn't be modified.
+            return;
+          }
+          
+          if (this.config.listAttributes.indexOf(attKey) !== -1) {
+            // Allow some parameters to have multiple values.
+            attVal = attVal.split(',').map((item) => {
+              return item.trim();
+            });
+          }
+          
+          if (this.config.urlAttributes.indexOf(attKey) !== -1) {
             // Fix for relatively positioned images
             // An easy way to specify images in markdown files is to list them relative to the file itself.
             // Take the permalink (since it's already resolved), and prepend the base to the image.
@@ -97,39 +116,18 @@ class File {
   }
 
   /**
-   * Set list attributes.
-   * @method
-   * @description
-   * Sets front matter attributes that are specified as list attributes to
-   * an array by splitting the string by commas.
+   * Parse filename from the URL of this file and sets to `name`
    */
-  setListAttributes() {
-    this.config.listAttributes.forEach((attribute) => {
-      // Keep ESLint from complaining
-      // ref https://ourcodeworld.com/articles/read/1425/how-to-fix-eslint-error-do-not-access-objectprototype-method-hasownproperty-from-target-object-no-prototype-builtins
-      if (Object.getOwnPropertyDescriptor(this, attribute) && this[attribute]) {
-        this[attribute] = this[attribute].split(',').map((item) => {
-          return item.trim();
-        });
-      }
-    });
-  }
-
-  /**
-   * Sets filename.
-   * @method
-   */
-  setFilename() {
+  parseFilename() {
     this.name = this.url.substr(this.url.lastIndexOf('/'))
       .replace('/', '')
       .replace(this.config.extension, '');
   }
 
   /**
-   * Sets permalink.
-   * @method
+   * Parse permalink from the URL of this file and sets to `permalink`
    */
-  setPermalink() {
+  parsePermalink() {
     this.permalink = 
       this.config.mode === 'GITHUB' ? 
         ['#', this.type, this.name].join('/') : 
@@ -137,13 +135,9 @@ class File {
   }
 
   /**
-   * Set file date.
-   * @method
-   * @description
-   * Check if file has date in front matter otherwise use the date
-   * in the filename.
+   * Parse file date from either the frontmatter or server last-modified header
    */
-  setDate() {
+  parseDate() {
     var dateRegEx = new RegExp(this.config.dateParser);
     if (this.date) {
       // Date is set from markdown via the "date" inline header
@@ -162,41 +156,41 @@ class File {
   }
 
   /**
-   * Set file body.
-   * @method
-   * @description
-   * Sets the body of the file based on content after the front matter.
+   * Parse file body from the markdown content
    */
-  setBody() {
-    var html = this.content
-      .split(this.config.frontMatterSeperator)
-      .splice(2)
-      .join(this.config.frontMatterSeperator);
-    if (this.html) {
-      this.body = html;
-    } else {
-      if (this.config.markdownEngine) {
-        this.body = this.config.markdownEngine(html);
+  parseBody() {
+    if (!this.bodyLoaded) {
+      // Only render content if it hasn't been loaded yet, (allows for repeated calls)
+
+      let html = this.content
+        .split(this.config.frontMatterSeperator)
+        .splice(2)
+        .join(this.config.frontMatterSeperator);
+      if (this.html) {
+        this.body = html;
       } else {
-        var md = new Markdown();
-        this.body = md.render(html);
+        if (this.config.markdownEngine) {
+          this.body = this.config.markdownEngine(html);
+        } else {
+          let md = new Markdown();
+          this.body = md.render(html);
+        }
       }
+
+      this.bodyLoaded = true;
     }
   }
 
   /**
-   * Parse file content.
-   * @method
-   * @description
+   * Parse file content
+   * 
    * Sets all file attributes and content.
    */
   parseContent() {
-    this.setFilename();
-    this.setPermalink();
+    this.parseFilename();
+    this.parsePermalink();
     this.parseFrontMatter();
-    this.setListAttributes();
-    this.setDate();
-    this.setBody();
+    this.parseDate();
   }
 
   /**
@@ -224,11 +218,13 @@ class File {
   }
 
   /**
-   * Renders file.
-   * @method
+   * Renders file with a configured layout
+   * 
    * @async
    */
   render(callback) {
+    this.parseBody();
+    
     if (this.seotitle) {
       document.title = this.seotitle;
     } else if (this.title) {

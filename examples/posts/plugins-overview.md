@@ -106,17 +106,18 @@ Any block-level HTML node (div, main, article, aside, etc), can be used, the plu
 | data-type   | yes      | "posts,pages,etc"      | Any valid content type defined on your site                         |
 | data-layout | no       | "post-list"            | Layout to use for rendering content, useful for controlling UX      |
 | data-link   | no       | "^posts/subproject/.+" | Regex or regular string to match, will only include matchings files |
+| data-sort   | no       | "datetime-r"           | Sort results by a specific key                                      |
 
 **Example**
 
 ```.html
-<div data-plugin="cms:pagelist" data-type="pages" data-layout="page-list" data-link="pages/games/">
+<div data-plugin="cms:pagelist" data-type="pages" data-layout="page-list" data-link="pages/games/" data-sort="title">
   Loading Content...
 </div>
 ```
 **Renders (if enabled)**
 
-<div data-plugin="cms:pagelist" data-type="pages" data-layout="page-list" data-link="pages/games/">Loading Content...</div>
+<div data-plugin="cms:pagelist" data-type="pages" data-layout="page-list" data-link="pages/games/" data-sort="title">Loading Content...</div>
 
 
 
