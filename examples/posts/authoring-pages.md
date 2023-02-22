@@ -11,6 +11,33 @@ All pages in CMS.js are simply Markdown, but they do support a variety of niciti
 
 By default the CMS ships with `pages` and `posts` as content types.  Just create `.md` pages within those directories.  Other types of content can be added should you need to.  Subdirectories **ARE** supported, (but only a single level down).
 
+A common usage (especially for posts), is to include a date string in the URL to organize them.  Else you will end up with a mess of files.
+
+The following directory structure examples will all provide the same automatic date string parsing from the URL.
+
+```
+ - posts/
+    |- 2021-01-02-something.md
+```
+
+```
+ - posts/
+    |- 2021/
+       |- 01-02-something.md
+```
+
+```
+ - posts/
+    |- 2021-01/
+       |- 02-something.md
+```
+
+```
+ - posts/
+    |- 2021-01-02/
+       |- something.md
+```
+
 ## Page Meta Data
 
 Article metadata is provided via a concept called "frontmatter", this is essentially just a block of content at the very start of an article wrapped with `---` tags.  This is beneficial for being able to set your article title, excerpt text, and other data.
