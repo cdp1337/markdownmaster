@@ -46,19 +46,6 @@ export function extend(target, opts, callback) {
 }
 
 /**
- * Checks if the file URL with file extension is a valid file to load.
- * @function
- * @param {string} fileUrl - File URL
- * @returns {boolean} Is valid.
- */
-export function isValidFile(fileUrl, extension) {
-  if (fileUrl) {
-    var ext = fileUrl.split('.').pop();
-    return (ext === extension.replace('.', '') || ext === 'html') ? true : false;
-  }
-}
-
-/**
  * Get URL parameter by name.
  * @function
  * @param {string} name - Name of parameter.
@@ -90,10 +77,14 @@ export function getGithubUrl(type, gh) {
 
 /**
  * Formats date string to datetime
+ * 
+ * Accepts dashes or slashes between characters, (to support YYYY/MM/DD URL directories)
+ * 
  * @param {string} dateString - Date string to convert.
  * @returns {object} Formatted datetime
  */
 export function getDatetime(dateStr) {
+  dateStr = dateStr.replaceAll('/', '-');
   var dt = new Date(dateStr);
   return new Date(dt.getTime() - dt.getTimezoneOffset() * (-60000));
 }

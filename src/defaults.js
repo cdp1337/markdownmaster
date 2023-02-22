@@ -9,7 +9,7 @@ const defaults = {
   frontMatterSeperator: /^---$/m,
   listAttributes: ['tags'],
   urlAttributes: ['image'],
-  dateParser: /\d{4}-\d{2}(?:-\d{2})?/,
+  dateParser: /\d{4}[-/]\d{2}(?:[-/]\d{2})?/,
   dateFormat: (date) => {
     return [(date.getMonth() + 1), date.getDate(), date.getFullYear()].join('/');
   },
