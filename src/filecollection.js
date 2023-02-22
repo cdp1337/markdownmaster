@@ -1,6 +1,6 @@
 import { messages as msg, handleMessage } from './messages';
 import { renderLayout } from './templater';
-import { get, isValidFile, getGithubUrl, getFilenameFromPath } from './utils';
+import { get, getGithubUrl, getFilenameFromPath } from './utils';
 import File from './file';
 
 /**
@@ -30,10 +30,19 @@ class FileCollection {
   init(callback) {
     this.getFiles((success, error) => {
       if (error) handleMessage(msg['DIRECTORY_ERROR']);
-      this.loadFiles((success, error) => {
-        if (error) handleMessage(msg['GET_FILE_ERROR']);
+
+      if (this.files.length > 0) {
+        // Only try to load the files if the scan actually found files to load.
+        // Otherwise callback() is just never invoked.
+        this.loadFiles((success, error) => {
+          if (error) handleMessage(msg['GET_FILE_ERROR']);
+          callback();
+        });
+      } else {
+        // No files, just jump straight to the callback.
         callback();
-      });
+      }
+      
     });
   }
 
@@ -75,7 +84,8 @@ class FileCollection {
   }
 
   /**
-   * Get file elements.
+   * Get list of file elements from either the returned listing page scan (or JSON data for GITHUB)
+   * 
    * @param {object} data - File directory or Github data.
    * @returns {array} File elements
    */
@@ -118,7 +128,7 @@ class FileCollection {
    * @param {boolean} recurse - Set to FALSE to prevent further recursion
    */
   scanDirectory(callback, directory, recurse) {
-    window.CMS.debuglog('Scanning directory', directory);
+    window.CMS.debuglog('[' + this.type + '] Scanning directory', directory);
 
     get(directory, (success, error) => {
       if (error) callback(success, error);
@@ -126,11 +136,17 @@ class FileCollection {
       // find the file elements that are valid files, exclude others
       this.getFileElements(success).forEach((file) => {
         var fileUrl = this.getFileUrl(file, this.config.mode, directory);
-        window.CMS.debuglog('Found link ' + file + ' => ' + fileUrl);
-
-        if (isValidFile(fileUrl, this.config.extension)) {
+        
+        if (
+          // Skip top-level path
+          fileUrl !== this.config.webpath &&
+          // Must be a file on this site
+          fileUrl.indexOf(this.config.webpath) === 0 &&
+          // Must end with the extension configured
+          fileUrl.endsWith(this.config.extension)
+        ) {
           // Regular markdown file
-          window.CMS.debuglog('Adding ' + fileUrl + ' to collection ' + this.type);
+          window.CMS.debuglog('[' + this.type + '] Found valid file, adding to collection', {original: file.href, parsed: fileUrl});
           this.files.push(new File(fileUrl, this.type, this.layout.single, this.config));
         } else if (
           // Allow recurse to be disabled
@@ -148,10 +164,13 @@ class FileCollection {
           // Allow this for any directory listing NOT absolutely resolved (they will just point back to the parent directory)
           this.directories.push(fileUrl);
           this.scanDirectory(callback, fileUrl, false);
+        } else {
+          window.CMS.debuglog('[' + this.type + '] Skipping invalid link', {original: file.href, parsed: fileUrl});
         }
       });
 
       this.directoriesScanned++;
+      window.CMS.debuglog('[' + this.type + '] Scanning of ' + directory + ' complete (' + this.directoriesScanned + ' of ' + this.directories.length + ')');
 
       if (this.directoriesScanned === this.directories.length) {
         callback(success, error);
