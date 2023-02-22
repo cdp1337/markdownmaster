@@ -1,4 +1,25 @@
-## 3.0.0 - Nov 22, 2022
+## 3.1.0 - 2022-11-24
+
+author: cdp1337
+
+Version 3.1.0 features server-side scripts to better assist with crawler visibility, as evidently Google will refuse to fully index markdown content.
+The two included server scripts are sitemap generator and a crawler-friendly site renderer.
+
+### New Features
+
+* New server-side scripts to better support crawlers and bots
+* Add support for sorting in the page-list plugin
+* Add support for multiple filters to be applied at a time
+* Add support for lazy-loading markdown content in articles
+* Add support for custom URL-type attributes in frontmatter
+
+### Fixes
+
+* Fix support for sorting of articles
+* Refactor internal method names to be more consistent to their actions
+
+
+## 3.0.0 - 2022-11-22
 
 author: cdp1337
 
@@ -24,7 +45,7 @@ Version 3.x features a nearly completely rewrite of all core concepts of this ut
 * Add several plugins to core system
 
 
-## 2.0.0 - Nov 21, 2018
+## 2.0.0 - 2018-11-21
 
 author: chrisdiana
 
@@ -44,7 +65,7 @@ author: chrisdiana
 * Small size footprint
 
 
-## 1.0.0 Jan 20, 2016 
+## 1.0.0 2016-01-20
 
 author: chrisdiana
 

@@ -1,24 +1,18 @@
-# Google Evidently Hates Markdown
+# Little Fixes
 
-Version 3.1.0 features server-side scripts to better assist with crawler visibility, as evidently Google will refuse to fully index markdown content.
-The two included server scripts are:
+Several small fixes
 
-* Sitemap generator
-* Crawler-friendly md-to-html generator
+## New Features
 
-
-## Changes
-
-* New server-side scripts to better support crawlers and bots
-* Refactor internal method names to be more consistent to their actions
-* Fix support for sorting of articles
-* Add support for sorting in the page-list plugin
-* Add support for multiple filters to be applied at a time
-* Add support for lazy-loading markdown content in articles
-* Add support for custom URL-type attributes in frontmatter
+* New feature to allow parsing date strings in URL as directories, ex: `site.tld/posts/2023-02/09-something.md`
 
 
-## Upgrade from 3.0.0 to 3.1.0
+## Fixes
+
+* Fix empty directories tripping up the router
+
+
+## Upgrade from 3.0.x to 3.1.x
 
 1. Install the fast CGI wrapper on your server, `sudo apt install fcgiwrap`
 2. Configure `cgi-bin/config.ini` with values that mimic `js/config.js`
