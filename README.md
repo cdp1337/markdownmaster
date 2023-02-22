@@ -14,7 +14,7 @@ This fork is a HEAVILY modified copy of [Chris Diana's original](https://github.
 -----
 
 ![Version](https://img.shields.io/github/package-json/v/cdp1337/cms.js.svg)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/cdp1337/cms.js/CMS.JS%20CI%20Test)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cdp1337/cms.js/test.yml?branch=main)
 ![License](https://img.shields.io/github/license/cdp1337/cms.js.svg)
 
 
@@ -22,6 +22,9 @@ This fork is a HEAVILY modified copy of [Chris Diana's original](https://github.
   <span>English</span> |
   <a href="./README-zh.md">简体中文</a>
 </p>
+
+
+
 
 
 ## Features
