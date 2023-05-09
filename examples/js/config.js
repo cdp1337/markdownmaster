@@ -74,6 +74,53 @@ var config = {
     },
   ],
 
+  // Specify the date format for displaying dates within.
+  // Since this is a method, advanced usage can be implemented like switching formatting based on user's locale, etc.
+  dateFormat: (date) => {
+    /**
+     * Common option parameters:
+     * 
+     * * weekday - The representation of the weekday. Possible values are:
+     *   * "long" (e.g., Thursday)
+     *   * "short" (e.g., Thu)
+     *   * "narrow" (e.g., T). Two weekdays may have the same narrow style for some locales (e.g. Tuesday's narrow style is also T).
+     *   * key ommitted, weekday is not displayed at all
+     * 
+     * * year - The representation of the year. Possible values are:
+     *   * "numeric" (e.g., 2012)
+     *   * "2-digit" (e.g., 12)
+     * 
+     * * month - The representation of the month. Possible values are:
+     *   * "numeric" (e.g., 3)
+     *   * "2-digit" (e.g., 03)
+     *   * "long" (e.g., March)
+     *   * "short" (e.g., Mar)
+     *   * "narrow" (e.g., M). Two months may have the same narrow style for some locales (e.g. May's narrow style is also M).
+     * 
+     * * day - The representation of the day. Possible values are:
+     *   * "numeric" (e.g., 1)
+     *   * "2-digit" (e.g., 01)
+     * 
+     * For more information about date options, refer to 
+     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#options
+     */
+    const options = {
+      //weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    };
+    return date.toLocaleDateString(window.navigator.language, options);
+
+    // Optionally return a hard-coded format, (if you don't want the UI to vary)
+    //return [(date.getMonth() + 1), date.getDate(), date.getFullYear()].join('/');
+  },
+
+  // List of attributes in Markdown files which get processed as an array of comma-separated values
+  listAttributes: ['tags'],
+  // List of attributes in Markdown files which get processed as URLs (both relative and absolutely resolved)
+  urlAttributes: ['image', 'banner'],
+
   // Set to true to enable debug logging, (will enable logging events to the console)
   debug: false,
 };
