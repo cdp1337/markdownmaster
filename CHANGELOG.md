@@ -1,3 +1,19 @@
+## NEXT
+
+### New Features
+
+* New support for HTML attributes inline
+* Add text/title support to URLs in frontcontent
+* dateFormat, listAttributes, & urlAttributes config
+* Include Prism.JS as an extra for sites
+* Include FontAwesome as an extra for sites
+
+### Fixes
+
+* Do not include DRAFT pages in taglist
+* Fix beginning newline on sitemap
+
+
 ## 3.1.0 - 2022-11-24
 
 author: cdp1337

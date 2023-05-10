@@ -1,15 +1,26 @@
-# Little Fixes
+# _next version title_
 
-Several small fixes
+_release notes for next version_
 
 ## New Features
 
-* New feature to allow parsing date strings in URL as directories, ex: `site.tld/posts/2023-02/09-something.md`
-
+* New support for HTML attributes inline
+* Add text/title support to URLs in frontcontent
+* dateFormat, listAttributes, & urlAttributes config
+* Include Prism.JS as an extra for sites
+* Include FontAwesome as an extra for sites
 
 ## Fixes
 
-* Fix empty directories tripping up the router
+* Do not include DRAFT pages in taglist
+* Fix beginning newline on sitemap
+
+Images, links, and paragraphs now support {...} format of inline text to define custom HTML parameters for rendered elements.  Support CSS-style selectors and any valid HTML attribute, (including quoted text).
+
+*BREAKING CHANGE* URL-type properties now return "label" and "url", with the label being the text prior to the URL, separated by a vertical pipe '|'.  This allows pages to make use of URL in buttons or alt text for images
+Copy the dateFormat, listAttributes, and urlAttribute declarations into the default configuration file for easier editing by admins.  The date also switched to locale-aware defaults.
+
+## Upgrade from 3.1.x to NEXT
 
 
 ## Upgrade from 3.0.x to 3.1.x
