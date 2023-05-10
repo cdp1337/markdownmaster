@@ -139,7 +139,7 @@ urlAttributes: ['image', 'banner']
 
 ## CGI Application Configuration
 
-The server-side app has a configuration file which will need set too within [config.ini](../cgi-bin/config.ini).  These parameters control the CGI application responsible for assist with crawler access to your site.
+The server-side app needs configured via its own [config.ini](../cgi-bin/config.ini) within the `cgi-bin` directory.  These parameters are specific to just the CGI / Python version of the CMS responsible for rendering the site to bots and crawlers.
 
 ```
 [site]
