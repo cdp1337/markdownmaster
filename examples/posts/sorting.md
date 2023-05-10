@@ -9,12 +9,16 @@ Version 3.1.0 introduces new sorting parameters for use in site configuration an
 
 ## Common Parameters
 
-| Sort Key   | Sort Property | Direction |
-|------------|---------------|-----------|
-| title      | page title    | A-Z       |
-| datetime-r | date modified | New-Old   |
-| name       | Filename      | A-Z       |
-| permalink  | URL           | A-Z       |
+| Sort Key    | Sort Description               |
+|-------------|--------------------------------|
+| title       | Page Title A -> Z              |
+| title-r     | Page Title Z -> A              |
+| datetime    | Date Modified Oldest -> Newest |
+| datetime-r  | Date Modified Newest -> Oldest |
+| name        | Filename A -> Z                |
+| name-r      | Filename Z -> A                |
+| permalink   | URL A -> Z                     |
+| permalink-r | URL Z -> A                     |
 
 
 ## Sorting in Configuration
