@@ -3,9 +3,9 @@
   <% data.posts.forEach(function(post) { %>
     <% if(!post.draft) { %>
       <article class="post">
-        <h1 class="post-title">
+        <h2 class="post-title">
           <a href="<%= post.permalink %>"><%= post.title %></a>
-        </h1>
+        </h2>
         <time class="post-date"><%= post.date %></time>
 
         <% if(post.image) { %>
