@@ -38,26 +38,32 @@ import Markdown from './markdown';
 class File {
 
   constructor(url, type, layout, config) {
-    this.url = url;
-    this.type = type;
-    this.layout = layout;
-    this.config = config;
-    this.html = false;
+    // Author-defined parameters
+
+    this.author;
     this.content;
-    this.name;
-    this.extension;
-    this.title;
-    this.seotitle;
-    this.excerpt;
     this.date;
     this.datetime;
-    this.author;
-    this.body;
-    this.permalink;
-    this.tags;
+    this.draft = false;
+    this.excerpt;
     this.image;
+    this.layout = layout;
+    this.seotitle;
+    this.tags;
+    this.title;
+
+    // System-defined parameters
+
+    this.config = config;
+    this.body;
     // System parameter to track if the body has been rendered with markdown, (saves performance for large amounts of files)
     this.bodyLoaded = false;
+    this.extension;
+    this.html = false;
+    this.name;
+    this.permalink;
+    this.type = type;
+    this.url = url;
   }
 
   /**
@@ -145,6 +151,15 @@ class File {
               label: attTitle,
               url: attURL
             };
+          }
+
+          // Auto-typecast support for true/false
+          if (attVal === 'true') {
+            attVal = true;
+          }
+
+          if (attVal === 'false') {
+            attVal = false;
           }
 
           if (attVal !== '') {

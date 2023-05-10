@@ -321,7 +321,7 @@ class FileCollection {
       tagNames = [];
     
     this.files.forEach(file => {
-      if (file.tags) {
+      if (!file.draft && file.tags) {
         file.tags.forEach(tag => {
           let pos = tagNames.indexOf(tag);
           if (pos === -1) {
