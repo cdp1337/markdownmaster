@@ -97,12 +97,28 @@ class File {
           }
           
           if (this.config.urlAttributes.indexOf(attKey) !== -1) {
+            // URLs should support a title / alt text
+            // This allows for the use of meta fields in buttons or accessible images.
+            let attTitle = '', attURL = '';
+            if (attVal.indexOf('|') !== -1) {
+              // Split on a '|'
+              [attTitle, attURL] = attVal.split('|').map(s => { return s.trim(); });
+            }
+            else {
+              attTitle = attVal.split('/').reverse()[0]; // basename
+              attURL = attVal;
+            }
             // Fix for relatively positioned images
             // An easy way to specify images in markdown files is to list them relative to the file itself.
             // Take the permalink (since it's already resolved), and prepend the base to the image.
-            if (attVal.indexOf('://') === -1) {
-              attVal = this.permalink.replace(/\/[^/]+$/, '/') + attVal;
+            if (attURL.indexOf('://') === -1) {
+              attURL = this.permalink.replace(/\/[^/]+$/, '/') + attURL;
             }
+
+            attVal = {
+              label: attTitle,
+              url: attURL
+            };
           }
 
           if (attVal !== '') {
@@ -145,7 +161,8 @@ class File {
       this.date = this.config.dateFormat(this.datetime);
     } else if (dateRegEx.test(this.url)) {
       // Date is retrieved from file URL
-      this.date = dateRegEx.exec(this.url)[0];
+      // Support 2023-01-02 and 2023/01/02 formats in the URL
+      this.date = dateRegEx.exec(this.url)[0].replace('/', '-');
       this.datetime = getDatetime(this.date);
       this.date = this.config.dateFormat(this.datetime);
     } else if (this.datetime) {
