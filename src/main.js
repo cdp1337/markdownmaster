@@ -11,6 +11,7 @@ import CMS from './cms';
 // Import marked and marked plugins
 import {marked} from 'marked';
 import customRenderer from './addons/marked.renderer';
+import customTokenizer from './addons/marked.tokenizer';
 
 // Import CMS plugins
 import MastodonShare from './addons/mastodon_share';
@@ -20,7 +21,22 @@ import Search from './addons/search';
 
 
 // Load marked addons
-marked.use({ renderer: customRenderer });
+marked.use({
+  extensions: [
+    {
+      name: 'link',
+      renderer: customRenderer.link,
+    },
+    {
+      name: 'image',
+      renderer: customRenderer.image,
+    },
+  ],
+  renderer: {
+    paragraph: customRenderer.paragraph,
+  },
+  tokenizer: customTokenizer
+});
 
 // Make available in global space
 window.marked = marked;

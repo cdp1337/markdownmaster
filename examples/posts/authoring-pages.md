@@ -112,37 +112,37 @@ Should display an image when rendered within the browser:
 This is because `test-icon.gif` is in the same directory as `authoring-pages.md` and can referenced easily.
 
 
-## Custom Additions
+## Extended Markdown Functionality
 
-Some improvements have been provided in the default package for the default markdown engine.  These deviate slightly from the official specification, but are still within the spirit of markdown.
+All base markdown features _should_ work, and a number of extended features have been added to better support web publishing.
 
-### Paragraph Attributes
+### HTML Attributes
 
-Paragraphs support attribute modifiers to allow the author to have some control over layout of the content.  It will be up to the theme to support these modifiers however.
+HTML attributes can be set on some elements, including:
 
-For example with the following CSS code:
+* paragraphs
+* links
+* images
 
-```.css
-.center {
-  text-align: center;
-}
-```
+To use HTML attributes, append `{...}` to the end of the line with the HTML tags inside.
+As some examples:
 
-The following markdown will provide centered text:
+Short paragraph with `class="center"` added
 
-```.md
+```md
 This is a short example paragraph {.center}
 ```
 
-Paragraph attributes support the following tags:
+This link will have a `title` and `target` set
 
-* `{.className}` - Add the class "className" to the container of the content
-* `{#nodeID}` - Set the `id` of the paragraph to "nodeID"
-* `{data-tag=somevalue}` - Render the paragraph as `<p data-tag="somevalue">...`
-* `{style=color:pink;font-weight:bold;}` - Directly control inline styling (supported though not exactly recommended)
-
-Multiple attributes can be specified at once:
-
-```.md
-This paragraph is going to be centered, pink, and BOLD! {.center style=color:pink;font-weight:bold;}
+```md
+[Go Search](https://www.duckduckgo.com) {title="Search for something" target=_blank}
 ```
+
+This image will have a border
+
+```md
+![test image](test.png) {style="border:5px solid pink;"}
+```
+
+Any valid HTML tag can be used and CSS shorthand for class (`.` prefix) and ID (`#` prefix) are also supported.
