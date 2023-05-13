@@ -28,7 +28,7 @@ import defaults from './defaults';
 import FileCollection from './filecollection';
 import { messages as msg, createMessageContainer, handleMessage } from './messages';
 import { getParameterByName } from './utils';
-import { renderLayout } from './templater';
+import {loadTemplate, renderLayout} from './templater';
 
 /**
  * Represents a CMS instance
@@ -416,6 +416,26 @@ class CMS {
     this.historyPushState(this.config.webpath + type + '.html?s=' + encodeURIComponent(search));
   }
 
+  /**
+   * Renders a layout with the set data
+   *
+   * @param {string} layout Base filename of layout to render
+   * @param {object} data Data passed to template.
+   * @return {Promise} Returns rendered HTML on success or the error message on error
+   */
+  renderLayout(layout, data) {
+    return new Promise((resolve, reject) => {
+      let url = [this.config.webpath, this.config.layoutDirectory, '/', layout, '.html'].join('');
+      loadTemplate(url, data, (success, error) => {
+        if (error) {
+          reject(error);
+        }
+        else {
+          resolve(success);
+        }
+      });
+    });
+  }
 }
 
 export default CMS;
