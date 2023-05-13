@@ -391,6 +391,16 @@ class CMS {
   }
 
   /**
+   * Get the given collection either by name or NULL if it does not exist
+   *
+   * @param {string} name
+   * @return {FileCollection|null}
+   */
+  getCollection(name) {
+    return (Object.hasOwn(this.collections, name)) ? this.collections[name] : null;
+  }
+
+  /**
     * Sort method for file collections.
     * @method
     * @param {string} type - Type of file collection.
@@ -398,7 +408,7 @@ class CMS {
     */
   sort(type, sort) {
     if (this.ready) {
-      this.collections[type][type].sort(sort);
+      this.collections[type].entries.sort(sort);
       this.collections[type].render();
     } else {
       handleMessage(msg['NOT_READY_WARNING']);
