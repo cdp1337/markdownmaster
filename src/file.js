@@ -29,11 +29,12 @@ import { get, extend, getDatetime} from './utils';
 import Markdown from './markdown';
 
 /**
- * Represents a file.
+ * Represents a Markdown file installed in one of the collection directories
+ *
  * @constructor
- * @param {string} url - The URL of the file.
- * @param {string} type - The type of file (i.e. posts, pages).
- * @param {object} layout - The layout templates of the file.
+ * @param {string} url    The URL of the file
+ * @param {string} type   The type of file (i.e. posts, pages)
+ * @param {object} layout The layout templates of the file
  */
 class File {
 
@@ -68,12 +69,10 @@ class File {
 
   /**
   * Load file content from the server
+  *
   * @method
   * @async
   * @param {function} callback - Callback function.
-  * @description
-  * Get the file's HTML content and set the file object html
-  * attribute to the file content.
   */
   loadContent(callback) {
     get(this.url, (success, error, lastModified) => {
@@ -118,6 +117,7 @@ class File {
           if (protectedAttributes.indexOf(attKey) !== -1) {
             // To prevent the user from messing with important parameters, skip a few.
             // These are calculated and used internally and really shouldn't be modified.
+            console.warn(this.url + ' has a protected key [' + attKey + '], value will NOT be parsed.');
             return;
           }
           
@@ -252,7 +252,7 @@ class File {
   }
 
   /**
-   * Check if this file matches a given query
+   * Perform a text search on this file to see if the content contains a given search query
    * 
    * @param {string} query Query to check if this file matches against
    * @returns {boolean}
@@ -273,6 +273,158 @@ class File {
     });
 
     return found;
+  }
+
+  /**
+   * Perform an attribute search on this file to see if its metadata matches the query
+   *
+   * @param {Object} query Dictionary containing key/values to search
+   * @param {string} [mode=AND] "OR" or "AND" if we should check all keys or any of them
+   * @returns {boolean}
+   *
+   * @example
+   * // Match if this file is authored by Alice
+   * file.matchesAttributeSearch({author: 'Alice'});
+   *
+   * // Match if this file is authored by Alice or Bob
+   * file.matchesAttributeSearch({author: ['Alice', 'Bob']});
+   *
+   * // Match if this file is authored by Alice or Bob AND has the tag Configuration
+   * file.matchesAttributeSearch({author: ['Alice', 'Bob'], tags: 'Configuration'});
+   *
+   * // Match if this file is authored by Bob OR has the tag HR
+   * file.matchesAttributeSearch({author: 'Bob', tags: 'HR'}, 'OR');
+   */
+  matchesAttributeSearch(query, mode) {
+    let found = false, matches_all = true;
+
+    mode = mode || 'AND';
+
+    for (let [key, value] of Object.entries(query)) {
+      if (Array.isArray(value)) {
+        // Multiple values, this grouping is an 'OR' automatically
+        let set_match = false;
+        for(let i = 0; i < value.length; i++) {
+          if (this._matchesAttribute(key, value[i])) {
+            set_match = true;
+          }
+        }
+        if (set_match) {
+          found = true;
+        }
+        else {
+          matches_all = false;
+        }
+      }
+      else {
+        if (this._matchesAttribute(key, value)) {
+          found = true;
+        }
+        else {
+          matches_all = false;
+        }
+      }
+    }
+
+    if (mode.toUpperCase() === 'OR') {
+      // an OR check just needs at least one matching result
+      return found;
+    }
+    else {
+      // an AND check (default) needs at least one matching AND all other matching
+      return found && matches_all;
+    }
+  }
+
+  /**
+   * Internal method to parse a value query, including support for comparison prefixes in the string
+   * Supports a single value to compare and both single and array values from the metadata
+   *
+   * @param {string}      key   Frontmatter meta key to compare against
+   * @param {string|null} value Value comparing
+   * @returns {boolean}
+   * @private
+   */
+  _matchesAttribute(key, value) {
+    if (!Object.hasOwn(this, key) || this[key] === null) {
+      // If the property is either not set or NULL, only NULL check value will match
+      // This is done separately to make the Array logic easier herein.
+      return value === null;
+    }
+
+    let local_val = this[key];
+    if (!Array.isArray(local_val)) {
+      // To support array values, just convert everything to an array to make the logic simpler.
+      local_val = [ local_val ];
+    }
+    // local_val = this[key].toLowerCase();
+
+    if (value !== null) {
+      // Support different comparison options
+      if (value.indexOf('~ ') === 0) {
+        // "~ " prefix is RegExp
+        value = value.substring(2);
+        for(let val of local_val) {
+          if ((new RegExp(value)).exec(val) !== null) {
+            return true;
+          }
+        }
+        return false;
+      }
+      else if(value.indexOf('>= ') === 0) {
+        // Mathematical operation
+        value = value.substring(3);
+        for(let val of local_val) {
+          if (val >= value) {
+            return true;
+          }
+        }
+        return false;
+      }
+      else if(value.indexOf('<= ') === 0) {
+        // Mathematical operation
+        value = value.substring(3);
+        for(let val of local_val) {
+          if (val <= value) {
+            return true;
+          }
+        }
+        return false;
+      }
+      else if(value.indexOf('> ') === 0) {
+        // Mathematical operation
+        value = value.substring(2);
+        for(let val of local_val) {
+          if (val > value) {
+            return true;
+          }
+        }
+        return false;
+      }
+      else if(value.indexOf('< ') === 0) {
+        // Mathematical operation
+        value = value.substring(2);
+        for(let val of local_val) {
+          if (val < value) {
+            return true;
+          }
+        }
+        return false;
+      }
+      else {
+        // Default case, standard comparison
+        value = value.toLowerCase();
+        for(let val of local_val) {
+          if (val.toLowerCase() === value) {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+    else {
+      return local_val === value;
+    }
   }
 
   /**

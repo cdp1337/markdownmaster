@@ -43,7 +43,7 @@ class FileCollection {
     this.config = config;
     this.files = [];
     this.directories = [];
-    this[type] = this.files;
+    this.entries = this.files;
     this.directoriesScanned = 0;
   }
 
@@ -230,7 +230,7 @@ class FileCollection {
    * Reset filters and sorting
    */
   resetFilters() {
-    this[this.type] = this.files;
+    this.entries = this.files;
   }
 
   /**
@@ -248,7 +248,7 @@ class FileCollection {
     }
 
     if (typeof(param) === 'object') {
-      this[this.type].sort(param);
+      this.entries.sort(param);
     } else {
       let direction = 1;
       if (param.match(/-r$/)) {
@@ -256,7 +256,7 @@ class FileCollection {
         param = param.substring(0, param.length - 2);
       }
 
-      this[this.type].sort((a, b) => {
+      this.entries.sort((a, b) => {
         if (direction === 1) {
           return a[param] >= b[param];
         } else {
@@ -272,8 +272,23 @@ class FileCollection {
    * @param {string} search - Search query.
    */
   filterSearch(search) {
-    this[this.type] = this[this.type].filter((file) => {
+    this.entries = this.entries.filter((file) => {
       return file.matchesSearch(search);
+    });
+  }
+
+  /**
+   * Search file collection by arbitrary attributes
+   *
+   * @see {@link File#matchesAttributeSearch} for full documentation of usage
+   * @param {Object} search Dictionary containing key/values to search
+   * @param {string} mode   "OR" or "AND" if we should check all keys or any of them
+   */
+  filterAttributeSearch(search, mode) {
+    mode = mode || 'AND';
+
+    this.entries = this.entries.filter((file) => {
+      return file.matchesAttributeSearch(search, mode);
     });
   }
 
@@ -281,17 +296,10 @@ class FileCollection {
    * Filter content to display by a tag
    * @method
    * @param {string} query - Search query.
-   * 
-   * @todo Refactor to "filterByTag" (nothing is actually returned here)
-   * @todo Support multiple filters
    */
   filterTag(query) {
-    this[this.type] = this[this.type].filter((file) => {
-      if (query && file.tags) {
-        return file.tags.some((tag) => {
-          return tag === query;
-        });
-      }
+    this.entries = this.entries.filter((file) => {
+      return file.matchesAttributeSearch({tags: query});
     });
   }
 
@@ -299,13 +307,10 @@ class FileCollection {
    * Filter results by a URL regex
    * 
    * @param {string} url URL fragment/regex to filter against
-   * 
-   * @todo Support multiple filters
    */
   filterPermalink(url) {
-    this[this.type] = this[this.type].filter((file) => {
-      let fileUrl = file.permalink.substring(this.config.webpath.length);
-      return fileUrl.match(url);
+    this.entries = this.entries.filter((file) => {
+      return file.matchesAttributeSearch({permalink: '~ ' + url + '.*'});
     });
   }
 
@@ -378,7 +383,7 @@ class FileCollection {
     } else {
       document.title = 'Listing';
     }
-    return renderLayout(this.layout.list, this.config, this, callback);
+    renderLayout(this.layout.list, this.config, this, callback);
   }
 
 }
