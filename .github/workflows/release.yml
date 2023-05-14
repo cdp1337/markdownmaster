@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     
     steps:
@@ -25,6 +25,10 @@ jobs:
           cache: 'npm'
       # Install dependencies in a ci mode
       - run: npm ci
+      # Run a lint test to verify the syntax
+      - run: npm run lint
+      # Run all test suites
+      - run: npm run test
       # Check for issues and compile the base code
       - run: npm run compile
       # Minify the application (to ensure minification works without error)
