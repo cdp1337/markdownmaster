@@ -207,7 +207,7 @@ title: Testing Bug Features
 ---`;
       f.parseFrontMatter();
       expect(f.url).toContain('2023-03-14');
-      expect(f.date).toBeUndefined();
+      expect(f.date).toBeNull();
       f.parseDate();
       expect(f.date).toEqual('Mar 14, 2023');
       expect(f.datetime).toBeInstanceOf(Date);
@@ -222,7 +222,7 @@ title: Testing Bug Features
 ---`;
       f.parseFrontMatter();
       expect(f.url).toContain('2023/03/14');
-      expect(f.date).toBeUndefined();
+      expect(f.date).toBeNull();
       f.parseDate();
       expect(f.date).toEqual('Mar 14, 2023');
       expect(f.datetime).toBeInstanceOf(Date);
@@ -238,7 +238,7 @@ title: Testing Bug Features
       // Spoof this as it would be set from the HTTP header
       f.datetime = 'Sun, 07 May 2023 19:03:08 GMT';
       f.parseFrontMatter();
-      expect(f.date).toBeUndefined();
+      expect(f.date).toBeNull();
       f.parseDate();
       expect(f.date).toEqual('May 7, 2023');
       expect(f.datetime).toBeInstanceOf(Date);
@@ -253,7 +253,7 @@ title: Testing Bug Features
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
       f.content = generic_contents;
       expect(f.bodyLoaded).toEqual(false);
-      expect(f.body).toBeUndefined();
+      expect(f.body).toBeNull();
       f.parseBody();
       expect(f.bodyLoaded).toEqual(true);
       expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
@@ -263,10 +263,22 @@ title: Testing Bug Features
       f.config.markdownEngine = null;
       f.content = generic_contents;
       expect(f.bodyLoaded).toEqual(false);
-      expect(f.body).toBeUndefined();
+      expect(f.body).toBeNull();
       f.parseBody();
       expect(f.bodyLoaded).toEqual(true);
-      expect(f.body).toBe('<h1>Test Page</h1>\n\n<p>This is test content about Zebras</p>');
+      expect(f.body).toEqual('<h1>Test Page</h1>\n\n<p>This is test content about Zebras</p>');
+    });
+    /**
+     * Test if the Markdown page has no FrontMatter content, it should still render
+     */
+    it('no frontmatter', () => {
+      let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
+      f.content = `# Test Page
+
+This is test content about Zebras`;
+      f.parseBody();
+      expect(f.bodyLoaded).toEqual(true);
+      expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
     });
   });
 
@@ -274,11 +286,11 @@ title: Testing Bug Features
     it('standard', () => {
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
       f.content = generic_contents;
-      expect(f.title).toBeUndefined();
-      expect(f.date).toBeUndefined();
-      expect(f.author).toBeUndefined();
-      expect(f.name).toBeUndefined();
-      expect(f.permalink).toBeUndefined();
+      expect(f.title).toBeNull();
+      expect(f.date).toBeNull();
+      expect(f.author).toBeNull();
+      expect(f.name).toBeNull();
+      expect(f.permalink).toBeNull();
       f.parseContent();
       expect(f.title).toEqual('Testing Bug Features');
       expect(f.seotitle).toEqual('Google Friendly Title');

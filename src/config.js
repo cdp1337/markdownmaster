@@ -25,7 +25,7 @@ export class Config extends Object {
 
     /**
      * Markdown engine to use for parsing into HTML
-     * @type {(function(*, *, *): (*|undefined))|*}
+     * @type {function}
      */
     this.markdownEngine = marked.parse;
 
@@ -140,9 +140,9 @@ export class Config extends Object {
 
     /**
      * Separator for FrontMatter content in Markdown files
-     * @type {RegExp}
+     * @type {string}
      */
-    this.frontMatterSeperator = /^---$/m;
+    this.frontMatterSeperator = '---';
 
     /**
      * Extension to match Files with

@@ -32,12 +32,6 @@ import CMSError from './cmserror';
 
 /**
  * Represents a Markdown file installed in one of the collection directories
- *
- * @constructor
- * @param {string} url    The URL of the file
- * @param {string} type   The type of file (i.e. posts, pages)
- * @param {string} layout The layout templates of the file
- * @param {Config} config Configuration from the CMS
  */
 class File {
 
@@ -57,19 +51,75 @@ class File {
     'url'
   ];
 
+  /**
+   * @param {string} url    The URL of the file
+   * @param {string} type   The type of file (i.e. posts, pages)
+   * @param {string} layout The layout templates of the file
+   * @param {Config} config Configuration from the CMS
+   */
   constructor(url, type, layout, config) {
-    // Author-defined parameters
+    // Common author-defined parameters
 
-    this.author;
-    this.date;
-    this.datetime;
+    /**
+     * Author name - pulled from FrontMatter
+     * @type {string|null}
+     */
+    this.author = null;
+    /**
+     * Banner alt/label and URL for this page, useful for pretty headers on pages
+     * @type {{label: string, url: string}|null}
+     */
+    this.banner = null;
+    /**
+     * Date published - pulled from FrontMatter or URL
+     * Will be converted into the requested format from Config.dateParser
+     *
+     * @see {@link Config#dateParser} for rendering info
+     * @type {string|null}
+     */
+    this.date = null;
+    /**
+     * Date object holding the date published - pulled from Last-Modified header
+     * if date is not set otherwise
+     * @type {Date|null}
+     */
+    this.datetime = null;
+    /**
+     * Set to TRUE to flag this File as draft (and not rendered to the site)
+     * @type {boolean}
+     */
     this.draft = false;
-    this.excerpt;
-    this.image;
+    /**
+     * Short excerpt or teaser about the page, useful on listing pages
+     * @type {string|null}
+     */
+    this.excerpt = null;
+    /**
+     * Image alt/label and URL for this page
+     * @type {{label: string, url: string}|null}
+     */
+    this.image = null;
+    /**
+     * Default layout for rendering this file
+     * @type {string}
+     */
     this.layout = layout;
-    this.seotitle;
-    this.tags;
-    this.title;
+    /**
+     * Window title / SEO title for this page, useful for differing from page title
+     * @type {string|null}
+     */
+    this.seotitle = null;
+    /**
+     * List of tags associated with this page
+     * @type {string[]|null}
+     */
+    this.tags = null;
+    /**
+     * Title for this page, generally rendered as an H1
+     * @type {string|null}
+     */
+    this.title = null;
+
 
     // System-defined parameters
 
@@ -77,7 +127,7 @@ class File {
      * Rendered HTML body for this File
      * @type {string}
      */
-    this.body;
+    this.body = null;
 
     /**
      * Set to true when the HTML body has been parsed (performance tracker)
@@ -95,19 +145,19 @@ class File {
      * Raw Markdown contents of this File
      * @type {string}
      */
-    this.content;
+    this.content = null;
 
     /**
      * Base filename of this File (without the extension)
      * @type {string}
      */
-    this.name;
+    this.name = null;
 
     /**
      * Browseable link to this File (includes .html)
      * @type {string}
      */
-    this.permalink;
+    this.permalink = null;
 
     /**
      * Collection type this file resides under
@@ -125,7 +175,6 @@ class File {
   /**
    * Load file content from the server
    *
-   * @async
    * @returns {Promise<string>}
    * @throws {CMSError}
    */
@@ -254,7 +303,7 @@ class File {
   }
 
   /**
-   * Parse file date from either the frontmatter or server last-modified header
+   * Parse file date from either the FrontMatter or server Last-Modified header
    */
   parseDate() {
     let dateRegEx = new RegExp(this.config.dateParser);
@@ -282,10 +331,17 @@ class File {
     if (!this.bodyLoaded) {
       // Only render content if it hasn't been loaded yet, (allows for repeated calls)
 
-      let html = this.content
-        .split(this.config.frontMatterSeperator)
-        .splice(2)
-        .join(this.config.frontMatterSeperator);
+      let html;
+      if (this._checkHasFrontMatter()) {
+        // Trim off the FrontMatter from the content
+        html = this.content
+          .split(this.config.frontMatterSeperator)
+          .splice(2)
+          .join(this.config.frontMatterSeperator);
+      } else {
+        // This file does not contain any valid formatted FrontMatter content
+        html = this.content;
+      }
 
       if (this.config.markdownEngine) {
         this.body = this.config.markdownEngine(html);
@@ -401,6 +457,28 @@ class File {
   }
 
   /**
+   * Renders file with a configured layout
+   *
+   * @async
+   * @returns {Promise}
+   * @throws {Error}
+   */
+  async render() {
+    this.parseBody();
+
+    // Rendering a full page will update the page title
+    if (this.seotitle) {
+      document.title = this.seotitle;
+    } else if (this.title) {
+      document.title = this.title;
+    } else {
+      document.title = 'Page';
+    }
+
+    return renderLayout(this.layout, this);
+  }
+
+  /**
    * Internal method to parse a value query, including support for comparison prefixes in the string
    * Supports a single value to compare and both single and array values from the metadata
    *
@@ -506,25 +584,29 @@ class File {
   }
 
   /**
-   * Renders file with a configured layout
-   * 
-   * @async
-   * @returns {Promise}
-   * @throws {Error}
+   * Check if this File has FrontMatter content
+   *
+   * This is important because parseContent needs to know if it needs to strip the meta fields
+   * @returns {boolean}
+   * @private
    */
-  async render() {
-    this.parseBody();
-
-    // Rendering a full page will update the page title
-    if (this.seotitle) {
-      document.title = this.seotitle;
-    } else if (this.title) {
-      document.title = this.title;
-    } else {
-      document.title = 'Page';
+  _checkHasFrontMatter() {
+    if (this.content === null || this.content === '') {
+      // Failsafe checks
+      return false;
     }
 
-    return renderLayout(this.layout, this);
+    // FrontMatter always starts on line 1
+    let r = new RegExp('^' + this.config.frontMatterSeperator),
+      m = this.content.match(r);
+    if (m === null) {
+      return false;
+    }
+
+    // There must be at least 2 separators
+    r = new RegExp('^' + this.config.frontMatterSeperator + '$[^]', 'gm');
+    m = this.content.match(r);
+    return (Array.isArray(m) && m.length >= 2);
   }
 
 }
