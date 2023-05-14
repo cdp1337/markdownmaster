@@ -296,6 +296,13 @@ This is test content about Zebras`;
       expect(f.bodyLoaded).toEqual(true);
       expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
     });
+    it('no content', () => {
+      let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
+      f.content = '';
+      f.parseBody();
+      expect(f.bodyLoaded).toEqual(true);
+      expect(f.body).toEqual('');
+    });
   });
 
   describe('parseContent', () => {
