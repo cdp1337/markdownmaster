@@ -24,25 +24,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { get } from './utils';
-import { messages as msg, handleMessage } from './messages';
+import {pathJoin} from './utils';
+import CMSError from './cmserror';
+import Log from './log';
 
-/**
- * Templating function that renders HTML templates.
- * @function
- * @param {string} text - HTML text to be evaluated.
- * @returns {string} Rendered template with injected data.
- */
-export function Templater(text) {
-  return new Function(
-    'data',
-    'var output=' +
-    JSON.stringify(text)
-      .replace(/<%=(.+?)%>/g, '"+($1)+"')
-      .replace(/<%(.+?)%>/g, '";$1\noutput+="') +
-    ';return output;'
-  );
-}
+let layout_path = '',
+  system_container = null;
 
 /**
  * Load template from URL.
@@ -50,32 +37,118 @@ export function Templater(text) {
  * @async
  * @param {string} url - URL of template to load.
  * @param {object} data - Data to load into template.
- * @param {function} callback - Callback function
+ * @returns {Promise<string>}
+ * @throws {CMSError}
  */
-export function loadTemplate(url, data, callback) {
-  get(url, (success, error) => {
-    if (error) callback(success, error);
-    callback(Templater(success)(data), error);
+export async function loadTemplate(url, data) {
+  return new Promise((resolve, reject) => {
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          reject(new CMSError(response.status, response.statusText));
+        }
+        return response.text();
+      })
+      .then(tmpl => {
+        let fn = new Function(
+            'data',
+            'var output=' +
+            JSON.stringify(tmpl)
+              .replace(/<%=(.+?)%>/g, '"+($1)+"')
+              .replace(/<%(.+?)%>/g, '";$1\noutput+="') +
+            ';return output;'
+          ),
+          html = '';
+
+        /**
+         * Run the template renderer in a completely isolated scope
+         *
+         * @param {Object} data
+         * @returns {string}
+         */
+        let renderer = function(data) {
+          return fn.call(this, data);
+        };
+
+        try {
+          html = renderer(data);
+          resolve(html);
+        }
+        catch(e) {
+          reject(new CMSError(500, e));
+        }
+      });
+  });
+}
+
+/**
+ * Fetch the layout and return in the resolve
+ *
+ * @async
+ * @param {string} layout - Filename of layout.
+ * @param {object} data - Data passed to template.
+ * @returns {Promise<string>}
+ * @throws {CMSError}
+ */
+export async function fetchLayout(layout, data) {
+  return new Promise((resolve, reject) => {
+    let url = pathJoin(layout_path, layout + '.html');
+    loadTemplate(url, data)
+      .then(html => {
+        Log.Debug('Template', 'Fetched templated layout', url);
+        resolve(html);
+      })
+      .catch(e => {
+        Log.Error('Template', 'Error while rendered layout', url, e.message);
+        reject(e);
+      });
   });
 }
 
 /**
  * Renders the layout into the main container.
- * @function renderLayout
+ *
  * @async
  * @param {string} layout - Filename of layout.
  * @param {object} data - Data passed to template.
+ * @returns {Promise}
+ * @throws {CMSError}
  */
-export function renderLayout(layout, config, data, callback) {
-  //config.container.innerHTML = '';
-  var url = [config.webpath, config.layoutDirectory, '/', layout, '.html'].join('');
-  loadTemplate(url, data, (success, error) => {
-    if (error) {
-      handleMessage(msg['LAYOUT_LOAD_ERROR']);
-      callback(null, error);
-    } else {
-      config.container.innerHTML = success;
-      callback('rendered', null);
-    }
+export async function renderLayout(layout, data) {
+  return new Promise((resolve, reject) => {
+    fetchLayout(layout, data).then(html => {
+      system_container.innerHTML = html;
+      resolve();
+    }).catch(e => {
+      reject(e);
+    });
   });
+}
+
+/**
+ * Render an error to the browser
+ *
+ * @param {CMSError} error
+ * @returns {Promise}
+ */
+export async function renderError(error) {
+  return renderLayout('error' + error.code, {});
+}
+
+/**
+ * Set the system layout directory (generally only called from the CMS)
+ *
+ * @param {string} args
+ */
+export function setSystemLayoutPath(...args) {
+  layout_path = pathJoin(...args);
+}
+
+/**
+ * Set the system layout directory (generally only called from the CMS)
+ *
+ * @param {HTMLElement} container
+ */
+export function setSystemContainer(container) {
+  system_container = container;
 }

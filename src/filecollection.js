@@ -24,16 +24,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { messages as msg, handleMessage } from './messages';
 import { renderLayout } from './templater';
-import { get, getGithubUrl, getFilenameFromPath } from './utils';
+import { pathJoin } from './utils';
 import File from './file';
+import Log from './log';
+import CMSError from './cmserror';
 
 /**
  * Represents a file collection.
  * @constructor
- * @param {string} type - The type of file collection (i.e. posts, pages).
- * @param {object} layout - The layouts of the file collection type.
+ * @param {string} type   The type of file collection (i.e. posts, pages).
+ * @param {Object} layout The layouts of the file collection type.
+ * @param {Object} config Configuration from the CMS
  */
 class FileCollection {
 
@@ -48,75 +50,55 @@ class FileCollection {
   }
 
   /**
-   * Initialize file collection.
-   * @method
+   * Initialize file collection
+   *
    * @async
-   * @param {function} callback - Callback function
+   * @returns {Promise}
    */
-  init(callback) {
-    this.getFiles((success, error) => {
-      if (error) handleMessage(msg['DIRECTORY_ERROR']);
-
-      if (this.files.length > 0) {
-        // Only try to load the files if the scan actually found files to load.
-        // Otherwise callback() is just never invoked.
-        this.loadFiles((success, error) => {
-          if (error) handleMessage(msg['GET_FILE_ERROR']);
-          callback();
+  async init() {
+    return new Promise((resolve) => {
+      this.getFiles().then(() => {
+        this.loadFiles().then(() => {
+          resolve();
         });
-      } else {
-        // No files, just jump straight to the callback.
-        callback();
-      }
-      
+      });
     });
   }
 
   /**
-   * Get file list URL.
-   * @method
-   * @param {string} type - Type of file collection.
+   * Get file list URL
+   *
    * @returns {string} URL of file list
    */
-  getFileListUrl(type, config) {
-    return (config.mode === 'GITHUB') ? getGithubUrl(type, config.github) : this.config.webpath + type;
+  getFileListUrl() {
+    console.log(this);
+    return pathJoin(this.config.webpath, this.type);
   }
 
   /**
    * Get file URL.
    * @method
-   * @param {object} file - File object.
+   * @param {string} href      File href attribute as retrieved from the server
+   * @param {string} directory Directory this file was retrieved from
    * @returns {string} File URL
    */
-  getFileUrl(file, mode, type) {
-    if (mode === 'GITHUB') {
-      return file['download_url'];
+  getFileUrl(href, directory) {
+    if (href.startsWith('/')) {
+      // Absolutely resolved paths should be returned unmodified
+      return href;
     } else {
-      let href = getFilenameFromPath(file.getAttribute('href'));
-      if (href[0] === '/') {
-        // Absolutely resolved paths should be returned unmodified
-        return href;
-      } else {
-        // Relatively linked URLs get appended to the parent directory
-        if (type[type.length - 1] === '/') {
-          // parent directory ends in a trailing slash
-          return type + href;
-        } else {
-          // No trailing slash, so adjust as necessary
-          return type + '/' + href;
-        }
-      }
+      return pathJoin(directory, href);
     }
   }
 
   /**
    * Get list of file elements from either the returned listing page scan (or JSON data for GITHUB)
    * 
-   * @param {object} data - File directory or Github data.
-   * @returns {array} File elements
+   * @param {object|string} data - File directory or Github data.
+   * @returns {string[]} File elements
    */
   getFileElements(data) {
-    var fileElements;
+    let fileElements = [];
 
     // Github Mode
     if (this.config.mode === 'GITHUB') {
@@ -125,11 +107,17 @@ class FileCollection {
     // Server Mode
     else {
       // convert the directory listing to a DOM element
-      var listElement = document.createElement('div');
+      let listElement = document.createElement('div');
       listElement.innerHTML = data;
-      // get the links in the directory listing
-      fileElements = [].slice.call(listElement.getElementsByTagName('a'));
+      // get the valid links in the directory listing
+      listElement.querySelectorAll('a').forEach(el => {
+        let href = el.getAttribute('href');
+        if (href !== '../' && (href.endsWith(this.config.extension) || href.endsWith('/'))) {
+          fileElements.push(href);
+        }
+      });
     }
+
     return fileElements;
   }
 
@@ -137,70 +125,85 @@ class FileCollection {
    * Get files from file listing and set to file collection.
    * @method
    * @async
-   * @param {function} callback - Callback function
+   * @returns {Promise}
    */
-  getFiles(callback) {
-    this.directories = [this.getFileListUrl(this.type, this.config)];
-
-    this.scanDirectory(callback, this.directories[0], true);
+  async getFiles() {
+    return new Promise((resolve) => {
+      // Scan the top-level directory first
+      this.scanDirectory(this.getFileListUrl())
+        .then(directories => {
+          // THEN scan any child directory discovered to allow for 1-level depth paths
+          let promises = [];
+          for(let dir of directories) {
+            promises.push(this.scanDirectory(dir));
+          }
+          if (promises.length > 0) {
+            Promise.all(promises)
+              .then(() => {
+                resolve();
+              });
+          }
+          else {
+            // No additional directories found, resolve immediately.
+            resolve();
+          }
+        });
+    });
   }
 
   /**
    * Perform the underlying directory lookup
    * @method
    * @async
-   * @param {function} callback - Callback function
-   * @param {string} directory - Directory URL to scan
-   * @param {boolean} recurse - Set to FALSE to prevent further recursion
+   * @param {string} directory   Directory URL to scan
+   * @returns {Promise<string[]>} Array of subdirectories found
    */
-  scanDirectory(callback, directory, recurse) {
-    window.CMS.debuglog('[' + this.type + '] Scanning directory', directory);
+  async scanDirectory(directory) {
+    Log.Debug(this.type, 'Scanning directory', directory);
 
-    get(directory, (success, error) => {
-      if (error) callback(success, error);
+    return new Promise((resolve) => {
+      fetch(directory)
+        .then(response => {
+          return response.text();
+        })
+        .then(contents => {
+          let directories = [];
 
-      // find the file elements that are valid files, exclude others
-      this.getFileElements(success).forEach((file) => {
-        var fileUrl = this.getFileUrl(file, this.config.mode, directory);
-        
-        if (
-          // Skip top-level path
-          fileUrl !== this.config.webpath &&
-          // Must be a file on this site
-          fileUrl.indexOf(this.config.webpath) === 0 &&
-          // Must end with the extension configured
-          fileUrl.endsWith(this.config.extension)
-        ) {
-          // Regular markdown file
-          window.CMS.debuglog('[' + this.type + '] Found valid file, adding to collection', {original: file.href, parsed: fileUrl});
-          this.files.push(new File(fileUrl, this.type, this.layout.single, this.config));
-        } else if (
-          // Allow recurse to be disabled
-          recurse && 
-          // Only iterate when not in github mode
-          this.config.mode !== 'GITHUB' && 
-          // skip checking '?...' sort option links
-          fileUrl[fileUrl.length - 1] === '/' && 
-          // skip top-level path
-          fileUrl !== this.config.webpath &&
-          // skip parent directory links, we're going DOWN, not UP
-          fileUrl.indexOf('/../') === -1
-        ) {
-          // in SERVER mode, support recursing ONE directory deep.
-          // Allow this for any directory listing NOT absolutely resolved (they will just point back to the parent directory)
-          this.directories.push(fileUrl);
-          this.scanDirectory(callback, fileUrl, false);
-        } else {
-          window.CMS.debuglog('[' + this.type + '] Skipping invalid link', {original: file.href, parsed: fileUrl});
-        }
-      });
+          this.getFileElements(contents).forEach(file => {
+            let fileUrl = this.getFileUrl(file, directory);
 
-      this.directoriesScanned++;
-      window.CMS.debuglog('[' + this.type + '] Scanning of ' + directory + ' complete (' + this.directoriesScanned + ' of ' + this.directories.length + ')');
+            if (
+              // Skip top-level path
+              fileUrl !== this.config.webpath &&
+              // Must be a file on this site
+              fileUrl.indexOf(this.config.webpath) === 0 &&
+              // Must end with the extension configured
+              fileUrl.endsWith(this.config.extension)
+            ) {
+              // Regular markdown file
+              Log.Debug(this.type, 'Found valid file, adding to collection', {directory, file, fileUrl});
+              this.files.push(new File(fileUrl, this.type, this.layout.single, this.config));
+            } else if (
+              // Only iterate when not in github mode
+              this.config.mode !== 'GITHUB' &&
+              // skip checking '?...' sort option links
+              fileUrl[fileUrl.length - 1] === '/' &&
+              // skip top-level path
+              fileUrl !== this.config.webpath &&
+              // skip parent directory links, we're going DOWN, not UP
+              fileUrl.indexOf('/../') === -1
+            ) {
+              // in SERVER mode, support recursing ONE directory deep.
+              // Allow this for any directory listing NOT absolutely resolved (they will just point back to the parent directory)
+              directories.push(fileUrl);
+            } else {
+              Log.Debug(this.type, 'Skipping invalid link', {directory, file, fileUrl});
+            }
+          });
 
-      if (this.directoriesScanned === this.directories.length) {
-        callback(success, error);
-      }
+          Log.Debug(this.type, 'Scanning of ' + directory + ' complete');
+          resolve(directories);
+        });
     });
   }
 
@@ -208,20 +211,19 @@ class FileCollection {
    * Load files and get file content.
    * @method
    * @async
-   * @param {function} callback - Callback function
+   * @returns {Promise}
    */
-  loadFiles(callback) {
-    var promises = [];
-    // Load file content
-    this.files.forEach((file, i) => {
-      file.loadContent((success, error) => {
-        if (error) callback(success, error);
-        promises.push(i);
-        file.parseContent();
-        // Execute after all content is loaded
-        if (this.files.length == promises.length) {
-          callback(success, error);
-        }
+  async loadFiles() {
+    return new Promise((resolve) => {
+      let promises = [];
+
+      this.files.forEach((file) => {
+        promises.push(file.loadContent());
+      });
+
+      // Once all files have been loaded, notify the parent
+      Promise.allSettled(promises).then(() => {
+        resolve();
       });
     });
   }
@@ -240,7 +242,7 @@ class FileCollection {
    * If a string is requested, only specific keywords are supported.  Use -r to inverse results.
    * If NULL is requested, the default sort for this collection type is used.
    * 
-   * @param {object|string|null} param A function, string, or empty value to sort by
+   * @param {object|string|null} [param=null] A function, string, or empty value to sort by
    */
   filterSort(param) {
     if (typeof(param) === 'undefined' || param === null) {
@@ -268,10 +270,12 @@ class FileCollection {
 
   /**
    * Search file collection by attribute.
-   * @method
+   *
    * @param {string} search - Search query.
    */
   filterSearch(search) {
+    Log.Debug(this.type, 'Performing text search for files', search);
+
     this.entries = this.entries.filter((file) => {
       return file.matchesSearch(search);
     });
@@ -282,10 +286,12 @@ class FileCollection {
    *
    * @see {@link File#matchesAttributeSearch} for full documentation of usage
    * @param {Object} search Dictionary containing key/values to search
-   * @param {string} mode   "OR" or "AND" if we should check all keys or any of them
+   * @param {string} [mode=AND]   "OR" or "AND" if we should check all keys or any of them
    */
   filterAttributeSearch(search, mode) {
     mode = mode || 'AND';
+
+    Log.Debug(this.type, 'Performing "' + mode + '" attribute search for files', search);
 
     this.entries = this.entries.filter((file) => {
       return file.matchesAttributeSearch(search, mode);
@@ -293,25 +299,25 @@ class FileCollection {
   }
 
   /**
-   * Filter content to display by a tag
-   * @method
+   * Filter content to display by a tag (Convenience method)
+   *
+   * @see filterAttributeSearch
+   *
    * @param {string} query - Search query.
    */
   filterTag(query) {
-    this.entries = this.entries.filter((file) => {
-      return file.matchesAttributeSearch({tags: query});
-    });
+    this.filterAttributeSearch({tags: query});
   }
 
   /**
-   * Filter results by a URL regex
+   * Filter results by a URL regex (Convenience method)
+   *
+   * @see filterAttributeSearch
    * 
    * @param {string} url URL fragment/regex to filter against
    */
   filterPermalink(url) {
-    this.entries = this.entries.filter((file) => {
-      return file.matchesAttributeSearch({permalink: '~ ' + url + '.*'});
-    });
+    this.filterAttributeSearch({permalink: '~ ' + url + '.*'});
   }
 
   /**
@@ -354,10 +360,11 @@ class FileCollection {
    * @method
    * @param {string} permalink - Permalink to search.
    * @returns {File} File object.
+   * @throws {CMSError}
    */
   getFileByPermalink(permalink) {
 
-    window.CMS.debuglog('Retrieving file by permalink', permalink);
+    Log.Debug(this.type, 'Retrieving file by permalink', permalink);
 
     let foundFiles = this.files.filter((file) => {
       return file.permalink === permalink || 
@@ -365,7 +372,7 @@ class FileCollection {
     });
 
     if (foundFiles.length === 0) {
-      throw 'Requested file could not be located';
+      throw new CMSError(404, 'Requested file could not be located');
     }
     
     return foundFiles[0];
@@ -373,17 +380,21 @@ class FileCollection {
 
   /**
    * Renders file collection.
-   * @method
+   *
    * @async
-   * @returns {string} Rendered layout
+   * @returns {Promise}
+   * @throws {Error}
    */
-  render(callback) {
+  async render() {
+
+    // Rendering a full page will update the page title
     if (this.layout.title) {
       document.title = this.layout.title;
     } else {
       document.title = 'Listing';
     }
-    renderLayout(this.layout.list, this.config, this, callback);
+
+    return renderLayout(this.layout.list, this);
   }
 
 }

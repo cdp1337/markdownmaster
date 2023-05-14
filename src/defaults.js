@@ -26,9 +26,8 @@
 
 const defaults = {
   elementId: null,
-  layoutDirectory: null,
+  layoutDirectory: 'layouts',
   defaultView: null,
-  errorLayout: null,
   mode: 'SERVER',
   github: null,
   types: [],

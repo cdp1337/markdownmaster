@@ -25,101 +25,97 @@
  */
 
 /**
- * AJAX Get utility function.
- * @function
- * @async
- * @param {string} url - URL of the request.
- * @param {function} callback - Callback after request is complete.
- */
-export function get(url, callback) {
-  var req = new XMLHttpRequest();
-  req.open('GET', url, true);
-  req.onreadystatechange = function() {
-    if (req.readyState === 4) {
-      if (req.status === 200) {
-        // Add support for returning the Last-Modified header for lazy timestamps
-        callback(req.response, false, req.getResponseHeader('Last-Modified'));
-      } else {
-        callback(req, req.statusText, null);
-      }
-    }
-  };
-  req.send();
-}
-
-/**
- * Extend utility function for extending objects.
- * @function
- * @param {object} target - Target object to extend.
- * @param {object} opts - Options to extend.
- * @param {function} callback - Callback function after completion.
- * @returns {object} Extended target object.
- */
-export function extend(target, opts, callback) {
-  var next;
-  if (typeof opts === 'undefined') {
-    opts = target;
-  }
-  for (next in opts) {
-    if (Object.prototype.hasOwnProperty.call(opts, next)) {
-      target[next] = opts[next];
-    }
-  }
-  if (callback) {
-    callback();
-  }
-  return target;
-}
-
-/**
- * Get URL parameter by name.
- * @function
- * @param {string} name - Name of parameter.
- * @param {string} url - URL
- * @returns {string} Parameter value
- */
-export function getParameterByName(name, url) {
-  if (!url) url = window.location.href;
-  name = name.replace(/[[]]/g, '\\$&');
-  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-    results = regex.exec(url);
-  if (!results) return null;
-  if (!results[2]) return '';
-  return decodeURIComponent(results[2].replace(/\+/g, ' '));
-}
-
-
-/**
- * Get Github URL based on configuration.
- * @function
- * @param {string} type - Type of file.
- * @returns {string} GIthub URL
- */
-export function getGithubUrl(type, gh) {
-  var url = [gh.host, 'repos', gh.username, gh.repo, 'contents', type + '?ref=' + gh.branch];
-  if (gh.prefix) url.splice(5, 0, gh.prefix);
-  return url.join('/');
-}
-
-/**
- * Formats date string to datetime
+ * Formats date string to a Date object rounded to the closest day
  * 
  * Accepts dashes or slashes between characters, (to support YYYY/MM/DD URL directories)
  * 
- * @param {string} dateString - Date string to convert.
- * @returns {object} Formatted datetime
+ * @param {string} dateStr Date string to convert
+ * @returns {Date} Formatted datetime
  */
 export function getDatetime(dateStr) {
+  let matches;
+  if ((matches = dateStr.match(/^(1[0-2]|[1-9])\/(3[0-1]|[1-2][0-9]|[0-9])\/((?:20|19)?[0-9][0-9])$/))) {
+    // US-based M/d/Y
+    if (matches[3] < 100) {
+      // Short format year (2-digit)
+      matches[3] = '20' + matches[3];
+    }
+
+    dateStr = [matches[3], matches[1], matches[2]].join('-');
+  }
   dateStr = dateStr.replaceAll('/', '-');
-  var dt = new Date(dateStr);
+  let dt = new Date(dateStr);
   return new Date(dt.getTime() - dt.getTimezoneOffset() * (-60000));
 }
 
 /**
- * @param {string} filepath - Full file path including file name.
- * @returns {string} filename
+ * Function to join paths while ensuring each is separated by a slash
+ *
+ * @param {string} args
+ * @returns {string}
+ *
+ * @example
+ * pathJoin('posts', 'topic');
+ * // Returns 'posts/topic'
+ *
+ * pathJoin('posts', 'topic', 'README.md');
+ * // Returns 'posts/topic/README.md'
  */
-export function getFilenameFromPath(filepath) {
-  //return filepath.split('\\').pop().split('/').pop();
-  return filepath.split('\\').pop();
+export function pathJoin(...args) {
+  let path = '';
+  // Lazy person's os.path.join()
+  for(let i = 0; i < args.length; i++) {
+
+    if (args[i] === '' || args[i] === null) {
+      // Failsafe checks
+      continue;
+    }
+
+    if (path.endsWith('/') && args[i].startsWith('/')) {
+      // If paths are provided as ['/', '/posts'], we don't want to double the slashes.
+      path += args[i].substring(1);
+    }
+    else {
+      path += args[i];
+    }
+
+    if (i + 1 < args.length && !args[i].endsWith('/')) {
+      path += '/';
+    }
+  }
+
+  return path;
+}
+
+/**
+ * Get the directory name of the requested file
+ *
+ * @param {string} path
+ * @returns {string}
+ */
+export function dirname(path) {
+  if (path.indexOf('/') === -1) {
+    // No slashes, no path
+    return '';
+  }
+  return path.substring(0, path.lastIndexOf('/') + 1);
+}
+
+/**
+ * Get the basename of a given file, optionally without the extension
+ *
+ * @param {string} path
+ * @param {boolean} [without_extension=false]
+ * @returns {string}
+ */
+export function basename(path, without_extension) {
+  if (path.indexOf('/') !== -1) {
+    path = path.substring(path.lastIndexOf('/') + 1);
+  }
+
+  if (without_extension && path.indexOf('.') !== -1) {
+    path = path.substring(0, path.lastIndexOf('.'));
+  }
+
+  return path;
 }

@@ -25,8 +25,10 @@
  */
 
 import { renderLayout } from './templater';
-import { get, extend, getDatetime} from './utils';
+import {basename, dirname, getDatetime, pathJoin} from './utils';
 import Markdown from './markdown';
+import Log from './log';
+import CMSError from './cmserror';
 
 /**
  * Represents a Markdown file installed in one of the collection directories
@@ -34,15 +36,31 @@ import Markdown from './markdown';
  * @constructor
  * @param {string} url    The URL of the file
  * @param {string} type   The type of file (i.e. posts, pages)
- * @param {object} layout The layout templates of the file
+ * @param {string} layout The layout templates of the file
+ * @param {Config} config Configuration from the CMS
  */
 class File {
+
+  /**
+   * Set of keys which cannot be set from the FrontMatter content
+   * These generally have a built-in or reserved purpose
+   * @type {string[]}
+   */
+  static ProtectedAttributes = [
+    'body',
+    'bodyLoaded',
+    'config',
+    'content',
+    'name',
+    'permalink',
+    'type',
+    'url'
+  ];
 
   constructor(url, type, layout, config) {
     // Author-defined parameters
 
     this.author;
-    this.content;
     this.date;
     this.datetime;
     this.draft = false;
@@ -55,41 +73,89 @@ class File {
 
     // System-defined parameters
 
-    this.config = config;
+    /**
+     * Rendered HTML body for this File
+     * @type {string}
+     */
     this.body;
-    // System parameter to track if the body has been rendered with markdown, (saves performance for large amounts of files)
+
+    /**
+     * Set to true when the HTML body has been parsed (performance tracker)
+     * @type {boolean}
+     */
     this.bodyLoaded = false;
-    this.extension;
-    this.html = false;
+
+    /**
+     * System configuration
+     * @type {Config}
+     */
+    this.config = config;
+
+    /**
+     * Raw Markdown contents of this File
+     * @type {string}
+     */
+    this.content;
+
+    /**
+     * Base filename of this File (without the extension)
+     * @type {string}
+     */
     this.name;
+
+    /**
+     * Browseable link to this File (includes .html)
+     * @type {string}
+     */
     this.permalink;
+
+    /**
+     * Collection type this file resides under
+     * @type {string}
+     */
     this.type = type;
+
+    /**
+     * Path to the raw Markdown source file
+     * @type {string}
+     */
     this.url = url;
   }
 
   /**
-  * Load file content from the server
-  *
-  * @method
-  * @async
-  * @param {function} callback - Callback function.
-  */
-  loadContent(callback) {
-    get(this.url, (success, error, lastModified) => {
-      if (error) callback(success, error);
-      this.content = success;
+   * Load file content from the server
+   *
+   * @async
+   * @returns {Promise<string>}
+   * @throws {CMSError}
+   */
+  async loadContent() {
+    return new Promise((resolve, reject) => {
+      fetch(this.url)
+        .then(response => {
+          if (!response.ok) {
+            Log.Warn(this.type, 'Unable to load file', this.url, response);
 
-      // Patch to retrieve the last modified timestamp automatically from the server.
-      // If "datetime" is assigned in the content, it'll override the server header.
-      if (lastModified) {
-        this.datetime = lastModified;
-      }
+            reject(new CMSError(response.status, response.statusText));
+          }
 
-      // check if the response returns a string instead
-      // of an response object
-      if (typeof this.content === 'string') {
-        callback(success, error);
-      }
+          if (response.headers.has('Last-Modified')) {
+            this.datetime = response.headers.get('Last-Modified');
+          }
+
+          return response.text();
+        })
+        .then(content => {
+          this.content = content;
+          this.parseContent();
+
+          Log.Debug(this.type, 'Loaded file ' + this.url);
+          resolve(content);
+        })
+        .catch(e => {
+          Log.Warn(this.type, 'Unable to load file', this, e);
+          reject(new CMSError(503, e));
+        });
     });
   }
 
@@ -102,19 +168,17 @@ class File {
    * These values get set directly on the `File` object for use within templates or system use.
    */
   parseFrontMatter() {
-    let yaml = this.content.split(this.config.frontMatterSeperator)[1],
-      protectedAttributes = ['url', 'type', 'config', 'name', 'extension', 'body', 'permalink', 'bodyLoaded', 'html'];
+    let yaml = this.content.split(this.config.frontMatterSeperator)[1];
 
     if (yaml) {
-      let attributes = {};
       yaml.split(/\n/g).forEach((attributeStr) => {
         // Fix https://github.com/chrisdiana/cms.js/issues/95 by splitting ONLY on the first occurrence of a colon.
         if ( attributeStr.indexOf(':') !== -1) {
           let attPos = attributeStr.indexOf(':'),
-            attKey = attributeStr.substr(0, attPos).trim(),
-            attVal = attributeStr.substr(attPos +1).trim();
+            attKey = attributeStr.substring(0, attPos).trim().toLowerCase(),
+            attVal = attributeStr.substring(attPos +1).trim();
           
-          if (protectedAttributes.indexOf(attKey) !== -1) {
+          if (File.ProtectedAttributes.indexOf(attKey) !== -1) {
             // To prevent the user from messing with important parameters, skip a few.
             // These are calculated and used internally and really shouldn't be modified.
             console.warn(this.url + ' has a protected key [' + attKey + '], value will NOT be parsed.');
@@ -144,7 +208,11 @@ class File {
             // An easy way to specify images in markdown files is to list them relative to the file itself.
             // Take the permalink (since it's already resolved), and prepend the base to the image.
             if (attURL.indexOf('://') === -1) {
-              attURL = this.permalink.replace(/\/[^/]+$/, '/') + attURL;
+              if (!this.permalink) {
+                // Ensure the permalink for this file is ready
+                this.parsePermalink();
+              }
+              attURL = pathJoin(dirname(this.permalink), attURL);
             }
 
             attVal = {
@@ -164,11 +232,10 @@ class File {
 
           if (attVal !== '') {
             // Only retrieve this key/value if the value is not an empty string.  (false is allowed)
-            attributes[attKey] = attVal;
+            this[attKey] = attVal;
           }
         }
       });
-      extend(this, attributes, null);
     }
   }
 
@@ -176,26 +243,21 @@ class File {
    * Parse filename from the URL of this file and sets to `name`
    */
   parseFilename() {
-    this.name = this.url.substr(this.url.lastIndexOf('/'))
-      .replace('/', '')
-      .replace(this.config.extension, '');
+    this.name = basename(this.url, true);
   }
 
   /**
    * Parse permalink from the URL of this file and sets to `permalink`
    */
   parsePermalink() {
-    this.permalink = 
-      this.config.mode === 'GITHUB' ? 
-        ['#', this.type, this.name].join('/') : 
-        this.url.substring(0, this.url.length - this.config.extension.length) + '.html';
+    this.permalink = pathJoin(dirname(this.url), basename(this.url, true) + '.html');
   }
 
   /**
    * Parse file date from either the frontmatter or server last-modified header
    */
   parseDate() {
-    var dateRegEx = new RegExp(this.config.dateParser);
+    let dateRegEx = new RegExp(this.config.dateParser);
     if (this.date) {
       // Date is set from markdown via the "date" inline header
       this.datetime = getDatetime(this.date);
@@ -224,15 +286,11 @@ class File {
         .split(this.config.frontMatterSeperator)
         .splice(2)
         .join(this.config.frontMatterSeperator);
-      if (this.html) {
-        this.body = html;
+
+      if (this.config.markdownEngine) {
+        this.body = this.config.markdownEngine(html);
       } else {
-        if (this.config.markdownEngine) {
-          this.body = this.config.markdownEngine(html);
-        } else {
-          let md = new Markdown();
-          this.body = md.render(html);
-        }
+        this.body = (new Markdown()).render(html);
       }
 
       this.bodyLoaded = true;
@@ -259,13 +317,19 @@ class File {
    */
   matchesSearch(query) {
     let words = query.toLowerCase().split(' '),
-      found = true;
+      found = true,
+      checks = '';
+
+    if (this.content) {
+      checks += this.content.toLowerCase();
+    }
+
+    if (this.title) {
+      checks += this.title.toLowerCase();
+    }
     
     words.forEach(word => {
-      if (
-        this.content.toLowerCase().indexOf(word) === -1 &&
-        this.title.toLowerCase().indexOf(word) === -1
-      ) {
+      if (checks.indexOf(word) === -1) {
         // This keyword was not located anywhere, matches need to be complete when multiple words are provided.
         found = false;
         return false;
@@ -346,95 +410,112 @@ class File {
    * @private
    */
   _matchesAttribute(key, value) {
+    let op = '',
+      check,
+      local_val;
+
     if (!Object.hasOwn(this, key) || this[key] === null) {
       // If the property is either not set or NULL, only NULL check value will match
       // This is done separately to make the Array logic easier herein.
       return value === null;
+    } else if (value === null) {
+      // If the value is null, then we only want unset attributes,
+      // but the above check confirmed that the value is set
+      return false;
     }
 
-    let local_val = this[key];
-    if (!Array.isArray(local_val)) {
-      // To support array values, just convert everything to an array to make the logic simpler.
-      local_val = [ local_val ];
+    if (value.indexOf('~ ') === 0) {
+      // "~ " prefix is RegExp
+      op = '~';
+      check = new RegExp(value.substring(2));
     }
-    // local_val = this[key].toLowerCase();
-
-    if (value !== null) {
-      // Support different comparison options
-      if (value.indexOf('~ ') === 0) {
-        // "~ " prefix is RegExp
-        value = value.substring(2);
-        for(let val of local_val) {
-          if ((new RegExp(value)).exec(val) !== null) {
-            return true;
-          }
-        }
-        return false;
-      }
-      else if(value.indexOf('>= ') === 0) {
-        // Mathematical operation
-        value = value.substring(3);
-        for(let val of local_val) {
-          if (val >= value) {
-            return true;
-          }
-        }
-        return false;
-      }
-      else if(value.indexOf('<= ') === 0) {
-        // Mathematical operation
-        value = value.substring(3);
-        for(let val of local_val) {
-          if (val <= value) {
-            return true;
-          }
-        }
-        return false;
-      }
-      else if(value.indexOf('> ') === 0) {
-        // Mathematical operation
-        value = value.substring(2);
-        for(let val of local_val) {
-          if (val > value) {
-            return true;
-          }
-        }
-        return false;
-      }
-      else if(value.indexOf('< ') === 0) {
-        // Mathematical operation
-        value = value.substring(2);
-        for(let val of local_val) {
-          if (val < value) {
-            return true;
-          }
-        }
-        return false;
-      }
-      else {
-        // Default case, standard comparison
-        value = value.toLowerCase();
-        for(let val of local_val) {
-          if (val.toLowerCase() === value) {
-            return true;
-          }
-        }
-        return false;
-      }
+    else if(value.indexOf('>= ') === 0) {
+      // Mathematical operation
+      op = '>=';
+      check = value.substring(3);
+    }
+    else if(value.indexOf('<= ') === 0) {
+      // Mathematical operation
+      op = '<=';
+      check = value.substring(3);
+    }
+    else if(value.indexOf('> ') === 0) {
+      // Mathematical operation
+      op = '>';
+      check = value.substring(2);
+    }
+    else if(value.indexOf('< ') === 0) {
+      // Mathematical operation
+      op = '<';
+      check = value.substring(2);
     }
     else {
-      return local_val === value;
+      // Default case, standard comparison but done case insensitively
+      op = '=';
+      check = value.toLowerCase();
     }
+
+    if (key === 'date') {
+      // This is a useless parameter as it's formatted into a human-friendly version,
+      // but we can remap it to datetime (that's probably what they wanted)
+      key = 'datetime';
+    }
+
+    if (key === 'datetime') {
+      // Dates must be compared against other Dates.
+      check = new Date(value);
+    }
+
+
+    if (Array.isArray(this[key])) {
+      local_val = this[key];
+    } else {
+      // To support array values, just convert everything to an array to make the logic simpler.
+      local_val = [ this[key] ];
+    }
+
+    for(let val of local_val) {
+      if (op === '~') {
+        if (check.exec(val) !== null) {
+          return true;
+        }
+      } else if (op === '>=') {
+        if (val >= check) {
+          return true;
+        }
+      } else if (op === '<=') {
+        if (val <= check) {
+          return true;
+        }
+      } else if (op === '>') {
+        if (val > check) {
+          return true;
+        }
+      } else if (op === '<') {
+        if (val < check) {
+          return true;
+        }
+      } else {
+        if (val.toLowerCase() === check) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
    * Renders file with a configured layout
    * 
    * @async
+   * @returns {Promise}
+   * @throws {Error}
    */
-  render(callback) {
+  async render() {
     this.parseBody();
-    
+
+    // Rendering a full page will update the page title
     if (this.seotitle) {
       document.title = this.seotitle;
     } else if (this.title) {
@@ -442,7 +523,8 @@ class File {
     } else {
       document.title = 'Page';
     }
-    return renderLayout(this.layout, this.config, this, callback);
+
+    return renderLayout(this.layout, this);
   }
 
 }
