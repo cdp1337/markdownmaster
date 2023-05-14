@@ -230,7 +230,13 @@ class File {
           if (File.ProtectedAttributes.indexOf(attKey) !== -1) {
             // To prevent the user from messing with important parameters, skip a few.
             // These are calculated and used internally and really shouldn't be modified.
-            console.warn(this.url + ' has a protected key [' + attKey + '], value will NOT be parsed.');
+            Log.Warn(this.type, this.url, 'has a protected key [' + attKey + '], value will NOT be parsed.');
+            return;
+          }
+
+          if (typeof this[attKey] === 'function') {
+            // Do not allow methods to be overridden
+            Log.Warn(this.type, this.url, 'unable to load key [' + attKey + '], target is a function!');
             return;
           }
           

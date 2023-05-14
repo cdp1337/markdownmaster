@@ -130,7 +130,7 @@ permalink: https://test.tld
 ---`;
       console.warn = jest.fn(() => true);
       f.parseFrontMatter();
-      expect(console.warn.mock.calls[0][0]).toEqual('test.md has a protected key [permalink], value will NOT be parsed.');
+      expect(console.warn.mock.calls).toHaveLength(1);
     });
     it('relative file', () => {
       let f = new File('test.md', 'test', 'test', new Config());
@@ -165,6 +165,22 @@ THING: Yup, this is a thing!
       expect(f.title).toEqual('Testing Bug Features');
       expect(f.author).toEqual('Bob');
       expect(f.thing).toEqual('Yup, this is a thing!');
+    });
+
+    /**
+     * Check to ensure that function cannot be overridden from incoming keys
+     */
+    it('function overrides', () => {
+      console.warn = jest.fn(() => true );
+
+      let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
+      f.content = `---
+render: false
+title: Sneaky exploit attempt
+---`;
+      f.parseFrontMatter();
+      expect(f.render).toBeInstanceOf(Object);
+      expect(typeof f.render).toBe('function');
     });
   });
 
