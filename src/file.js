@@ -29,6 +29,7 @@ import {basename, dirname, getDatetime, pathJoin} from './utils';
 import Markdown from './markdown';
 import Log from './log';
 import CMSError from './cmserror';
+import jsYaml from 'js-yaml';
 
 /**
  * Represents a Markdown file installed in one of the collection directories
@@ -217,80 +218,36 @@ class File {
    * These values get set directly on the `File` object for use within templates or system use.
    */
   parseFrontMatter() {
-    let yaml = this.content.split(this.config.frontMatterSeperator)[1];
+    if (!this._checkHasFrontMatter()) {
+      // No FrontMatter, nothing to scan.
+      return;
+    }
+
+    let yaml = this.content.split(this.config.frontMatterSeperator)[1],
+      data;
 
     if (yaml) {
-      yaml.split(/\n/g).forEach((attributeStr) => {
-        // Fix https://github.com/chrisdiana/cms.js/issues/95 by splitting ONLY on the first occurrence of a colon.
-        if ( attributeStr.indexOf(':') !== -1) {
-          let attPos = attributeStr.indexOf(':'),
-            attKey = attributeStr.substring(0, attPos).trim().toLowerCase(),
-            attVal = attributeStr.substring(attPos +1).trim();
-          
-          if (File.ProtectedAttributes.indexOf(attKey) !== -1) {
-            // To prevent the user from messing with important parameters, skip a few.
-            // These are calculated and used internally and really shouldn't be modified.
-            Log.Warn(this.type, this.url, 'has a protected key [' + attKey + '], value will NOT be parsed.');
-            return;
-          }
+      data = jsYaml.load(yaml);
 
-          if (typeof this[attKey] === 'function') {
-            // Do not allow methods to be overridden
-            Log.Warn(this.type, this.url, 'unable to load key [' + attKey + '], target is a function!');
-            return;
-          }
-          
-          if (this.config.listAttributes.indexOf(attKey) !== -1) {
-            // Allow some parameters to have multiple values.
-            attVal = attVal.split(',').map((item) => {
-              return item.trim();
-            });
-          }
-          
-          if (this.config.urlAttributes.indexOf(attKey) !== -1) {
-            // URLs should support a title / alt text
-            // This allows for the use of meta fields in buttons or accessible images.
-            let attTitle = '', attURL = '';
-            if (attVal.indexOf('|') !== -1) {
-              // Split on a '|'
-              [attTitle, attURL] = attVal.split('|').map(s => { return s.trim(); });
-            }
-            else {
-              attTitle = attVal.split('/').reverse()[0]; // basename
-              attURL = attVal;
-            }
-            // Fix for relatively positioned images
-            // An easy way to specify images in markdown files is to list them relative to the file itself.
-            // Take the permalink (since it's already resolved), and prepend the base to the image.
-            if (attURL.indexOf('://') === -1) {
-              if (!this.permalink) {
-                // Ensure the permalink for this file is ready
-                this.parsePermalink();
-              }
-              attURL = pathJoin(dirname(this.permalink), attURL);
-            }
+      for(let [attKey, attVal] of Object.entries(data)) {
+        // For convenience all tags should be lowercase.
+        attKey = attKey.toLowerCase();
 
-            attVal = {
-              label: attTitle,
-              url: attURL
-            };
-          }
-
-          // Auto-typecast support for true/false
-          if (attVal === 'true') {
-            attVal = true;
-          }
-
-          if (attVal === 'false') {
-            attVal = false;
-          }
-
-          if (attVal !== '') {
-            // Only retrieve this key/value if the value is not an empty string.  (false is allowed)
-            this[attKey] = attVal;
-          }
+        if (File.ProtectedAttributes.indexOf(attKey) !== -1) {
+          // To prevent the user from messing with important parameters, skip a few.
+          // These are calculated and used internally and really shouldn't be modified.
+          Log.Warn(this.type, this.url, 'has a protected key [' + attKey + '], value will NOT be parsed.');
+          continue;
         }
-      });
+
+        if (typeof this[attKey] === 'function') {
+          // Do not allow methods to be overridden
+          Log.Warn(this.type, this.url, 'unable to load key [' + attKey + '], target is a function!');
+          continue;
+        }
+
+        this[attKey] = this._parseFrontMatterKey(attVal);
+      }
     }
   }
 
@@ -615,6 +572,41 @@ class File {
     return (Array.isArray(m) && m.length >= 2);
   }
 
+  /**
+   * Parse a FrontMatter value for special functionality
+   * @param {Object|Array|string|boolean|null|number} value
+   * @returns {Object|Array|string|boolean|null|number}
+   */
+  _parseFrontMatterKey(value) {
+    if(Array.isArray(value)) {
+      for(let i = 0; i < value.length; i++) {
+        value[i] = this._parseFrontMatterKey(value[i]);
+      }
+    } else if (value instanceof Object) {
+      for(let [k, v] of Object.entries(value)) {
+        if (k === 'src' || k === 'href') {
+          // Objects may have HREF or SRC attributes, treat these as such
+          // Fix for relatively positioned images
+          // An easy way to specify images in markdown files is to list them relative to the file itself.
+          // Take the permalink (since it's already resolved), and prepend the base to the image.
+          if (v.indexOf('://') === -1) {
+            if (!this.permalink) {
+              // Ensure the permalink for this file is ready
+              this.parsePermalink();
+            }
+            value[k] = pathJoin(dirname(this.permalink), v);
+          }
+        }
+
+        if (k === 'src' && !Object.hasOwn(value, 'alt')) {
+          // src is commonly used for images, so include an 'alt' attribute by default if not provided.
+          value['alt'] = basename(value[k]);
+        }
+      }
+    }
+
+    return value;
+  }
 }
 
 export default File;

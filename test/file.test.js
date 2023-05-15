@@ -38,12 +38,15 @@ describe('File', () => {
 title: Testing Bug Features
 seotitle: Google Friendly Title
 excerpt: This is a generic test
-date: 2023-03-14
+date: '2023-03-14'
 author: Alice
 rating: 4.5
-banner: https://www.http.cat/200.jpg
-image: Success Cat | https://www.http.cat/200.jpg
-tags: Test, Document
+banner: 
+  src: https://www.http.cat/200.jpg
+image: 
+  alt: Success Cat
+  src: https://www.http.cat/200.jpg
+tags: [Test, Document]
 falsy: false
 truth: true
 iamempty: 
@@ -58,9 +61,12 @@ title: Testing Bug Features
 seotitle: Google Friendly Title
 excerpt: This is a generic test
 author: Alice
-banner: https://www.http.cat/200.jpg
-image: Success Cat | https://www.http.cat/200.jpg
-tags: Test, Document
+banner: 
+  src: https://www.http.cat/200.jpg
+image: 
+  alt: Success Cat
+  src: https://www.http.cat/200.jpg
+tags: [Test, Document]
 ---
 
 # Test Page
@@ -89,8 +95,8 @@ This is test content about Zebras`;
         expect(f.seotitle).toEqual('Google Friendly Title');
         expect(f.excerpt).toEqual('This is a generic test');
         expect(f.author).toEqual('Alice');
-        expect(f.banner).toEqual({label: '200.jpg', url: 'https://www.http.cat/200.jpg'});
-        expect(f.image).toEqual({label: 'Success Cat', url: 'https://www.http.cat/200.jpg'});
+        expect(f.banner).toEqual({alt: '200.jpg', src: 'https://www.http.cat/200.jpg'});
+        expect(f.image).toEqual({alt: 'Success Cat', src: 'https://www.http.cat/200.jpg'});
         expect(f.tags).toEqual(['Test', 'Document']);
         expect(f.url).toEqual('test.md');
         expect(f.date).toEqual('May 7, 2023');
@@ -136,21 +142,22 @@ This is test content about Zebras`;
       expect(f.seotitle).toEqual('Google Friendly Title');
       expect(f.excerpt).toEqual('This is a generic test');
       expect(f.author).toEqual('Alice');
-      expect(f.banner).toEqual({label: '200.jpg', url: 'https://www.http.cat/200.jpg'});
-      expect(f.image).toEqual({label: 'Success Cat', url: 'https://www.http.cat/200.jpg'});
+      expect(f.banner).toEqual({alt: '200.jpg', src: 'https://www.http.cat/200.jpg'});
+      expect(f.image).toEqual({alt: 'Success Cat', src: 'https://www.http.cat/200.jpg'});
       expect(f.tags).toEqual(['Test', 'Document']);
       expect(f.url).toEqual('test.md');
       expect(f.date).toEqual('2023-03-14');
       expect(f.falsy).toEqual(false);
       expect(f.truth).toEqual(true);
-      expect(f.iamempty).toBeUndefined();
+      expect(f.iamempty).toBeNull();
     });
     it('protected attributes', () => {
       let f = new File('test.md', 'test', 'test', new Config());
       f.content = `---
 title: Testing SEO Features
 permalink: https://test.tld
----`;
+---
+`;
       console.warn = jest.fn(() => true);
       f.parseFrontMatter();
       expect(console.warn.mock.calls).toHaveLength(1);
@@ -159,19 +166,25 @@ permalink: https://test.tld
       let f = new File('test.md', 'test', 'test', new Config());
       f.content = `---
 title: Testing SEO Features
-image: Local Cat | images/200.jpg
----`;
+image: 
+  alt: Local Cat
+  src: images/200.jpg
+---
+`;
       f.parseFrontMatter();
-      expect(f.image).toEqual({label: 'Local Cat', url: 'images/200.jpg'});
+      expect(f.image).toEqual({alt: 'Local Cat', src: 'images/200.jpg'});
     });
     it('relative file with directory', () => {
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
       f.content = `---
 title: Testing SEO Features
-image: Local Cat | images/200.jpg
----`;
+image: 
+  alt: Local Cat
+  src: images/200.jpg
+---
+`;
       f.parseFrontMatter();
-      expect(f.image).toEqual({label: 'Local Cat', url: '/posts/topic/images/200.jpg'});
+      expect(f.image).toEqual({alt: 'Local Cat', src: '/posts/topic/images/200.jpg'});
     });
     it('bad key case', () => {
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
@@ -179,7 +192,8 @@ image: Local Cat | images/200.jpg
 Title: Testing Bug Features
 Author: Bob
 THING: Yup, this is a thing! 
----`;
+---
+`;
       f.parseFrontMatter();
 
       expect(f.Title).toBeUndefined();
@@ -200,10 +214,34 @@ THING: Yup, this is a thing!
       f.content = `---
 render: false
 title: Sneaky exploit attempt
----`;
+---
+`;
       f.parseFrontMatter();
       expect(f.render).toBeInstanceOf(Object);
       expect(typeof f.render).toBe('function');
+    });
+    it('multiple attributes', () => {
+      let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
+      f.content = `---
+title: Testing SEO Features
+categories: [Soup, Food]
+utensils:
+  - spoon
+  - fork
+  - knife
+images:
+  - alt: Local Cat
+    src: images/200.jpg
+  - alt: Remote Cat
+    src: https://http.cat/200.jpg
+---
+`;
+      f.parseFrontMatter();
+      expect(f.categories).toEqual(['Soup', 'Food']);
+      expect(f.utensils).toEqual(['spoon', 'fork', 'knife']);
+      expect(f.images).toHaveLength(2);
+      expect(f.images[0]).toEqual({alt: 'Local Cat', src: '/posts/topic/images/200.jpg'});
+      expect(f.images[1]).toEqual({alt: 'Remote Cat', src: 'https://http.cat/200.jpg'});
     });
   });
 
@@ -228,8 +266,9 @@ title: Sneaky exploit attempt
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
       f.content = `---
 title: Testing Bug Features
-date: 2023-03-14
----`;
+date: '2023-03-14'
+---
+`;
       f.parseFrontMatter();
       assert.equal(f.date, '2023-03-14');
       f.parseDate();
@@ -243,7 +282,8 @@ date: 2023-03-14
       let f = new File('/posts/topic/2023-03-14-test.md', 'test', 'test', new Config());
       f.content = `---
 title: Testing Bug Features
----`;
+---
+`;
       f.parseFrontMatter();
       expect(f.url).toContain('2023-03-14');
       expect(f.date).toBeNull();
@@ -258,7 +298,8 @@ title: Testing Bug Features
       let f = new File('/posts/topic/2023/03/14/test.md', 'test', 'test', new Config());
       f.content = `---
 title: Testing Bug Features
----`;
+---
+`;
       f.parseFrontMatter();
       expect(f.url).toContain('2023/03/14');
       expect(f.date).toBeNull();
@@ -273,7 +314,8 @@ title: Testing Bug Features
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
       f.content = `---
 title: Testing Bug Features
----`;
+---
+`;
       // Spoof this as it would be set from the HTTP header
       f.datetime = 'Sun, 07 May 2023 19:03:08 GMT';
       f.parseFrontMatter();
@@ -342,12 +384,12 @@ This is test content about Zebras`;
       expect(f.seotitle).toEqual('Google Friendly Title');
       expect(f.excerpt).toEqual('This is a generic test');
       expect(f.author).toEqual('Alice');
-      expect(f.banner).toEqual({label: '200.jpg', url: 'https://www.http.cat/200.jpg'});
-      expect(f.image).toEqual({label: 'Success Cat', url: 'https://www.http.cat/200.jpg'});
+      expect(f.banner).toEqual({alt: '200.jpg', src: 'https://www.http.cat/200.jpg'});
+      expect(f.image).toEqual({alt: 'Success Cat', src: 'https://www.http.cat/200.jpg'});
       expect(f.tags).toEqual(['Test', 'Document']);
       expect(f.falsy).toEqual(false);
       expect(f.truth).toEqual(true);
-      expect(f.iamempty).toBeUndefined();
+      expect(f.iamempty).toBeNull();
       expect(f.permalink).toEqual('/posts/topic/test.html');
       expect(f.url).toEqual('/posts/topic/test.md');
       expect(f.date).toEqual('Mar 14, 2023');

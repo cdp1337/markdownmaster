@@ -34,6 +34,7 @@ Support CSS-style selectors and any valid HTML attribute,
 * Fix for FrontMatter overwriting functions
 * Fix parsing of files with no FrontMatter
 * Fix bug where images inside anchors were not dispatching the router
+* FrontMatter now correctly handles YAML parsing 
 
 
 ## Changes
@@ -49,7 +50,6 @@ The date also switched to locale-aware defaults.
 * Removed Github support (it was broken anyway on this fork)
 * Switch to new Configuration system
 * Switch to Promises for async operations
-
 
 
 

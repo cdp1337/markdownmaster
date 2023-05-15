@@ -149,18 +149,6 @@ export class Config extends Object {
     this.dateParser = /\d{4}[-/]\d{2}(?:[-/]\d{2})?/;
 
     /**
-     * List of attributes in Markdown files which get processed as an array of comma-separated values
-     * @type {string[]}
-     */
-    this.listAttributes = ['tags'];
-
-    /**
-     * List of attributes in Markdown files which get processed as URLs (both relative and absolutely resolved)
-     * @type {string[]}
-     */
-    this.urlAttributes = ['image', 'banner'];
-
-    /**
      * Separator for FrontMatter content in Markdown files
      * @type {string}
      */
