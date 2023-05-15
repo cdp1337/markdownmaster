@@ -25,27 +25,34 @@
  */
 
 /**
- * Formats date string to a Date object rounded to the closest day
+ * Formats date string to a Date object converted to the user's local timezone
  * 
  * Accepts dashes or slashes between characters, (to support YYYY/MM/DD URL directories)
  * 
- * @param {string} dateStr Date string to convert
- * @returns {Date} Formatted datetime
+ * @param {string|Date} dateStr Date string to convert
+ * @returns {Date} Rendered Date object
  */
 export function getDatetime(dateStr) {
-  let matches;
-  if ((matches = dateStr.match(/^(1[0-2]|[1-9])\/(3[0-1]|[1-2][0-9]|[0-9])\/((?:20|19)?[0-9][0-9])$/))) {
-    // US-based M/d/Y
-    if (matches[3] < 100) {
-      // Short format year (2-digit)
-      matches[3] = '20' + matches[3];
-    }
-
-    dateStr = [matches[3], matches[1], matches[2]].join('-');
+  let matches, dt;
+  if (dateStr instanceof Date) {
+    // The input value may be a Date if passed from FrontMatter as a YAML date, allow this.
+    dt = dateStr;
   }
-  dateStr = dateStr.replaceAll('/', '-');
-  let dt = new Date(dateStr);
-  return new Date(dt.getTime() - dt.getTimezoneOffset() * (-60000));
+  else {
+    if ((matches = dateStr.match(/^(1[0-2]|[1-9])\/(3[0-1]|[1-2][0-9]|[0-9])\/((?:20|19)?[0-9][0-9])$/))) {
+      // US-based M/d/Y
+      if (matches[3] < 100) {
+        // Short format year (2-digit)
+        matches[3] = '20' + matches[3];
+      }
+
+      dateStr = [matches[3], matches[1], matches[2]].join('-');
+    }
+    dateStr = dateStr.replaceAll('/', '-');
+    dt = new Date(dateStr);
+  }
+
+  return new Date(dt.getTime() + dt.getTimezoneOffset() * 60000);
 }
 
 /**

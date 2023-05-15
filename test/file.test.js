@@ -243,6 +243,19 @@ images:
       expect(f.images[0]).toEqual({alt: 'Local Cat', src: '/posts/topic/images/200.jpg'});
       expect(f.images[1]).toEqual({alt: 'Remote Cat', src: 'https://http.cat/200.jpg'});
     });
+    it('date is not yesterday', () => {
+      let f = new File('test.md', 'test', 'test', new Config());
+      f.content = `---
+title: Testing SEO Features
+date: 2023-04-10
+---
+`;
+      f.parseFrontMatter();
+      expect(f.date).toBeInstanceOf(Date);
+      assert.equal(f.date.getFullYear(), 2023);
+      assert.equal(f.date.getMonth(), 3);
+      assert.equal(f.date.getDate(), 10);
+    });
   });
 
   describe('parseFilename', () => {
@@ -326,6 +339,22 @@ title: Testing Bug Features
       expect(f.datetime.getFullYear()).toEqual(2023);
       expect(f.datetime.getMonth()).toEqual(4);
       expect(f.datetime.getDate()).toEqual(7);
+    });
+    it('date frontmatter is a date', () => {
+      let f = new File('test.md', 'test', 'test', new Config());
+      f.content = `---
+title: Testing SEO Features
+date: 2023-04-10
+---
+`;
+      f.parseFrontMatter();
+      expect(f.date).toBeInstanceOf(Date);
+      f.parseDate();
+      expect(f.date).toEqual('Apr 10, 2023');
+      expect(f.datetime).toBeInstanceOf(Date);
+      assert.equal(f.datetime.getFullYear(), 2023);
+      assert.equal(f.datetime.getMonth(), 3);
+      assert.equal(f.datetime.getDate(), 10);
     });
   });
 

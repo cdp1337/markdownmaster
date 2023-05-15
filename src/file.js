@@ -579,9 +579,13 @@ class File {
    */
   _parseFrontMatterKey(value) {
     if(Array.isArray(value)) {
-      for(let i = 0; i < value.length; i++) {
+      for (let i = 0; i < value.length; i++) {
         value[i] = this._parseFrontMatterKey(value[i]);
       }
+    } else if (value instanceof Date) {
+      // Native Date objects will utilize UTC which is probably not what the user wanted.
+      // Convert that date to the user's local timezone
+      return new Date(value.getTime() + value.getTimezoneOffset() * 60000);
     } else if (value instanceof Object) {
       for(let [k, v] of Object.entries(value)) {
         if (k === 'src' || k === 'href') {
