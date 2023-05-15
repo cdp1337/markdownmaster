@@ -1,17 +1,22 @@
 ---
-title: Authoring Pages
 author: Charlie Powell
 tags: Howto, Markdown, Authoring
 ---
 
-All pages in CMS.js are simply Markdown, but they do support a variety of nicities.
+# Authoring Pages
+
+All pages in MarkdownMaster CMS are simply Markdown, but they do support a variety of nicities.
 
 
 ## Page Location
 
-By default the CMS ships with `pages` and `posts` as content types.  Just create `.md` pages within those directories.  Other types of content can be added should you need to.  Subdirectories **ARE** supported, (but only a single level down).
+By default, the CMS ships with `pages` and `posts` as content types. 
+Just create `.md` pages within those directories. 
+Other types of content can be added should you need to. 
+Subdirectories **ARE** supported, (but only a single level down).
 
-A common usage (especially for posts), is to include a date string in the URL to organize them.  Else you will end up with a mess of files.
+A common usage (especially for posts), is to group files by date published
+to better organize them, otherwise you will end up with a mess of files and assets.
 
 The following directory structure examples will all provide the same automatic date string parsing from the URL.
 

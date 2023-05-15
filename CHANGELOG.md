@@ -1,4 +1,4 @@
-## NEXT
+## 4.0.0 - UNRELEASED
 
 ### New Features
 
@@ -7,12 +7,29 @@
 * dateFormat, listAttributes, & urlAttributes config
 * Include Prism.JS as an extra for sites
 * Include FontAwesome as an extra for sites
+* Better error management
+* Better logging support
+* Better support for external scripts
+* Add fetchLayout and renderLayout
+* Add support for filtering files by date published
+* New convenience method CMS.getCollection
+* New support for complex filtering of files
 
 ### Fixes
 
 * Do not include DRAFT pages in taglist
 * Fix beginning newline on sitemap
+* Fix for FrontMatter overwriting functions
+* Fix parsing of files with no FrontMatter
+* Fix bug where images inside anchors were not dispatching the router
 
+
+### Changes
+
+* Removed Github support (it was broken anyway on this fork)
+* Switch to new Configuration system
+* Switch to Promises for async operations
+* Rebrand from CMS.js to MarkdownMaster (This project has diverged far enough)
 
 ## 3.1.0 - 2022-11-24
 

@@ -1,23 +1,21 @@
 {
-  "name": "@cdp1337/cmsjs",
-  "version": "3.1.0",
+  "name": "markdownmaster",
+  "version": "4.0.0",
   "type": "module",
   "description": "The JavaScript Site Generator, forked from Chris Diana's CMS.js",
   "keywords": [
     "client-side, javascript, site-generator, cms, markdown"
   ],
-  "homepage": "https://github.com/cdp1337/cms.js",
+  "homepage": "https://github.com/cdp1337/markdownmaster",
   "scripts": {
     "compile": "rollup -c",
-    "minify": "uglifyjs dist/cms.js -m --comments /^!/ -o dist/cms.min.js",
-    "example": "copyfiles --flat dist/cms.min.js examples/js/",
-    "build": "npm run compile && npm run minify && npm run example",
+    "minify": "uglifyjs dist/cms.js -m --comments /^!/ -o dist/cms.min.js && copyfiles --flat dist/cms.min.js examples/js/",
+    "build": "npm run compile && npm run minify",
     "pack": "./build_pack.sh",
     "watch": "rollup -c -w",
     "dev": "npm-run-all --parallel serve watch",
     "docs": "jsdoc -c jsdoc.conf",
     "serve": "serve ./examples/",
-    "start": "npm run dev",
     "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "prepare": "husky install",
     "lint": "npx eslint src/"
@@ -35,14 +33,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/cdp1337/cms.js.git"
+    "url": "git://github.com/cdp1337/markdownmaster.git"
   },
   "author": {
     "name": "Charlie Powell"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cdp1337/cms.js/issues"
+    "url": "https://github.com/cdp1337/markdownmaster/issues"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",
@@ -73,7 +71,7 @@
     "rollup": "^3.21.6",
     "rollup-plugin-livereload": "^2.0.5",
     "serialize-javascript": ">=3.1.0",
-    "serve": "^10.1.2",
+    "serve": "^14.2.0",
     "set-value": ">=2.0.1",
     "uglify-js": "^3.17.4"
   }

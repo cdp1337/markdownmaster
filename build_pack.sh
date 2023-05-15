@@ -25,7 +25,7 @@ getTagVersion() {
 }
 
 # Create the archive
-TGZ_FILE="cmsjs-$(getTagVersion).tgz"
+TGZ_FILE="markdownmaster-$(getTagVersion).tgz"
 echo "Creating tarball ${TGZ_FILE}..."
 tar -czf release/$TGZ_FILE dist/cms.min.js dist/cms.es.js dist/cms.js examples/ RELEASE.md LICENSE.md README.md INSTALL.apache.md INSTALL.mailinabox.md
 

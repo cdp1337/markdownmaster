@@ -1,12 +1,12 @@
 /**
- * CMS.js - Utilities used within the CMS (mostly internal functions)
+ * MarkdownMaster CMS
  *
  * The MIT License (MIT)
  * Copyright (c) 2021 Chris Diana
  * https://chrisdiana.github.io/cms.js
  *
  * Copyright (c) 2023 Charlie Powell
- * https://github.com/cdp1337/cms.js
+ * https://github.com/cdp1337/markdownmaster
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,

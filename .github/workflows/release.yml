@@ -48,7 +48,7 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: CMS.js ${{ github.ref }}
+          release_name: MarkdownMaster CMS ${{ github.ref }}
           tag_name: ${{ github.ref }}
           body_path: RELEASE.md
         env:

@@ -1,7 +1,7 @@
 ---
 title: Site Configuration
 author: Charlie Powell
-tags: Howto, Configuration
+tags: [Howto, Configuration]
 ---
 
 ## Web Application Configuration

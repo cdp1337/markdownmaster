@@ -1,12 +1,12 @@
 /**
- * CMS.js - Primary handler for CMS
+ * MarkdownMaster CMS
  *
  * The MIT License (MIT)
  * Copyright (c) 2021 Chris Diana
  * https://chrisdiana.github.io/cms.js
  *
  * Copyright (c) 2023 Charlie Powell
- * https://github.com/cdp1337/cms.js
+ * https://github.com/cdp1337/markdownmaster
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -76,11 +76,11 @@ class CMS {
    * Init
    * @method
    * @description
-   * Initializes the application based on the configuration. Sets up up config object,
+   * Initializes the application based on the configuration. Sets up config object,
    * hash change event listener for router, and loads the content.
    */
   init() {
-    Log.Debug('CMS', 'Initializing CMS.js');
+    Log.Debug('CMS', 'Initializing MarkdownMaster CMS');
 
     // create message container element if debug mode is enabled
     if (this.config.debug) {
