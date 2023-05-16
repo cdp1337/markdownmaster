@@ -41,20 +41,20 @@ import Search from './addons/search';
 
 // Load marked addons
 marked.use({
-  extensions: [
-    {
-      name: 'link',
-      renderer: customRenderer.link,
-    },
-    {
-      name: 'image',
-      renderer: customRenderer.image,
-    },
-  ],
-  renderer: {
-    paragraph: customRenderer.paragraph,
-  },
-  tokenizer: customTokenizer
+	extensions: [
+		{
+			name: 'link',
+			renderer: customRenderer.link,
+		},
+		{
+			name: 'image',
+			renderer: customRenderer.image,
+		},
+	],
+	renderer: {
+		paragraph: customRenderer.paragraph,
+	},
+	tokenizer: customTokenizer
 });
 
 // Make available in global space
@@ -62,10 +62,10 @@ window.marked = marked;
 
 // Load addons
 let systemPlugins = {
-  mastodon_share: new MastodonShare(),
-  pagebodyclass: new PageBodyClass(),
-  pagelist: new Pagelist(),
-  search: new Search()
+	mastodon_share: new MastodonShare(),
+	pagebodyclass: new PageBodyClass(),
+	pagelist: new Pagelist(),
+	search: new Search()
 };
 
 export default (options) => new CMS(window, options, systemPlugins);

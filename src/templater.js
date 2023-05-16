@@ -29,7 +29,7 @@ import CMSError from './cmserror';
 import Log from './log';
 
 let layout_path = '',
-  system_container = null;
+	system_container = null;
 
 /**
  * Load template from URL.
@@ -41,44 +41,43 @@ let layout_path = '',
  * @throws {CMSError}
  */
 export async function loadTemplate(url, data) {
-  return new Promise((resolve, reject) => {
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          reject(new CMSError(response.status, response.statusText));
-        }
-        return response.text();
-      })
-      .then(tmpl => {
-        let fn = new Function(
-            'data',
-            'var output=' +
-            JSON.stringify(tmpl)
-              .replace(/<%=(.+?)%>/g, '"+($1)+"')
-              .replace(/<%(.+?)%>/g, '";$1\noutput+="') +
-            ';return output;'
-          ),
-          html = '';
+	return new Promise((resolve, reject) => {
+		fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					reject(new CMSError(response.status, response.statusText));
+				}
+				return response.text();
+			})
+			.then(tmpl => {
+				let fn = new Function(
+						'data',
+						'var output=' +
+						JSON.stringify(tmpl)
+							.replace(/<%=(.+?)%>/g, '"+($1)+"')
+							.replace(/<%(.+?)%>/g, '";$1\noutput+="') +
+						';return output;'
+					),
+					html = '';
 
-        /**
-         * Run the template renderer in a completely isolated scope
-         *
-         * @param {Object} data
-         * @returns {string}
-         */
-        let renderer = function(data) {
-          return fn.call(this, data);
-        };
+				/**
+				 * Run the template renderer in a completely isolated scope
+				 *
+				 * @param {Object} data
+				 * @returns {string}
+				 */
+				let renderer = function (data) {
+					return fn.call(this, data);
+				};
 
-        try {
-          html = renderer(data);
-          resolve(html);
-        }
-        catch(e) {
-          reject(new CMSError(500, e));
-        }
-      });
-  });
+				try {
+					html = renderer(data);
+					resolve(html);
+				} catch (e) {
+					reject(new CMSError(500, e));
+				}
+			});
+	});
 }
 
 /**
@@ -91,18 +90,18 @@ export async function loadTemplate(url, data) {
  * @throws {CMSError}
  */
 export async function fetchLayout(layout, data) {
-  return new Promise((resolve, reject) => {
-    let url = pathJoin(layout_path, layout + '.html');
-    loadTemplate(url, data)
-      .then(html => {
-        Log.Debug('Template', 'Fetched templated layout', url);
-        resolve(html);
-      })
-      .catch(e => {
-        Log.Error('Template', 'Error while rendered layout', url, e.message);
-        reject(e);
-      });
-  });
+	return new Promise((resolve, reject) => {
+		let url = pathJoin(layout_path, layout + '.html');
+		loadTemplate(url, data)
+			.then(html => {
+				Log.Debug('Template', 'Fetched templated layout', url);
+				resolve(html);
+			})
+			.catch(e => {
+				Log.Error('Template', 'Error while rendered layout', url, e.message);
+				reject(e);
+			});
+	});
 }
 
 /**
@@ -115,14 +114,14 @@ export async function fetchLayout(layout, data) {
  * @throws {CMSError}
  */
 export async function renderLayout(layout, data) {
-  return new Promise((resolve, reject) => {
-    fetchLayout(layout, data).then(html => {
-      system_container.innerHTML = html;
-      resolve();
-    }).catch(e => {
-      reject(e);
-    });
-  });
+	return new Promise((resolve, reject) => {
+		fetchLayout(layout, data).then(html => {
+			system_container.innerHTML = html;
+			resolve();
+		}).catch(e => {
+			reject(e);
+		});
+	});
 }
 
 /**
@@ -132,7 +131,7 @@ export async function renderLayout(layout, data) {
  * @returns {Promise}
  */
 export async function renderError(error) {
-  return renderLayout('error' + error.code, {});
+	return renderLayout('error' + error.code, {});
 }
 
 /**
@@ -141,7 +140,7 @@ export async function renderError(error) {
  * @param {string} args
  */
 export function setSystemLayoutPath(...args) {
-  layout_path = pathJoin(...args);
+	layout_path = pathJoin(...args);
 }
 
 /**
@@ -150,5 +149,5 @@ export function setSystemLayoutPath(...args) {
  * @param {HTMLElement} container
  */
 export function setSystemContainer(container) {
-  system_container = container;
+	system_container = container;
 }

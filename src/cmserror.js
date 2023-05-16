@@ -26,14 +26,14 @@
  * @param {string} message Error message text
  */
 class CMSError extends Error {
-  constructor(code, message) {
-    super(message);
-    this.code = code;
-  }
+	constructor(code, message) {
+		super(message);
+		this.code = code;
+	}
 
-  toString() {
-    return '[' + this.code + '] ' + this.message;
-  }
+	toString() {
+		return '[' + this.code + '] ' + this.message;
+	}
 }
 
 export default CMSError;
