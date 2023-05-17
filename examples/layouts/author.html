@@ -1,0 +1,32 @@
+<!-- Author Template -->
+<article class="author fade-in">
+  <h1 class="post-title">
+    <%= data.title %>
+  </h1>
+  <% if(data.image) { %>
+    <img src="<%= data.image.url %>"/>
+  <% } %>
+
+  <div class="post-content">
+    <%= data.body %>
+  </div>
+
+  <% if(data.github) { %>
+    <a itemprop="url" href="<%= data.github %>"><%= data.title %> on Github</a>
+  <% } %>
+
+  <% if(data.mastodon) { %>
+    <a itemprop="url" href="<%= data.mastodon %>"><%= data.title %> on Mastodon</a>
+  <% } %>
+
+  <cms-pagelist
+    type="posts"
+    layout="post-list-embed"
+    sort="datetime-r"
+    filter-1author="<%= data.title %>"
+    filter-2author="<%= data.alias %>"
+    filter-tags="Configuration"
+  >
+    Loading Content...
+  </cms-pagelist>
+</article>

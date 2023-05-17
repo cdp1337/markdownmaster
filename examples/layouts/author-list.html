@@ -1,0 +1,12 @@
+<!-- Page List Template -->
+<div class="authors-list fade-in">
+  <h1>Authors</h1>
+  <% data.authors.forEach(function(author) { %>
+    <h2>
+      <a href="<%= author.permalink %>"><%= author.title %></a>
+    </h2>
+    <% if(author.excerpt) { %>
+      <p><%= author.excerpt %></p>
+    <% } %>
+  <% }) %>
+</div>

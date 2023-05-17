@@ -1,6 +1,6 @@
 <!-- Post List Template -->
 <main class="posts-list fade-in">
-  <% data.posts.forEach(function(post) { %>
+  <% data.entries.forEach(function(post) { %>
     <% if(!post.draft) { %>
       <article class="post">
         <h2 class="post-title">
@@ -24,7 +24,7 @@
   <% }) %>
 </main>
 <aside>
-  <input type="search" id="search" data-type="posts" placeholder="Search for Post..."/>
+  <input type="search" id="search" is="cms-search" data-type="posts" placeholder="Search for Post..."/>
   <hr/>
 
   <% data.getTags().forEach(function(tag) { %>

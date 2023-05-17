@@ -3,21 +3,29 @@
   <h1 class="post-title">
     <%= data.title %>
   </h1>
+
+
   <% if(data.date) { %>
     <time class="post-date">
       <span><%= data.date %></span>
     </time>
   <% } %>
+
   <div class="post-tags">
     <% if(data.tags) { %>
       <% data.tags.forEach(function(tag) { %>
         <% if(tag) { %>
-          <a href="<!--#echo var=webpath -->posts.html?tag=<%= tag %>" class="post-tag"><%= tag %></a>
+          <a href="/posts.html?tag=<%= encodeURIComponent(tag) %>" class="post-tag"><%= tag %></a>
         <% } %>
       <% }) %>
     <% } %>
   </div>
+
   <div class="post-content">
     <%= data.body %>
   </div>
+
+  <% if(data.author) { %>
+    <cms-author author="<%= data.author %>" layout="author-embed">Author: <%= data.author %></cms-author>
+  <% } %>
 </article>

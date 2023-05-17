@@ -1,7 +1,13 @@
 # Extra - PrismJS Syntax Highlighter
 
+Prism is a lightweight, extensible syntax highlighter, 
+built with modern web standards in mind. It’s used in millions of websites, 
+including some of those you visit daily.
+
+## Installation
+
 To install PrismJS, add the following code snippets to your `index.html`.
-Multiple themes are included, use which ever you want (dark/light/auto).
+Multiple theme options are included, so use which ever you want (dark/light/auto).
 
 ```html
 <!DOCTYPE html>
@@ -12,8 +18,12 @@ Multiple themes are included, use which ever you want (dark/light/auto).
         <!-- PrismJS Light Theme-->
         <link rel="stylesheet" href="/extras/prismjs/css/light.min.css">
         
+        <!-- OR -->
+        
         <!-- PrismJS Dark Theme-->
         <link rel="stylesheet" href="/extras/prismjs/css/dark.min.css">
+
+        <!-- OR -->
         
         <!-- PrismJS AUTO Theme-->
         <link rel="stylesheet" href="/extras/prismjs/css/dark.min.css" media="(prefers-color-scheme:dark)">

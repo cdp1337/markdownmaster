@@ -4,26 +4,11 @@ var config = {
   // ID of element to attach CMS.js to
   elementId: 'cms',
 
-  // Mode 'GITHUB' for Github Pages, 'SERVER' for Self Hosted
-  // Defaults to Server mode if not specified
-  mode: 'SERVER',
-
   // When in SERVER mode, set this to the web path to use for the URL.
   // for example, if your site is located in https://domain.tld/cms/
   // your webpath should be '/cms/'
   // NOTE, a trailing slash is REQUIRED.
   webpath: '/',
-
-  // If Github mode is set, your Github username, repo name,
-  // and branch to get files from.
-  github: {
-    username: 'yourusername',
-    repo: 'yourrepo',
-    branch: 'gh-pages',
-    host: 'https://api.github.com',
-    // Use prefix option if your site is located in a subdirectory.
-    // prefix: 'subdirectory',
-  },
 
   // Customize the markdown engine here. For example, if you choose to use the
   // Marked library just specify the marked function.
@@ -31,9 +16,6 @@ var config = {
 
   // The name of the layouts directory.
   layoutDirectory: 'layouts',
-
-  // The error layout template name.
-  errorLayout: 'error',
 
   // The URL that will be the default view that will initially load
   // Examples:
@@ -70,6 +52,15 @@ var config = {
         single: 'page',
         sort: 'title',
         title: 'Pages'
+      },
+    },
+    {
+      name: 'authors',
+      layout: {
+        list: 'author-list',
+        single: 'author',
+        sort: 'title',
+        title: 'Authors'
       },
     },
   ],
@@ -116,17 +107,12 @@ var config = {
     //return [(date.getMonth() + 1), date.getDate(), date.getFullYear()].join('/');
   },
 
-  // List of attributes in Markdown files which get processed as an array of comma-separated values
-  listAttributes: ['tags'],
-  // List of attributes in Markdown files which get processed as URLs (both relative and absolutely resolved)
-  urlAttributes: ['image', 'banner'],
-
   // Set to true to enable debug logging, (will enable logging events to the console)
   debug: false,
 };
 
 // Initialize CMS.js
-var site = CMS(config);
+const site = CMS(config);
 
 /**
  * Called immediately upon successful initialization of the CMS
@@ -134,7 +120,7 @@ var site = CMS(config);
  * @param {CMS} event.detail.cms The CMS object passed for reference
  */
 document.addEventListener('cms:load', event => {
-  event.detail.cms.debuglog('CMS initialized and ready to run user-specific code!', event.detail.cms);
+  event.detail.cms.log.Debug('config', 'CMS initialized and ready to run user-specific code!', event.detail.cms);
 });
 
 /**
@@ -149,10 +135,10 @@ document.addEventListener('cms:load', event => {
  * @param {string} event.detail.type Content type selected
  */
 document.addEventListener('cms:route', event => {
-  event.detail.cms.debuglog('Page being displayed', event.detail);
+  event.detail.cms.log.Debug('config', 'Page being displayed', event.detail);
 });
 
 site.init();
 
 // Load some plugins
-site.enablePlugin(['pagebodyclass', 'pagelist']);
+site.enablePlugin(['pagebodyclass']);

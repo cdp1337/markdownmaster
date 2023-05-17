@@ -1,0 +1,20 @@
+<!-- Use https://schema.org/Person for more options here -->
+<div itemscope itemtype="https://schema.org/Person">
+  <a href="<%= data.permalink %>">
+    <span itemprop="name"><%= data.title %></span>
+  </a>
+
+  <% if(data.image) { %>
+    <a href="<%= data.permalink %>">
+      <img itemprop="image" src="<%= data.image.url %>" alt="<%= data.image.title %>"/>
+    </a>
+  <% } %>
+
+  <% if(data.github) { %>
+    <a itemprop="url" href="<%= data.github %>"><%= data.title %> on Github</a>
+  <% } %>
+
+  <% if(data.mastodon) { %>
+    <a itemprop="url" href="<%= data.mastodon %>"><%= data.title %> on Mastodon</a>
+  <% } %>
+</div>
