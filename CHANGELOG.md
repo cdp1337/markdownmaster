@@ -1,9 +1,8 @@
 ## 4.0.0 - UNRELEASED
 
-### New Features
+## New Features
 
 * New support for HTML attributes inline
-* Add text/title support to URLs in frontcontent
 * dateFormat, listAttributes, & urlAttributes config
 * Include Prism.JS as an extra for sites
 * Include FontAwesome as an extra for sites
@@ -14,22 +13,31 @@
 * Add support for filtering files by date published
 * New convenience method CMS.getCollection
 * New support for complex filtering of files
+* Add CMS-Author tag for embedded author snippet
+* Add CMS-Button tag for stylized buttons from a-elements
+* URLs in FrontMatter now support multiple values
 
-### Fixes
+
+## Fixes
 
 * Do not include DRAFT pages in taglist
 * Fix beginning newline on sitemap
 * Fix for FrontMatter overwriting functions
 * Fix parsing of files with no FrontMatter
 * Fix bug where images inside anchors were not dispatching the router
+* FrontMatter now correctly handles YAML parsing
 
 
-### Changes
+## Changes
 
 * Removed Github support (it was broken anyway on this fork)
 * Switch to new Configuration system
 * Switch to Promises for async operations
-* Rebrand from CMS.js to MarkdownMaster (This project has diverged far enough)
+* Move CMS-Pagelist to a standardized customElement
+* Move CMS-Search to a standardized customElement
+* URL-type properties now require `src` or `href` subattributes
+* The date formatting by default is now locale-aware
+
 
 ## 3.1.0 - 2022-11-24
 

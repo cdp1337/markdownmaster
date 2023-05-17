@@ -13,7 +13,6 @@ Support CSS-style selectors and any valid HTML attribute,
 (including quoted text).
 
 * New support for HTML attributes inline
-* Add text/title support to URLs in frontcontent
 * dateFormat, listAttributes, & urlAttributes config
 * Include Prism.JS as an extra for sites
 * Include FontAwesome as an extra for sites
@@ -24,7 +23,9 @@ Support CSS-style selectors and any valid HTML attribute,
 * Add support for filtering files by date published
 * New convenience method CMS.getCollection
 * New support for complex filtering of files 
-* URL parameters now support 'title | url_of_asset' format in FrontMatter
+* Add CMS-Author tag for embedded author snippet
+* Add CMS-Button tag for stylized buttons from a-elements
+* URLs in FrontMatter now support multiple values
 
 
 ## Fixes
@@ -39,24 +40,46 @@ Support CSS-style selectors and any valid HTML attribute,
 
 ## Changes
 
-*BREAKING CHANGE* URL-type properties now return "label" and "url", 
-with the label being the text prior to the URL, 
-separated by a vertical pipe '|'. 
-This allows pages to make use of URL in buttons or alt text for images
-Copy the dateFormat, listAttributes, and urlAttribute declarations 
-into the default configuration file for easier editing by admins. 
-The date also switched to locale-aware defaults.
-
 * Removed Github support (it was broken anyway on this fork)
 * Switch to new Configuration system
 * Switch to Promises for async operations
+* Move CMS-Pagelist to a standardized customElement
+* Move CMS-Search to a standardized customElement
+* URL-type properties now require `src` or `href` subattributes
+* The date formatting by default is now locale-aware
 
 
 
+## Upgrade from 3.1.x to 4.0.x
 
+---
 
-## Upgrade from 3.1.x to NEXT
+Listing templates now use `entries` for the key as opposed to `posts` or `pages`.
 
+* `data.posts` => `data.entries`
+* `data.pages` => `data.entries`
+
+---
+
+Tags and other lists in Markdown files now expect to be YAML-compatible lists
+
+* `tags: blah, foo` => `tags: [blah, foo]`
+
+---
+
+Banners and images no longer auto-resolve as URLs, instead `src` or `href` needs to be 
+used in YAML data
+
+* `banner: somefile.jpg` => `banner: { src: somefile.jpg }` 
+
+---
+
+Moved some plugins to built-in
+
+* `site.enablePlugin(['pagelist'])` => N/A (built-in)
+* `site.enablePlugin(['search'])` => N/A (built-in)
+
+---
 
 ## Upgrade from 3.0.x to 3.1.x
 
