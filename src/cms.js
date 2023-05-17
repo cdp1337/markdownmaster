@@ -300,7 +300,7 @@ class CMS {
 					);
 				}).catch(e => {
 					// Try to render the error instead
-					e.render().then(() => {
+					renderError(e).then(() => {
 						mode = 'error';
 						document.dispatchEvent(
 							new CustomEvent(

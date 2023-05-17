@@ -35,8 +35,10 @@ import customTokenizer from './addons/marked.tokenizer';
 // Import CMS plugins
 import MastodonShare from './addons/mastodon_share';
 import PageBodyClass from './addons/pagebodyclass';
-import Pagelist from './addons/pagelist';
-import Search from './addons/search';
+import CMSSearchElement from './addons/cms-search';
+import CMSAuthorElement from './addons/cms-author';
+import CMSPagelistElement from './addons/cms-pagelist';
+import CMSButtonElement from './addons/cms-button';
 
 
 // Load marked addons
@@ -60,12 +62,16 @@ marked.use({
 // Make available in global space
 window.marked = marked;
 
+// Load custom elements
+customElements.define('cms-author', CMSAuthorElement);
+customElements.define('cms-pagelist', CMSPagelistElement);
+customElements.define('cms-search', CMSSearchElement, { extends: 'input' });
+customElements.define('cms-button', CMSButtonElement, {extends: 'a'});
+
 // Load addons
 let systemPlugins = {
 	mastodon_share: new MastodonShare(),
-	pagebodyclass: new PageBodyClass(),
-	pagelist: new Pagelist(),
-	search: new Search()
+	pagebodyclass: new PageBodyClass()
 };
 
 export default (options) => new CMS(window, options, systemPlugins);

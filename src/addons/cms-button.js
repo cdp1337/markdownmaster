@@ -21,40 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export default class {
+export default class CMSButtonElement extends HTMLAnchorElement {
+
+	static get observedAttributes() {
+		return ['prefix', 'icon'];
+	}
 
 	constructor() {
+		// Always call super first in constructor
+		super();
 
-	}
+		// write element functionality in here
+		// Create a shadow root
+		const icon = document.createElement('i'),
+			span = document.createElement('span');
+		let icon_prefix = 'fa';
 
-	init() {
+		// Move the contents of the 'A' node to a new span (to play nicely along side an icon)
+		span.innerHTML = this.innerHTML;
+		this.innerHTML = '';
+		span.setAttribute('part', 'content');
 
-		/**
-		 * Called after any page load operation
-		 *
-		 * When using function() syntax, 'this' will point to the CMS object,
-		 * arrow function syntax 'site.onroute = () => { ... }' will be anonymous and detached.
-		 *
-		 * Either option is acceptable, just depending on your needs/preferences.
-		 * @method
-		 * @param {FileCollection[]|null} view.collection Collection of files to view for listing pages
-		 * @param {File|null} view.file Single file to view when available
-		 * @param {string} view.mode Type of view, usually either "list", "single", or error.
-		 * @param {string} view.query Any search query
-		 * @param {string} view.tag Any tag selected to view
-		 * @param {string} view.type Content type selected
-		 */
-		document.addEventListener('cms:route', event => {
-			document.querySelectorAll('[data-plugin="cms:search"]').forEach(el => {
-				if (el.dataset.loaded !== '1') {
-					el.addEventListener('keyup', e => {
-						if (e.key === 'Enter') {
-							event.detail.cms.search(e.target.dataset.type, e.target.value);
-						}
-					});
-				}
-			});
-		});
+		// Allow the user to select a different prefix, ie: using something other than fontawesome
+		if (this.hasAttribute('prefix') && this.getAttribute('prefix')) {
+			icon_prefix = this.getAttribute('prefix');
+		}
+
+		if (this.hasAttribute('icon') && this.getAttribute('icon')) {
+			icon.classList.add(icon_prefix, icon_prefix + '-' + this.getAttribute('icon'));
+			icon.setAttribute('part', 'icon');
+			this.appendChild(icon);
+		}
+
+		this.classList.add('button');
+		this.appendChild(span);
 	}
 }
-
