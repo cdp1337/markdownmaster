@@ -1,7 +1,7 @@
 ---
 title: Sorting
 author: Charlie Powell
-tags: Howto, Configuration, Authoring
+tags: [Howto, Configuration, Authoring]
 ---
 
 Version 3.1.0 introduces new sorting parameters for use in site configuration and plugins.
@@ -25,7 +25,7 @@ Version 3.1.0 introduces new sorting parameters for use in site configuration an
 
 `js/config.js` allows you to specify a default sort for various file types.  Listed below is an example where posts are sorted NEW to OLD and pages are listed A to Z.
 
-```.js
+```javascript
 types: [
     {
       name: 'posts',
@@ -54,6 +54,6 @@ Beyond the common attributes, any [page custom meta field](authoring-pages.md#pa
 
 From within the configuration, a function can be provided for completely custom functionality, for example to default to randomly sorted articles:
 
-```.js
+```javascript
 sort: (a, b) => { return Math.floor(Math.random() * 10) % 2; },
 ```

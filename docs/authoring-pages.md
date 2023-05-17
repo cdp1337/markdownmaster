@@ -1,6 +1,6 @@
 ---
 author: Charlie Powell
-tags: Howto, Markdown, Authoring
+tags: [Howto, Markdown, Authoring]
 ---
 
 # Authoring Pages
@@ -45,19 +45,52 @@ The following directory structure examples will all provide the same automatic d
 
 ## Page Meta Data
 
-Article metadata is provided via a concept called "frontmatter", this is essentially just a block of content at the very start of an article wrapped with `---` tags.  This is beneficial for being able to set your article title, excerpt text, and other data.
+Article metadata is provided via 
+[YAML](https://yaml.org/spec/1.2.2/#chapter-2-language-overview) 
+markup at the beginning of each file inside `---` blocks.
 
-To setup this metadata, include 3 dashes followed by each tag at the beginning of the article, for example:
+It's important that the **very first line** is `---` and the section is closed by 
+another `---` line to denote the end of the tags.
 
 ```.md
 ---
 title: Authoring Pages
 author: Charlie Powell
-tags: Howto, Markdown, Authoring
+tags: [Howto, Markdown, Authoring]
 ---
 ```
 
-**Please note**, empty lines within the `---` lines **are not supported** and may prevent parsing of the fields.
+### Tags and Lists of Values
+
+To define a list of tags, wrap the tags with `[ ... ]` or list them on each line with a `-` prefix, 
+for example these two will provide the same results:
+
+```yaml
+tags: [Howto, Markdown, Authoring]
+```
+
+```yaml
+tags: 
+  - Howto
+  - Markdown
+  - Authoring
+```
+
+### Images and URLs
+
+For images and URLs where extra information may be needed, 
+it is often beneficial to break them out into the various important tag.
+
+```yaml
+banner:
+  src: images/page_banner.jpg
+  alt: A banner image featuring something
+
+call_to_action:
+  href: https://mysite.tld
+  title: Check Out My Cool Thing!
+```
+
 
 ### Common Meta Attributes
 
@@ -77,9 +110,10 @@ Other attributes can be used, but will need to be added within your layout templ
 
 ## Page Headers
 
-By default page headers (H1 elements) are rendered within the layout template for content based off metadata, so the inclusion of one is not necessary.
+By default, page headers (H1 elements) are rendered within the layout template for content based off metadata, so 
+the inclusion of one is not necessary.
 
-```.md
+```markdown
 ---
 title: My Page
 ---
@@ -91,7 +125,7 @@ title: My Page
 
 This example will produce the following result because the page title is effectively defined twice:
 
-```.html
+```html
 <h1>My Page</h1>
 <h1>My Page</h1>
 ```
@@ -106,20 +140,19 @@ Since this is a _markdown_ content system, markdown syntax is used for writing t
 
 Images are supported within both the `image:...` metadata and from within article content.  These images can either be fully resolved or relatively resolved (relative to the file you are editing).
 
-```.md
+```markdown
 ![test image](test-icon.gif)
 ```
 
-Should display an image when rendered within the browser:
-
-![test image](test-icon.gif)
-
-This is because `test-icon.gif` is in the same directory as `authoring-pages.md` and can referenced easily.
+Referencing images relative to the base file works because the browser will make the request 
+relative to that file.  Top-level paths (starting with `/`) and absolute requests 
+(`https://...`) paths are also supported.
 
 
 ## Extended Markdown Functionality
 
-All base markdown features _should_ work, and a number of extended features have been added to better support web publishing.
+All base markdown features will work, and a number of extended features have 
+been added to better support web publishing.
 
 ### HTML Attributes
 
@@ -134,7 +167,7 @@ As some examples:
 
 Short paragraph with `class="center"` added
 
-```md
+```markdown
 This is a short example paragraph {.center}
 ```
 
@@ -146,7 +179,7 @@ This link will have a `title` and `target` set
 
 This image will have a border
 
-```md
+```markdown
 ![test image](test.png) {style="border:5px solid pink;"}
 ```
 

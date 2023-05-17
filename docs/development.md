@@ -134,3 +134,35 @@ for each different feature to keep the merge tidy.
 
 If a request is addressing an issue, (and it should), please reference the issue #
 in the merge request title along with a short description of the change.
+
+
+## Coding Guidelines
+
+When writing code, it is **highly** recommended to do so in a 
+[test driven development](https://en.wikipedia.org/wiki/Test-driven_development) 
+approach, this means:
+
+1. Add a test for expected functionality or change to expect
+    * The adding of a new feature begins by writing a test that passes if the feature's 
+    specifications are met. The developer can discover these specifications by asking about 
+    use cases and user stories. A key benefit of test-driven development is that it makes 
+    the developer focus on requirements before writing code.
+2. Run all tests. The new test should fail because the feature is not implemented
+    * This shows that new code is actually needed for the desired feature. 
+    It validates that the test harness is working correctly. 
+    It rules out the possibility that the new test is flawed and will always pass.
+3. Write the simplest code that passes the new test
+    * Inelegant or hard code is acceptable, as long as it passes the test. 
+    The code will be honed anyway in Step 5. 
+    No code should be added beyond the tested functionality.
+4. All tests should now pass
+    * If any fail, the new code must be revised until they pass. 
+    This ensures the new code meets the test requirements and does not break existing features.
+5. Refactor as needed, using tests after each refactor to ensure that functionality is preserved
+
+This provides a boilerplate in the project for what the code is _supposed_ to do
+to allow you to easily see when the feature is working as expected, and ensures that 
+any future work does not introduce any regression bugs.
+
+All tests **MUST** pass before a commit can be accepted!  This is enforced from husky
+in a pre-commit hook.

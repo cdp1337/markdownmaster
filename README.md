@@ -59,10 +59,9 @@ Check out a [live working site](https://veraciousnetwork.com)!
 ## Quick Start
 
 1. Download the [latest release](https://github.com/cdp1337/markdownmaster/releases/latest)
-2. Setup environment, refer to specific documentation for [Apache2](docs/INSTALL.apache.md)* and [Mail-in-a-Box](docs/INSTALL.mailinabox.md)
+2. Setup environment, refer to specific documentation for 
+   [NextCloud](docs/INSTALL.nextcloud-nginx.md) or [Mail-in-a-Box](docs/INSTALL.mailinabox.md)
 3. [Configure config.js and config.ini](docs/site-configuration.md) to your liking
-
-Note * Apache2 rewrite support needs updated for the CGI portion to work as of version 3.1.0.
 
 
 ## Documentation

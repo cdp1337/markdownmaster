@@ -1,10 +1,11 @@
 ---
 title: CMS Document-level Events
 author: Charlie Powell
-tags: Howto, Configuration
+tags: [Howto, Configuration]
 ---
 
-For extendability, several events are dispatched at the document level of the page.  This allows custom script to tie into events regardless of where they are defined.
+For extendability, several events are dispatched at the document level of the page. 
+This allows custom script to tie into events regardless of where they are defined.
 
 ## Event cms:load
 
@@ -16,7 +17,7 @@ Dispatched immediately upon successful initialization of the CMS
 
 **Example**
 
-```.js
+```javascript
 /**
  * Called immediately upon successful initialization of the CMS
  * 
@@ -44,7 +45,7 @@ Dispatched after any page load operation
 
 **Example**
 
-```.js
+```javascript
 /**
  * Called after any page load operation
  * 
