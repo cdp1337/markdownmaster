@@ -100,23 +100,16 @@ class FileCollection {
 	getFileElements(data) {
 		let fileElements = [];
 
-		// Github Mode
-		if (this.config.mode === 'GITHUB') {
-			fileElements = JSON.parse(data);
-		}
-		// Server Mode
-		else {
-			// convert the directory listing to a DOM element
-			let listElement = document.createElement('div');
-			listElement.innerHTML = data;
-			// get the valid links in the directory listing
-			listElement.querySelectorAll('a').forEach(el => {
-				let href = el.getAttribute('href');
-				if (href !== '../' && (href.endsWith(this.config.extension) || href.endsWith('/'))) {
-					fileElements.push(href);
-				}
-			});
-		}
+		// convert the directory listing to a DOM element
+		let listElement = document.createElement('div');
+		listElement.innerHTML = data;
+		// get the valid links in the directory listing
+		listElement.querySelectorAll('a').forEach(el => {
+			let href = el.getAttribute('href');
+			if (href !== '../' && (href.endsWith(this.config.extension) || href.endsWith('/'))) {
+				fileElements.push(href);
+			}
+		});
 
 		return fileElements;
 	}
@@ -183,8 +176,6 @@ class FileCollection {
 							Log.Debug(this.type, 'Found valid file, adding to collection', {directory, file, fileUrl});
 							this.files.push(new File(fileUrl, this.type, this.layout.single, this.config));
 						} else if (
-							// Only iterate when not in github mode
-							this.config.mode !== 'GITHUB' &&
 							// skip checking '?...' sort option links
 							fileUrl[fileUrl.length - 1] === '/' &&
 							// skip top-level path
