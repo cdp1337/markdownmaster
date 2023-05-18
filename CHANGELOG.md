@@ -1,6 +1,6 @@
 ## 4.0.0 - UNRELEASED
 
-## New Features
+### New Features
 
 * New support for HTML attributes inline
 * Include Prism.JS as an extra for sites
@@ -17,7 +17,7 @@
 * URLs in FrontMatter now support multiple values
 
 
-## Fixes
+### Fixes
 
 * Do not include DRAFT pages in taglist
 * Fix beginning newline on sitemap
@@ -27,7 +27,7 @@
 * FrontMatter now correctly handles YAML parsing
 
 
-## Changes
+### Changes
 
 * Removed Github support (it was broken anyway on this fork)
 * Switch to new Configuration system
