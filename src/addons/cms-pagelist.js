@@ -107,7 +107,7 @@ export default class CMSPagelistElement extends HTMLElement {
 			collection.filterAttributeSearch(filters);
 		}
 
-		window.CMS.renderLayout(layout, collection)
+		window.CMS.fetchLayout(layout, collection)
 			.then(html => {
 				this.innerHTML = html;
 			})
