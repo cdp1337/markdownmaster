@@ -3,7 +3,6 @@
 ## New Features
 
 * New support for HTML attributes inline
-* dateFormat, listAttributes, & urlAttributes config
 * Include Prism.JS as an extra for sites
 * Include FontAwesome as an extra for sites
 * Better error management

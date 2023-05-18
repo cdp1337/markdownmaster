@@ -35,7 +35,11 @@ import CMSError from './cmserror';
  * @constructor
  * @param {string} type   The type of file collection (i.e. posts, pages).
  * @param {Object} layout The layouts of the file collection type.
- * @param {Object} config Configuration from the CMS
+ * @param {string} layout.list   Listing template
+ * @param {string} layout.single Single page template
+ * @param {string} layout.sort   Default sort for listing view
+ * @param {string} layout.title  Title for listing view
+ * @param {Config} config Configuration from the CMS
  */
 class FileCollection {
 
@@ -45,7 +49,7 @@ class FileCollection {
 		this.config = config;
 		this.files = [];
 		this.directories = [];
-		this.entries = this.files;
+		this[type] = this.files;
 		this.directoriesScanned = 0;
 	}
 
@@ -222,7 +226,10 @@ class FileCollection {
 	 * Reset filters and sorting
 	 */
 	resetFilters() {
-		this.entries = this.files;
+		//this.entries = this.files;
+		this[this.type] = this.files.filter((file) => {
+			return !file.draft;
+		});
 	}
 
 	/**
@@ -240,7 +247,7 @@ class FileCollection {
 		}
 
 		if (typeof (param) === 'object') {
-			this.entries.sort(param);
+			this[this.type].sort(param);
 		} else {
 			let direction = 1;
 			if (param.match(/-r$/)) {
@@ -248,7 +255,7 @@ class FileCollection {
 				param = param.substring(0, param.length - 2);
 			}
 
-			this.entries.sort((a, b) => {
+			this[this.type].sort((a, b) => {
 				if (direction === 1) {
 					return a[param] >= b[param];
 				} else {
@@ -266,7 +273,7 @@ class FileCollection {
 	filterSearch(search) {
 		Log.Debug(this.type, 'Performing text search for files', search);
 
-		this.entries = this.entries.filter((file) => {
+		this[this.type] = this[this.type].filter((file) => {
 			return file.matchesSearch(search);
 		});
 	}
@@ -277,15 +284,18 @@ class FileCollection {
 	 * @see {@link File#matchesAttributeSearch} for full documentation of usage
 	 * @param {Object} search Dictionary containing key/values to search
 	 * @param {string} [mode=AND]   "OR" or "AND" if we should check all keys or any of them
+	 * @returns {File[]} Set of filtered files
 	 */
 	filterAttributeSearch(search, mode) {
 		mode = mode || 'AND';
 
 		Log.Debug(this.type, 'Performing "' + mode + '" attribute search for files', search);
 
-		this.entries = this.entries.filter((file) => {
+		this[this.type] = this[this.type].filter((file) => {
 			return file.matchesAttributeSearch(search, mode);
 		});
+
+		return this[this.type];
 	}
 
 	/**

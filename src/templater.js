@@ -60,18 +60,8 @@ export async function loadTemplate(url, data) {
 					),
 					html = '';
 
-				/**
-				 * Run the template renderer in a completely isolated scope
-				 *
-				 * @param {Object} data
-				 * @returns {string}
-				 */
-				let renderer = function (data) {
-					return fn.call(this, data);
-				};
-
 				try {
-					html = renderer(data);
+					html = fn.call(this, data); //renderer(data);
 					resolve(html);
 				} catch (e) {
 					reject(new CMSError(500, e));

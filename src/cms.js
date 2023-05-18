@@ -408,7 +408,7 @@ class CMS {
 	 */
 	sort(type, sort) {
 		if (this.ready) {
-			this.collections[type].entries.sort(sort);
+			this.collections[type].filterSort(sort);
 			this.collections[type].render();
 		} else {
 			handleMessage(msg['NOT_READY_WARNING']);

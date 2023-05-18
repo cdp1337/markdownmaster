@@ -77,8 +77,7 @@ export default class CMSAuthorElement extends HTMLElement {
 
 		// Search for this user
 		collection.resetFilters();
-		collection.filterAttributeSearch({title: author, alias: author}, 'OR');
-		results = collection.entries;
+		results = collection.filterAttributeSearch({title: author, alias: author}, 'OR');
 
 		// Only render if at least one found, (just pick the first)
 		if (results.length >= 1) {

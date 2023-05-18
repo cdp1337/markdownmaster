@@ -13,7 +13,6 @@ Support CSS-style selectors and any valid HTML attribute,
 (including quoted text).
 
 * New support for HTML attributes inline
-* dateFormat, listAttributes, & urlAttributes config
 * Include Prism.JS as an extra for sites
 * Include FontAwesome as an extra for sites
 * Better error management
@@ -51,13 +50,6 @@ Support CSS-style selectors and any valid HTML attribute,
 
 
 ## Upgrade from 3.1.x to 4.0.x
-
----
-
-Listing templates now use `entries` for the key as opposed to `posts` or `pages`.
-
-* `data.posts` => `data.entries`
-* `data.pages` => `data.entries`
 
 ---
 
