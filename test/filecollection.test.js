@@ -111,7 +111,7 @@ describe('FileCollection', () => {
 			expect(collection['tests'][0].title).toEqual('Zulu');
 			expect(collection['tests'][1].title).toEqual('Alpha');
 		});
-		it ('sticky sort', () => {
+		it ('feature #2 sticky sort', () => {
 			let collection = new FileCollection('tests', {list: 'test'}, new Config());
 			collection.files = [
 				new File('/tests/test1.md', 'tests', 'test', new Config()),

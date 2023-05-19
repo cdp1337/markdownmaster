@@ -15,6 +15,8 @@
 * Add CMS-Author tag for embedded author snippet
 * Add CMS-Button tag for stylized buttons from a-elements
 * URLs in FrontMatter now support multiple values
+* New support for sticky pages
+* New support for multiple sort keys
 
 
 ### Fixes
