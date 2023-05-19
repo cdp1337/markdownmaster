@@ -23,11 +23,18 @@
 
 import assert from 'assert';
 import {describe, expect, it, jest, test} from '@jest/globals';
+import {JSDOM} from 'jsdom';
 import File from '../src/file';
 import { Config } from '../src/config';
 import {FakeResponse} from './fakeresponse';
 import CMSError from '../src/cmserror';
 import {setSystemContainer} from '../src/templater';
+
+
+
+const dom = new JSDOM();
+global.document = dom.window.document;
+global.window = dom.window;
 
 
 
@@ -487,7 +494,6 @@ This is test content about Zebras`;
 
   describe('render', () => {
     let area = {};
-    global.document = {};
 
     it('seotitle', () => {
       setSystemContainer(area);

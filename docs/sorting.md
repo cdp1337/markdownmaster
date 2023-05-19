@@ -19,6 +19,8 @@ Version 3.1.0 introduces new sorting parameters for use in site configuration an
 | name-r      | Filename Z -> A                |
 | permalink   | URL A -> Z                     |
 | permalink-r | URL Z -> A                     |
+| sticky      | Sticky pages LAST              |
+| sticky-r    | Sticky pages FIRST             |
 
 
 ## Sorting in Configuration
@@ -47,6 +49,16 @@ types: [
     },
 ```
 
+
+## Multiple Parameters
+
+Multiple parameters can be used to sort at a time, useful for sticky posts.
+To sort based on multiple parameters simply separate each key with a comma.
+
+```javascript
+// Sort sticky pages at the top, THEN sort by title
+CMS.getCollection('posts').filterSort('sticky-r, title');
+```
 
 ## Advanced Usage
 

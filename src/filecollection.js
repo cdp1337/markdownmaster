@@ -50,7 +50,6 @@ class FileCollection {
 		this.files = [];
 		this.directories = [];
 		this[type] = this.files;
-		this.directoriesScanned = 0;
 	}
 
 	/**
@@ -239,28 +238,55 @@ class FileCollection {
 	 * If a string is requested, only specific keywords are supported.  Use -r to inverse results.
 	 * If NULL is requested, the default sort for this collection type is used.
 	 *
-	 * @param {object|string|null} [param=null] A function, string, or empty value to sort by
+	 * @param {function|string|null} [param=null] A function, string, or empty value to sort by
 	 */
 	filterSort(param) {
 		if (typeof (param) === 'undefined' || param === null) {
 			param = this.layout.sort || 'title';
 		}
 
-		if (typeof (param) === 'object') {
+		if (typeof (param) === 'function') {
 			this[this.type].sort(param);
 		} else {
-			let direction = 1;
-			if (param.match(/-r$/)) {
-				direction = 0;
-				param = param.substring(0, param.length - 2);
+			let params = [];
+
+			// Allow multiple comma-separated parameters to be requested
+			if (param.indexOf(',') !== -1) {
+				params = param.split(',').map(p => p.trim());
+			} else {
+				params = [ param ];
+			}
+
+			// Detect if the reverse order is requested ("-r" suffix) and inverse the directionality if so
+			for (let i = 0; i < params.length; i++) {
+				if (params[i].match(/-r$/)) {
+					params[i] = {
+						direction: -1,
+						key: params[i].substring(0, params[i].length - 2)
+					};
+				} else {
+					params[i] = {
+						direction: 1,
+						key: params[i]
+					};
+				}
 			}
 
 			this[this.type].sort((a, b) => {
-				if (direction === 1) {
-					return a[param] >= b[param];
-				} else {
-					return a[param] <= b[param];
+				// Loop through each key requested (in order) and check if one of them differ.
+				for(let i = 0; i < params.length; i++) {
+					if ((a[params[i].key] || null) > (b[params[i].key] || null)) {
+						// A > B, this is 1 in normal and -1 in reversed
+						return params[i].direction;
+					}
+					if ((a[params[i].key] || null) < (b[params[i].key] || null)) {
+						// A < B, this is -1 (1 * -1) in normal and 1 (-1 * -1) in reversed
+						return params[i].direction * -1;
+					}
 				}
+
+				// All requested keys are the same
+				return 0;
 			});
 		}
 	}
