@@ -27,6 +27,7 @@ import FileCollection from '../src/filecollection';
 import {Config} from '../src/config';
 import {JSDOM} from 'jsdom';
 import File from '../src/file';
+import CMSError from '../src/cmserror';
 
 
 const dom = new JSDOM();
@@ -34,20 +35,7 @@ global.document = dom.window.document;
 global.window = dom.window;
 
 describe('FileCollection', () => {
-	describe('getFileListUrl', () => {
-		// @todo
-	});
-	describe('getFileUrl', () => {
-		// @todo
-	});
-	describe('getFileElements', () => {
-		// @todo
-	});
-	describe('getFiles', () => {
-		// @todo
-	});
-	describe('scanDirectory', () => {
-		const good_contents = `<html><body>
+	const good_directory_listing_contents = `<html><body>
 <a href="../">../</a>
 <a href="subtopics/">subtopics/</a>
 <a href="img.png">img.png</a>
@@ -55,11 +43,79 @@ describe('FileCollection', () => {
 <a href="user.md">user.md</a>
 </body></html>
 		`;
+
+	const good_files = [
+		new File('/tests/test1.md', 'tests', 'test', new Config()),
+		new File('/tests/test2.md', 'tests', 'test', new Config()),
+		new File('/tests/test3.md', 'tests', 'test', new Config()),
+		new File('/tests/test4.md', 'tests', 'test', new Config()),
+	];
+	good_files[0].title = 'Zulu';
+	good_files[0].permalink = '/tests/test1.html';
+	good_files[1].title = 'Beta';
+	good_files[1].tags = ['Test', 'greek'];
+	good_files[1].permalink = '/tests/test2.html';
+	good_files[2].title = 'Charlie';
+	good_files[2].sticky = true;
+	good_files[2].permalink = '/tests/test3.html';
+	good_files[3].title = 'Alpha';
+	good_files[3].tags = ['Test'];
+	good_files[3].permalink = '/tests/test4.html';
+
+	describe('getFileListUrl', () => {
+		it('basic', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			expect(collection.getFileListUrl()).toEqual('/tests');
+		});
+	});
+	describe('getFileElements', () => {
+		it('basic', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			let files = collection.getFileElements(good_directory_listing_contents);
+			expect(files).toHaveLength(3);
+			expect(files[0]).toEqual('subtopics/');
+			expect(files[1]).toEqual('topic.md');
+			expect(files[2]).toEqual('user.md');
+		});
+	});
+	describe('getFiles', () => {
+		it('basic', () => {
+			let subtopics = `<html><body>
+<a href="../">../</a>
+<a href="images/">images/</a>
+<a href="topic1.md">topic1.md</a>
+<a href="topic2.md">topic2.md</a>
+</body></html>
+		`
+			fetch = jest.fn(url => {
+				return new Promise(resolve => {
+					let response = new FakeResponse();
+					if (url === '/tests/subtopics/') {
+						response._setSuccessfulContent(subtopics, 'html/html');
+					} else {
+						response._setSuccessfulContent(good_directory_listing_contents, 'html/html');
+					}
+
+					resolve(response);
+				});
+			});
+
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			collection.getFiles().then(() => {
+				expect(collection.files).toHaveLength(4);
+				expect(collection.files[0].url).toEqual('/tests/topic.md');
+				expect(collection.files[1].url).toEqual('/tests/user.md');
+				expect(collection.files[2].url).toEqual('/tests/subtopics/topic1.md');
+				expect(collection.files[3].url).toEqual('/tests/subtopics/topic2.md');
+			});
+		});
+	});
+	describe('scanDirectory', () => {
 		it('good test', () => {
 			fetch = jest.fn(() => {
 				return new Promise(resolve => {
 					let response = new FakeResponse();
-					response._setSuccessfulContent(good_contents, 'html/html');
+					response._setSuccessfulContent(good_directory_listing_contents, 'html/html');
 					resolve(response);
 				});
 			});
@@ -83,47 +139,31 @@ describe('FileCollection', () => {
 	describe('filterSort', () => {
 		it ('basic sort', () => {
 			let collection = new FileCollection('tests', {list: 'test'}, new Config());
-			collection.files = [
-				new File('/tests/test1.md', 'tests', 'test', new Config()),
-				new File('/tests/test2.md', 'tests', 'test', new Config())
-			];
-			collection.files[0].title = 'Zulu';
-			collection.files[1].title = 'Alpha';
+			collection.files = good_files;
 
 			collection.resetFilters();
 			collection.filterSort('title');
 
 			expect(collection['tests'][0].title).toEqual('Alpha');
-			expect(collection['tests'][1].title).toEqual('Zulu');
+			expect(collection['tests'][1].title).toEqual('Beta');
+			expect(collection['tests'][2].title).toEqual('Charlie');
+			expect(collection['tests'][3].title).toEqual('Zulu');
 		});
 		it ('reverse basic sort', () => {
 			let collection = new FileCollection('tests', {list: 'test'}, new Config());
-			collection.files = [
-				new File('/tests/test1.md', 'tests', 'test', new Config()),
-				new File('/tests/test2.md', 'tests', 'test', new Config())
-			];
-			collection.files[0].title = 'Alpha';
-			collection.files[1].title = 'Zulu';
+			collection.files = good_files;
 
 			collection.resetFilters();
 			collection.filterSort('title-r');
 
 			expect(collection['tests'][0].title).toEqual('Zulu');
-			expect(collection['tests'][1].title).toEqual('Alpha');
+			expect(collection['tests'][1].title).toEqual('Charlie');
+			expect(collection['tests'][2].title).toEqual('Beta');
+			expect(collection['tests'][3].title).toEqual('Alpha');
 		});
 		it ('feature #2 sticky sort', () => {
 			let collection = new FileCollection('tests', {list: 'test'}, new Config());
-			collection.files = [
-				new File('/tests/test1.md', 'tests', 'test', new Config()),
-				new File('/tests/test2.md', 'tests', 'test', new Config()),
-				new File('/tests/test3.md', 'tests', 'test', new Config()),
-				new File('/tests/test4.md', 'tests', 'test', new Config()),
-			];
-			collection.files[0].title = 'Zulu';
-			collection.files[1].title = 'Beta';
-			collection.files[2].title = 'Charlie';
-			collection.files[2].sticky = true;
-			collection.files[3].title = 'Alpha';
+			collection.files = good_files;
 
 			collection.resetFilters();
 			collection.filterSort('sticky-r, title');
@@ -133,33 +173,85 @@ describe('FileCollection', () => {
 			expect(collection['tests'][2].title).toEqual('Beta');
 			expect(collection['tests'][3].title).toEqual('Zulu');
 		});
-		/**
-		 * Sort results by a given parameter
-		 *
-		 * If a function is requested, that is used to sort the results.
-		 * If a string is requested, only specific keywords are supported.  Use -r to inverse results.
-		 * If NULL is requested, the default sort for this collection type is used.
-		 *
-		 * @param {object|string|null} [param=null] A function, string, or empty value to sort by
-		 */
 	});
 	describe('filterSearch', () => {
-		// @todo
+		it('basic', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			collection.files = good_files;
+
+			collection.resetFilters();
+			let files = collection.filterSearch('zulu');
+			expect(files).toHaveLength(1);
+			expect(files[0].title).toEqual('Zulu');
+		});
 	});
 	describe('filterAttributeSearch', () => {
-		// @todo
+		it('basic', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			collection.files = good_files;
+
+			collection.resetFilters();
+			let files = collection.filterAttributeSearch({title: 'zulu'});
+			expect(files).toHaveLength(1);
+			expect(files[0].title).toEqual('Zulu');
+		});
 	});
 	describe('filterTag', () => {
-		// @todo
+		it('basic', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			collection.files = good_files;
+
+			collection.resetFilters();
+			let files = collection.filterTag('greek');
+			expect(files).toHaveLength(1);
+			expect(files[0].title).toEqual('Beta');
+		});
 	});
 	describe('filterPermalink', () => {
-		// @todo
+		it('basic', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			collection.files = good_files;
+
+			collection.resetFilters();
+			let files = collection.filterPermalink('/tests/');
+			expect(files).toHaveLength(4);
+
+			files = collection.filterPermalink('/tests/test4');
+			expect(files).toHaveLength(1);
+		});
 	});
 	describe('getTags', () => {
-		// @todo
+		it('basic', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			collection.files = good_files;
+
+			collection.resetFilters();
+
+			let tags = collection.getTags();
+			expect(tags).toHaveLength(2);
+			expect(tags[0]).toEqual({name: 'Test', count: 2, url: '/tests.html?tag=Test'});
+			expect(tags[1]).toEqual({name: 'greek', count: 1, url: '/tests.html?tag=greek'});
+		});
 	});
 	describe('getFileByPermalink', () => {
-		// @todo
+		it('basic', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			collection.files = good_files;
+
+			collection.resetFilters();
+			let file = collection.getFileByPermalink('/tests/test2.html');
+			expect(file.url).toEqual('/tests/test2.md');
+		});
+		it('not found', () => {
+			let collection = new FileCollection('tests', {list: 'test'}, new Config());
+			collection.files = good_files;
+
+			collection.resetFilters();
+			expect(() => {
+				collection.getFileByPermalink('/tests/test-invalid.html')
+			}).toThrow(CMSError);
+		});
+
 	});
 	describe('render', () => {
 		// @todo

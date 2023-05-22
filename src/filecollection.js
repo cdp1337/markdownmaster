@@ -74,31 +74,14 @@ class FileCollection {
 	 * @returns {string} URL of file list
 	 */
 	getFileListUrl() {
-		console.log(this);
 		return pathJoin(this.config.webpath, this.type);
-	}
-
-	/**
-	 * Get file URL.
-	 * @method
-	 * @param {string} href      File href attribute as retrieved from the server
-	 * @param {string} directory Directory this file was retrieved from
-	 * @returns {string} File URL
-	 */
-	getFileUrl(href, directory) {
-		if (href.startsWith('/')) {
-			// Absolutely resolved paths should be returned unmodified
-			return href;
-		} else {
-			return pathJoin(directory, href);
-		}
 	}
 
 	/**
 	 * Get list of file elements from either the returned listing page scan (or JSON data for GITHUB)
 	 *
-	 * @param {object|string} data - File directory or Github data.
-	 * @returns {string[]} File elements
+	 * @param {string} data - HTML code from directory listing
+	 * @returns {string[]} URLs of files and directories located
 	 */
 	getFileElements(data) {
 		let fileElements = [];
@@ -165,7 +148,7 @@ class FileCollection {
 					let directories = [];
 
 					this.getFileElements(contents).forEach(file => {
-						let fileUrl = this.getFileUrl(file, directory);
+						let fileUrl = file.startsWith('/') ? file : pathJoin(directory, file);
 
 						if (
 							// Skip top-level path
@@ -295,6 +278,7 @@ class FileCollection {
 	 * Search file collection by attribute.
 	 *
 	 * @param {string} search - Search query.
+	 * @returns {File[]} Set of filtered files
 	 */
 	filterSearch(search) {
 		Log.Debug(this.type, 'Performing text search for files', search);
@@ -302,6 +286,8 @@ class FileCollection {
 		this[this.type] = this[this.type].filter((file) => {
 			return file.matchesSearch(search);
 		});
+
+		return this[this.type];
 	}
 
 	/**
@@ -330,9 +316,10 @@ class FileCollection {
 	 * @see filterAttributeSearch
 	 *
 	 * @param {string} query - Search query.
+	 * @returns {File[]} Set of filtered files
 	 */
 	filterTag(query) {
-		this.filterAttributeSearch({tags: query});
+		return this.filterAttributeSearch({tags: query});
 	}
 
 	/**
@@ -341,9 +328,10 @@ class FileCollection {
 	 * @see filterAttributeSearch
 	 *
 	 * @param {string} url URL fragment/regex to filter against
+	 * @returns {File[]} Set of filtered files
 	 */
 	filterPermalink(url) {
-		this.filterAttributeSearch({permalink: '~ ' + url + '.*'});
+		return this.filterAttributeSearch({permalink: '~ ' + url + '.*'});
 	}
 
 	/**
@@ -351,7 +339,7 @@ class FileCollection {
 	 *
 	 * Each set will contain the properties `name`, `count`, and `url`
 	 *
-	 * @returns {Object[]}
+	 * @returns {{name: string, count: number, url: string}[]}
 	 */
 	getTags() {
 		let tags = [],
