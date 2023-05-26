@@ -133,7 +133,9 @@ success "Setup ready!  Starting install"
 sleep 1
 
 # Configuration complete and ready to proceed!
-apt install fcgiwrap
+heading 'Setting Up CGI Application'
+apt install fcgiwrap python3-markdown python3-bs4 python3-lxml
+find "${SITEPATH}/cgi-bin/" -name '*.py' -exec chmod +x {} \;
 
 debug "Installing config to /etc/nginx/sites-enabled/${DOMAIN}.conf"
 sleep 1
