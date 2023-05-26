@@ -62,6 +62,11 @@ class CMS {
 		// Link to window for global functions
 		view.CMS = this;
 
+		// Allow the user to switch to debug mode, this will generate additional messages in the console
+		if ((new URLSearchParams(document.location.search)).get('testdebug') === '1') {
+			this.config.debug = true;
+		}
+
 		// Set up the layout system
 		setSystemLayoutPath(this.config.webpath, this.config.layoutDirectory);
 
