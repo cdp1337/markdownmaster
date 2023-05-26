@@ -1,5 +1,6 @@
 import configparser
 
+
 class SimpleSite:
 
     TYPE_HTML = 'text/html'
