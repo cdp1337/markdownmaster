@@ -25,8 +25,10 @@ Sync/
    |- mysite.com/
      |- index.html
      |- nginx.conf
+     |- cgi-bin/
      |- css/
      |- js/
+     |- layouts/
 ```
 
 ## 2. Configure Nginx
@@ -34,7 +36,7 @@ Sync/
 SSH to your NextCloud instance and run the auto-install script as sudo or root
 
 ```bash
-sudo bash <(curl -s https://raw.githubusercontent.com/cdp1337/markdownmaster/main/scripts/install.nextcloud-nginx.sh)
+curl -sL https://raw.githubusercontent.com/cdp1337/markdownmaster/main/scripts/install.nextcloud-nginx.sh | sudo -E bash -
 ```
 
 **Disclaimer**, it's a security risk to run unknown code from the internet as sudo!

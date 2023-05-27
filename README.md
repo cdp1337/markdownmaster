@@ -4,26 +4,28 @@
 ![CMS.js Logo](img/logo-md.png)
 -->
 
-MarkdownMaster CMS is a client-side library to render Markdown files from flat-files 
-for site pages and content using HTML layouts in the spirit 
-of [Jekyll](https://github.com/jekyll/jekyll), 
-but with no need for server-side scripts, processing, or builds
-(though some helper Python scripts are provided for some actions).
+MarkdownMaster CMS is a 100%* client-side, no-database, flat-file framework to 
+render a full HTML site from flat Markdown content files and HTML templates, 
+in the spirit of 
+[Jekyll](https://github.com/jekyll/jekyll).
 
-Deploying new pages is as simple as uploading Markdown files to your server.
+This CMS behaves as a Single-Page Application and loads all files from the server via 
+the auto-index feature in either 
+[Apache](https://httpd.apache.org/docs/2.4/mod/mod_autoindex.html)
+or [Nginx](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html) and performs 
+all processing of templates and content within the browser.
+
+Note* there _is_ a server-side component written as a Python CGI script to 
+better facilitate crawlers, bots, and search engines.  This component utilizes the 
+same flat files and templates as the client-side application.
+
+Because there is no database, registry, or administration of pages, 
+deploying new pages is as simple as just uploading Markdown files to your server.
 This can be done via automated sync applications such as NextCloud or just uploading
 via SFTP or your web hosting interface.  _No building or scripts needed for deployment!_
 
-The client-side behaves as a Single-Page App and only relies on the server 
-having indexing support enabled.
-No server-side scripts are necessary for the base application to run!
-
-The server-side provides rudimentary support for bot access to the site content. 
-They utilize the same files to generate valid HTML or XML for crawlers without 
-Javascript support.
-
-This project is based off [Chris Diana's CMS.js](https://github.com/chrisdiana/cms.js) 
-with a BUNCH of new features added.
+This project is originally based from
+[Chris Diana's CMS.js](https://github.com/chrisdiana/cms.js).
 
 
 ![MarkdownMaster CMS Screenshot](img/screenshot.png)
@@ -42,7 +44,7 @@ with a BUNCH of new features added.
 * Custom templates
 * Search, filtering, tagging and sorting
 * Apache, Nginx, Mail-in-a-box, and Nextcloud support
-* Small footprint - under 100kb minified
+* Small footprint
 * [marked.js](https://github.com/markedjs/marked) embedded
 * Automatic body classes based on page
 * Native JS events
@@ -102,6 +104,14 @@ from your Jekyll project's `_post` folder to your designated MarkdownMaster CMS 
 Copy all of your Markdown pages from your Jekyll projects root folder into your 
 designated MarkdownMaster CMS pages folder.
 
+## Debugging
+
+Debug mode can be enabled on your live site by appending `?testdebug=1` to the URL.
+This will force the CMS into debug mode where messages are printed to the browser console.
+
+Testing bot and crawler responses can be done by append `?testcrawler=1` to the URL.
+This will route to the cgi-bin Python version of the site which should be seen by 
+GoogleBot and crawlers.
 
 ## Thanks!
 
