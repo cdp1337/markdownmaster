@@ -23,8 +23,8 @@
 
 import {describe, expect, it, jest, test} from '@jest/globals';
 import {FakeResponse} from './fakeresponse';
-import {fetchLayout} from '../src/templater';
-import CMSError from '../src/cmserror';
+import {fetchLayout} from '../../src/client/templater';
+import CMSError from '../../src/client/cmserror';
 
 describe('templater', () => {
   const good_payload = {key: 'some key', roses: true};

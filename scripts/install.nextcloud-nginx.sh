@@ -134,7 +134,9 @@ sleep 1
 
 # Configuration complete and ready to proceed!
 heading 'Setting Up CGI Application'
-apt install fcgiwrap python3-markdown python3-bs4 python3-lxml
+apt install fcgiwrap python3
+python3 -m venv /opt/markdownmaster
+/opt/markdownmaster/bin/pip3 install Markdown beautifulsoup4 python-frontmatter lxml
 find "${SITEPATH}/cgi-bin/" -name '*.py' -exec chmod +x {} \;
 
 debug "Installing config to /etc/nginx/sites-enabled/${DOMAIN}.conf"

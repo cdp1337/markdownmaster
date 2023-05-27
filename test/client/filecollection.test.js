@@ -23,11 +23,11 @@
 
 import {describe, expect, it, jest, test} from '@jest/globals';
 import {FakeResponse} from './fakeresponse';
-import FileCollection from '../src/filecollection';
-import {Config} from '../src/config';
+import FileCollection from '../../src/client/filecollection';
+import {Config} from '../../src/client/config';
 import {JSDOM} from 'jsdom';
-import File from '../src/file';
-import CMSError from '../src/cmserror';
+import File from '../../src/client/file';
+import CMSError from '../../src/client/cmserror';
 
 
 const dom = new JSDOM();

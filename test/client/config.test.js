@@ -22,7 +22,7 @@
  */
 
 import {describe, expect, it, jest, test} from '@jest/globals';
-import {Config, ConfigType} from '../src/config';
+import {Config, ConfigType} from '../../src/client/config';
 
 describe('Config', () => {
   describe('load', () => {

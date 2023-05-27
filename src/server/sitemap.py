@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/opt/markdownmaster/bin/python3
 #
 # Generate a sitemap based on the files within this location
 # This is required as a server-side or manual action because this file is not processed with javascript.

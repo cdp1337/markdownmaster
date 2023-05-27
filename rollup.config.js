@@ -8,7 +8,7 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 const banner = `/*! ${pkg.name} v${pkg.version} | ${pkg.license} (c) ${new Date().getFullYear()} ${pkg.author.name}, (c) 2021 Chris Diana | ${pkg.homepage} */`;
 export default [
   {
-    input: 'src/main.js',
+    input: 'src/client/main.js',
     external: ['CMS'],
     output: [
       {

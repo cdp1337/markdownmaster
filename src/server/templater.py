@@ -2,8 +2,14 @@ from bs4 import BeautifulSoup
 
 
 class Templater:
-    def __init__(self):
-        with open('../index.html') as fp:
+    def __init__(self, template: str):
+        """
+        Initialize a new Template, using the specified file as the base of the template
+
+        :param template: Filename of template to load
+        :throws FileNotFoundError:
+        """
+        with open(template) as fp:
             self.soup = BeautifulSoup(fp, 'lxml')
 
     def set_title(self, title: str):
@@ -62,3 +68,11 @@ class Templater:
             # Does not exist
             tag = self.soup.new_tag('meta', attrs={prop: key, 'content': content})
             self.soup.head.append(tag)
+
+    def __str__(self):
+        """
+        Fetch this rendered template as an HTML string, ready for direct output to the browser
+
+        (Just calls str(soup)...)
+        """
+        return str(self.soup)

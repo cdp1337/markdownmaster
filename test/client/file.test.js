@@ -24,11 +24,14 @@
 import assert from 'assert';
 import {describe, expect, it, jest, test} from '@jest/globals';
 import {JSDOM} from 'jsdom';
-import File from '../src/file';
-import { Config } from '../src/config';
+import File from '../../src/client/file';
+import { Config } from '../../src/client/config';
 import {FakeResponse} from './fakeresponse';
-import CMSError from '../src/cmserror';
-import {setSystemContainer} from '../src/templater';
+import CMSError from '../../src/client/cmserror';
+import {setSystemContainer} from '../../src/client/templater';
+import fs from 'fs';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 
 
@@ -41,44 +44,15 @@ global.window = dom.window;
 describe('File', () => {
   // Define common file contents that can be re-used
 
-  const generic_contents = `---
-title: Testing Bug Features
-seotitle: Google Friendly Title
-excerpt: This is a generic test
-date: '2023-03-14'
-author: Alice
-rating: 4.5
-banner: 
-  src: https://www.http.cat/200.jpg
-image: 
-  alt: Success Cat
-  src: https://www.http.cat/200.jpg
-tags: [Test, Document]
-falsy: false
-truth: true
-iamempty: 
----
+  const generic_contents = fs.readFileSync(
+    dirname(fileURLToPath(import.meta.url)) + '/../assets/good_file.md',
+    'utf8'
+  );
+  const nodate_contents = fs.readFileSync(
+    dirname(fileURLToPath(import.meta.url)) + '/../assets/good_file_no_date.md',
+    'utf8'
+  );
 
-# Test Page
-
-This is test content about Zebras`;
-
-  const nodate_contents = `---
-title: Testing Bug Features
-seotitle: Google Friendly Title
-excerpt: This is a generic test
-author: Alice
-banner: 
-  src: https://www.http.cat/200.jpg
-image: 
-  alt: Success Cat
-  src: https://www.http.cat/200.jpg
-tags: [Test, Document]
----
-
-# Test Page
-
-This is test content about Zebras`;
 
   describe('loadContent', () => {
     it('load content', () => {

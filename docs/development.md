@@ -25,7 +25,7 @@ git clone git@github.com:cdp1337/markdownmaster.git
 cd markdownmaster
 # Have Node Package Manager install all development assets
 NODE_ENV=dev npm install
-# Setup husky pre-commit hooks
+# Setup husky and python environment
 npm run prepare
 ```
 

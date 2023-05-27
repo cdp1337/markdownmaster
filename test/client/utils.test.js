@@ -23,7 +23,7 @@
 
 import assert from 'assert';
 import {describe, expect, it, jest, test} from '@jest/globals';
-import {basename, dirname, getDatetime, pathJoin} from "../src/utils.js";
+import {basename, dirname, getDatetime, pathJoin} from "../../src/client/utils.js";
 
 describe('utils', function() {
   describe('#pathJoin', function() {
