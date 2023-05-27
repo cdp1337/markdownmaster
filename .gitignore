@@ -5,6 +5,7 @@ npm-debug.log
 dist/*.js
 examples/js/cms.min.js
 examples/js/cms.js
+examples/cgi-bin/*.py
 docs/jsdoc
 
 
