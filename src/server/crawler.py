@@ -39,7 +39,7 @@ if os.path.exists(doc) and os.path.isfile(doc):
     description = loader.get_meta(['description', 'excerpt'], '')
     image = loader.get_meta(['image'], '')
 
-    template = Templater()
+    template = Templater('../index.html')
     template.set_canonical(loader.url)
     template.set_title(seotitle)
     if description != '':
