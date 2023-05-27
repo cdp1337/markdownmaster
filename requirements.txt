@@ -1,0 +1,4 @@
+Markdown~=3.4.1
+beautifulsoup4~=4.11.2
+python-frontmatter~=1.0.0
+lxml~=4.9.2
