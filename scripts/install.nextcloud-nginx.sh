@@ -82,33 +82,25 @@ else
 	done
 fi
 
-heading 'Install Configuration 1 of 2'
-cat << EOT
-Edit nginx.conf and set the following lines at the start of the file
+
+heading 'Install Configuration 1 of 1'
+if [ $WWWALIAS -eq 1 ]; then
+  cat << EOT
+Edit cgi-bin/config.ini and set EITHER line under "[site]"
 (replacing the current values):
 
 
-set \$siteroot $SITEPATH;
-set \$sitedomain $DOMAIN;
+host = ${PROTO}${DOMAIN}
+
+OR (if you prefer www.${DOMAIN} to be used)
+
+host = ${PROTO}www.${DOMAIN}
 
 
 Save the file and this script will automatically resume when synced.
 EOT
-
-READY=0
-while [ $READY -eq 0 ]; do
-	sleep 2
-  if grep -q "set \$siteroot $SITEPATH;" "${SITEPATH}/nginx.conf"; then
-		if grep -q "set \$sitedomain $DOMAIN;" "${SITEPATH}/nginx.conf" ; then
-			READY=1
-			success 'nginx.conf configuration detected'
-		fi
-	fi
-done
-
-
-heading 'Install Configuration 2 of 2'
-cat << EOT
+else
+  cat << EOT
 Edit cgi-bin/config.ini and set the following line under "[site]"
 (replacing the current values):
 
@@ -118,6 +110,7 @@ host = ${PROTO}${DOMAIN}
 
 Save the file and this script will automatically resume when synced.
 EOT
+fi
 
 READY=0
 while [ $READY -eq 0 ]; do
@@ -126,6 +119,12 @@ while [ $READY -eq 0 ]; do
     READY=1
     success 'config.ini configuration detected'
 	fi
+	if [ $WWWALIAS -eq 1 ]; then
+    if grep -q "host = ${PROTO}www.${DOMAIN}" "${SITEPATH}/cgi-bin/config.ini"; then
+      READY=1
+      success 'config.ini configuration detected'
+    fi
+  fi
 done
 
 
@@ -137,7 +136,8 @@ heading 'Setting Up CGI Application'
 apt install fcgiwrap python3 python3-venv
 python3 -m venv /opt/markdownmaster
 /opt/markdownmaster/bin/pip3 install Markdown beautifulsoup4 python-frontmatter lxml
-find "${SITEPATH}/cgi-bin/" -name '*.py' -exec chmod +x {} \;
+chmod +x "${SITEPATH}/cgi-bin/crawler.py"
+chmod +x "${SITEPATH}/cgi-bin/sitemap.py"
 
 debug "Installing config to /etc/nginx/sites-enabled/${DOMAIN}.conf"
 sleep 1
