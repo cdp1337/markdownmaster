@@ -1,4 +1,25 @@
-import configparser
+"""
+MarkdownMaster CMS
+
+The MIT License (MIT)
+Copyright (c) 2023 Charlie Powell
+https://github.com/cdp1337/markdownmaster
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 
 
 class SimpleSite:
@@ -6,49 +27,33 @@ class SimpleSite:
     TYPE_HTML = 'text/html'
     TYPE_XML = 'text/xml'
 
-    def __init__(self) -> None:
-        self.type = SimpleSite.TYPE_HTML
+    type: str = ''
 
-        # Load configuration and check values are set
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        try:
-            self.hostname = config['site']['host']
-            self.path = config['site']['webpath']
-            self.default = config['site']['defaultview']
-            self.types = list(map(lambda x: x.strip(), config['site']['types'].split(',')))
-            self.debug = config['site']['debug']
-
-            if self.debug:
-                # This will enable debug output to the browser
-                import cgitb
-                cgitb.enable()
-        except KeyError:
-            self.error('Server-side configuration not complete, please check cgi-bin/config.ini')
-    
-    def _preRender(self) -> None:
-        if not self.type in [SimpleSite.TYPE_HTML, SimpleSite.TYPE_XML]:
+    @classmethod
+    def _pre_render(cls) -> None:
+        if cls.type not in [SimpleSite.TYPE_HTML, SimpleSite.TYPE_XML]:
             # Type not one of the supported registered types, remap to a supported one
-            self.type = self.TYPE_HTML
+            cls.type = cls.TYPE_HTML
 
-    def error(self, message: str, code: int = 500) -> None:
-        '''
+    @classmethod
+    def error(cls, message: str, code: int = 500) -> None:
+        """
         Render an error to the user to indicate something happened
-        '''
+        """
 
-        self._preRender()
+        cls._pre_render()
 
-        codeNames = {
+        code_names = {
             404: 'Not Found',
             500: 'Server Error',
         }
 
         try:
-            text = codeNames[code]
+            text = code_names[code]
         except KeyError:
-            self.error('Unsupported redirect code requested, ' + str(code))
+            cls.error('Unsupported redirect code requested, ' + str(code))
         
-        if self.type == SimpleSite.TYPE_XML:
+        if cls.type == SimpleSite.TYPE_XML:
             template = '''
             <?xml version="1.0"?>
             <xml><error>%s</error></xml>
@@ -65,20 +70,21 @@ class SimpleSite:
             '''
 
         print('HTTP/1.1 ' + str(code) + ' ' + text)
-        print('Content-Type: ' + self.type)
+        print('Content-Type: ' + cls.type)
         print('Status: ' + str(code))
         print()
         print(template % message)
         exit()
 
-    def redirect(self, path: str, code: int = 301) -> None:
-        '''
+    @classmethod
+    def redirect(cls, path: str, code: int = 301) -> None:
+        """
         Render a crawler-compliant redirect along with the requested redirect type
-        '''
+        """
 
-        self._preRender()
+        cls._pre_render()
 
-        codeNames = {
+        code_names = {
             301: 'Moved Permanently',
             302: 'Found',
             303: 'See Other',
@@ -87,11 +93,11 @@ class SimpleSite:
         }
 
         try:
-            text = codeNames[code]
+            text = code_names[code]
         except KeyError:
-            self.error('Unsupported redirect code requested, ' + str(code))
+            cls.error('Unsupported redirect code requested, ' + str(code))
         
-        if self.type == SimpleSite.TYPE_XML:
+        if cls.type == SimpleSite.TYPE_XML:
             template = '''
             <?xml version="1.0"?>
             <xml><redirect type="%s">%s</redirect></xml>
@@ -108,21 +114,22 @@ class SimpleSite:
             '''
 
         print('HTTP/1.1 ' + str(code) + ' ' + text)
-        print('Content-Type: ' + self.type)
+        print('Content-Type: ' + cls.type)
         print('Status: ' + str(code))
         print('Location: ' + path)
         print()
         print(template % (text, path))
         exit()
-    
-    def render(self, payload: str) -> None:
-        '''
+
+    @classmethod
+    def render(cls, payload: str) -> None:
+        """
         Render a full page
-        '''
-        self._preRender()
+        """
+        cls._pre_render()
 
         print('HTTP/1.1 200 OK')
-        print('Content-Type: ' + self.type)
+        print('Content-Type: ' + cls.type)
         print()
         print(payload)
         exit()

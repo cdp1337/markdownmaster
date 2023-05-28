@@ -45,11 +45,11 @@ describe('File', () => {
   // Define common file contents that can be re-used
 
   const generic_contents = fs.readFileSync(
-    dirname(fileURLToPath(import.meta.url)) + '/../assets/good_file.md',
+    dirname(fileURLToPath(import.meta.url)) + '/../assets/tests/good_file.md',
     'utf8'
   );
   const nodate_contents = fs.readFileSync(
-    dirname(fileURLToPath(import.meta.url)) + '/../assets/good_file_no_date.md',
+    dirname(fileURLToPath(import.meta.url)) + '/../assets/tests/good_file_no_date.md',
     'utf8'
   );
 
@@ -204,7 +204,7 @@ title: Sneaky exploit attempt
     it('multiple attributes', () => {
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
       f.content = `---
-title: Testing SEO Features
+title: Food Items
 categories: [Soup, Food]
 utensils:
   - spoon

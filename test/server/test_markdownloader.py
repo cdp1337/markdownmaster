@@ -5,7 +5,7 @@ from src.server.markdownloader import MarkdownLoader
 
 
 def _get_good_file() -> MarkdownLoader:
-    template_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/good_file.md')
+    template_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/tests/good_file.md')
     return MarkdownLoader('https://example.tld/tests/assets/good_file.html', template_file)
 
 

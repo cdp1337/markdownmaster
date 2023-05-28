@@ -1,15 +1,34 @@
 #!/opt/markdownmaster/bin/python3
+"""
+MarkdownMaster CMS
+
+The MIT License (MIT)
+Copyright (c) 2023 Charlie Powell
+https://github.com/cdp1337/markdownmaster
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 
 import cgi
 import re
 import os
-import markdown
 from simplesite import SimpleSite
 from templater import Templater
 from markdownloader import MarkdownLoader
-
-# Load the site and its configuration
-site = SimpleSite()
+from siteconfig import SiteConfig
 
 # Create instance of FieldStorage 
 form = cgi.FieldStorage()
@@ -18,7 +37,8 @@ try:
     page = form['page'].value
 except KeyError:
     # No page requested, detect the default page and redirect there.
-    site.redirect(site.hostname + site.path + site.default + '.html')
+    SimpleSite.redirect(SiteConfig.get_home_url())
+    exit()
 
 # Perform some basic sanitization on the page input
 page = page.replace('../', '')
@@ -28,10 +48,10 @@ page = re.sub(r'\?.*$', '', page)
 page = page.replace('.html', '')
 
 # Check if the page is present
-doc = '../' + page + '.md'
+doc = os.path.join(SiteConfig.get_path_root(), page + '.md')
 
 if os.path.exists(doc) and os.path.isfile(doc):
-    loader = MarkdownLoader(site.hostname + os.path.join(site.path, page + '.html'), doc)
+    loader = MarkdownLoader(SiteConfig.get_host() + os.path.join(SiteConfig.get_path_web(), page + '.html'), doc)
 
     # Pull in the meta fields useful for spiders
     seotitle = loader.get_meta(['seotitle', 'title'], page)
@@ -39,7 +59,7 @@ if os.path.exists(doc) and os.path.isfile(doc):
     description = loader.get_meta(['description', 'excerpt'], '')
     image = loader.get_meta(['image'], '')
 
-    template = Templater('../index.html')
+    template = Templater(os.path.join(SiteConfig.get_path_root(), 'index.html'))
     template.set_canonical(loader.url)
     template.set_title(seotitle)
     if description != '':
@@ -49,7 +69,7 @@ if os.path.exists(doc) and os.path.isfile(doc):
         template.set_meta_content('og:image', image)
 
     template.set_body('<h1>' + title + '</h1>' + str(loader))
-    site.render(str(template))
+    SimpleSite.render(str(template))
 
 else:
-    site.error('Requested page not found', 404)
+    SimpleSite.error('Requested page not found', 404)
