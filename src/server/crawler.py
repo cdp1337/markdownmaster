@@ -26,6 +26,7 @@ import cgi
 import re
 import os
 from simplesite import SimpleSite
+from filecollection import FileCollection
 from templater import Templater
 from markdownloader import MarkdownLoader
 from siteconfig import SiteConfig
@@ -72,4 +73,19 @@ if os.path.exists(doc) and os.path.isfile(doc):
     SimpleSite.render(str(template))
 
 else:
-    SimpleSite.error('Requested page not found', 404)
+    # Try a listing page instead
+    doc = os.path.join(SiteConfig.get_path_root(), page)
+    if os.path.exists(doc) and page in SiteConfig.get_types():
+        html = '<h1>Listing of ' + page + '</h1>'
+        collection = FileCollection(page)
+        for file in collection.files:
+            if not file.get_meta(['draft'], False):
+                html += file.get_listing()
+
+        template = Templater(os.path.join(SiteConfig.get_path_root(), 'index.html'))
+        template.set_canonical(SiteConfig.get_host() + os.path.join(SiteConfig.get_path_web(), page + '.html'))
+        template.set_title('Listing of ' + page)
+        template.set_body(html)
+        SimpleSite.render(str(template))
+    else:
+        SimpleSite.error('Requested page not found', 404)

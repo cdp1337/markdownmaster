@@ -75,6 +75,20 @@ class MarkdownLoader:
         # If nothing returned, return the default.
         return default
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        Get this file in its full HTML version
+        """
         md = markdown.Markdown()
         return md.convert(self.post.content)
+
+    def get_listing(self) -> str:
+        title = self.get_meta(['title', 'seotitle'], os.path.basename(self.url))
+        excerpt = self.get_meta(['excerpt', 'description'], '')
+        image = self.get_meta(['image'], None)
+
+        html = '<article><h2><a href="' + self.url + '">' + title + '</a></h2><p>' + excerpt + '</p>'
+        if image is not None and 'src' in image:
+            html += '<img src="' + image['src'] + '"/>'
+        html += '</article>'
+        return html
