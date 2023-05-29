@@ -33,8 +33,10 @@ jobs:
       - run: npm run compile
       # Minify the application (to ensure minification works without error)
       - run: npm run minify
-      # Copy to examples
-      - run: npm run example
+      # Copy CGI-BIN to examples
+      - run: npm run copy_cgi
+      # Ensure necessary CGI-BIN files are executable
+      - run: npm run executable_cgi
 
       # Build the deployable tarball
       # will set variable steps.archive.outputs.filename
