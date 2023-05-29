@@ -34,26 +34,40 @@ let _queuedMetas = null;
 let _queuedMetasPromises = [];
 
 let _queuedGetMetas = async (path) => {
-	return new Promise((resolve) => {
+	return new Promise((resolve, reject) => {
 		if (_queuedMetas === null) {
 			// Not loaded yet
 			_queuedMetas = true;
-			_queuedMetasPromises.push(resolve);
+			_queuedMetasPromises.push([resolve, reject]);
 			fetch(path)
 				.then(resp => {
-					return resp.json();
+					if (resp.status !== 200) {
+						_queuedMetas = false;
+						_queuedMetasPromises.forEach(r => {
+							r[1]('Server did not return a 200 successful');
+						});
+					}
+					else {
+						return resp.json();
+					}
 				})
 				.then(data => {
 					_queuedMetas = data;
 					// Resolve all the queued entries now
 					Log.Debug('server', 'Meta.json loaded from server, resolving all promises now');
 					_queuedMetasPromises.forEach(r => {
-						r(_queuedMetas);
+						r[0](_queuedMetas);
 					});
 				});
 		} else if (_queuedMetas === true) {
 			// Pending, add to queue
-			_queuedMetasPromises.push(resolve);
+			_queuedMetasPromises.push([resolve, reject]);
+		} else if (_queuedMetas === false) {
+			// Failed
+			reject('Previous lookup did not succeed, not retrying');
+		} else {
+			// Already received, just return the data.
+			resolve(_queuedMetas);
 		}
 	});
 };
@@ -193,6 +207,9 @@ class FileCollection {
 						this.files.push(f);
 					});
 					resolve();
+				})
+				.catch(e => {
+					reject(e);
 				});
 		});
 	}
