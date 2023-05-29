@@ -25,11 +25,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 import cgi
 import re
 import os
-from .simplesite import SimpleSite
-from .filecollection import FileCollection
-from .templater import Templater
-from .markdownloader import MarkdownLoader
-from .siteconfig import SiteConfig
+from simplesite import SimpleSite
+from filecollection import FileCollection
+from templater import Templater
+from markdownloader import MarkdownLoader
+from siteconfig import SiteConfig
 
 # Create instance of FieldStorage 
 form = cgi.FieldStorage()

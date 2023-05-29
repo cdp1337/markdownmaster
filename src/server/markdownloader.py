@@ -27,7 +27,7 @@ import re
 import markdown
 import frontmatter
 from datetime import date
-from .siteconfig import SiteConfig
+from siteconfig import SiteConfig
 
 
 class MarkdownLoader:

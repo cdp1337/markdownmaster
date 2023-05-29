@@ -1,14 +1,14 @@
 from unittest import TestCase
 import os
 
-from src.server.filecollection import FileCollection
-from src.server.markdownloader import MarkdownLoader
-from src.server.siteconfig import get_config_for_tests
+from filecollection import FileCollection
+from markdownloader import MarkdownLoader
+from siteconfig import get_config_for_tests
 
 # Override some of the config settings for the test environment
 config = get_config_for_tests()
-config.path_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/config.ini')
-config.path_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets')
+config.path_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../test/assets/config.ini')
+config.path_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../test/assets')
 config.load()
 
 

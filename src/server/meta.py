@@ -25,9 +25,9 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from .simplesite import SimpleSite
-from .filecollection import FileCollection
-from .siteconfig import SiteConfig
+from simplesite import SimpleSite
+from filecollection import FileCollection
+from siteconfig import SiteConfig
 
 SimpleSite.type = SimpleSite.TYPE_JSON
 payload = {}

@@ -24,8 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 import os
 from typing import Union
 
-from .markdownloader import MarkdownLoader
-from .siteconfig import SiteConfig
+from markdownloader import MarkdownLoader
+from siteconfig import SiteConfig
 
 
 class FileCollection:

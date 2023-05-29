@@ -1,18 +1,18 @@
 import os
 import unittest
 
-from src.server.markdownloader import MarkdownLoader
-from src.server.siteconfig import get_config_for_tests
+from markdownloader import MarkdownLoader
+from siteconfig import get_config_for_tests
 
 # Override some of the config settings for the test environment
 config = get_config_for_tests()
-config.path_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/config.ini')
-config.path_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets')
+config.path_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../test/assets/config.ini')
+config.path_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../test/assets')
 config.load()
 
 
 def _get_file(filename: str) -> MarkdownLoader:
-    template_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/tests/', filename)
+    template_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../test/assets/tests/', filename)
     return MarkdownLoader(template_file)
 
 
