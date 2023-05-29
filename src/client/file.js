@@ -614,7 +614,7 @@ class File {
 					// Fix for relatively positioned images
 					// An easy way to specify images in markdown files is to list them relative to the file itself.
 					// Take the permalink (since it's already resolved), and prepend the base to the image.
-					if (v.indexOf('://') === -1) {
+					if (v.indexOf('://') === -1 && v[0] !== '/') {
 						if (!this.permalink) {
 							// Ensure the permalink for this file is ready
 							this.parsePermalink();
