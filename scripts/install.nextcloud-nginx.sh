@@ -142,9 +142,12 @@ chmod +x "${SITEPATH}/cgi-bin/meta.py"
 
 debug "Installing config to /etc/nginx/sites-enabled/${DOMAIN}.conf"
 sleep 1
-# Setup nginx
-if [ $HTTPS -eq 0 ]; then
-	cat > /etc/nginx/sites-enabled/${DOMAIN}.conf << EOD
+if [ -e "/etc/nginx/sites-enabled/${DOMAIN}.conf" ]; then
+  error "${DOMAIN}.conf already exists, NOT overwriting (but resuming install)"
+else
+  # Setup nginx
+  if [ $HTTPS -eq 0 ]; then
+    cat > /etc/nginx/sites-enabled/${DOMAIN}.conf << EOD
 # Virtual host configuration for ${DOMAIN}
 
 server {
@@ -156,8 +159,8 @@ server {
 }
 
 EOD
-else
-	cat > /etc/nginx/sites-enabled/${DOMAIN}.conf << EOD
+  else
+    cat > /etc/nginx/sites-enabled/${DOMAIN}.conf << EOD
 # Virtual host configuration for ${DOMAIN}
 
 server {
@@ -178,8 +181,8 @@ server {
 }
 
 EOD
+  fi
 fi
-
 
 heading 'Testing Config'
 sleep 1
