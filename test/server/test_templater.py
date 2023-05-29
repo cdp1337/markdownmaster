@@ -4,6 +4,13 @@ import unittest
 from bs4 import BeautifulSoup
 
 from src.server.templater import Templater
+from src.server.siteconfig import get_config_for_tests
+
+# Override some of the config settings for the test environment
+config = get_config_for_tests()
+config.path_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/config.ini')
+config.path_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets')
+config.load()
 
 
 def _get_good_template() -> Templater:

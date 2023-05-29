@@ -30,6 +30,34 @@ import File from './file';
 import Log from './log';
 import CMSError from './cmserror';
 
+let _queuedMetas = null;
+let _queuedMetasPromises = [];
+
+let _queuedGetMetas = async (path) => {
+	return new Promise((resolve) => {
+		if (_queuedMetas === null) {
+			// Not loaded yet
+			_queuedMetas = true;
+			_queuedMetasPromises.push(resolve);
+			fetch(path)
+				.then(resp => {
+					return resp.json();
+				})
+				.then(data => {
+					_queuedMetas = data;
+					// Resolve all the queued entries now
+					Log.Debug('server', 'Meta.json loaded from server, resolving all promises now');
+					_queuedMetasPromises.forEach(r => {
+						r(_queuedMetas);
+					});
+				});
+		} else if (_queuedMetas === true) {
+			// Pending, add to queue
+			_queuedMetasPromises.push(resolve);
+		}
+	});
+};
+
 /**
  * Represents a file collection.
  * @constructor
@@ -60,11 +88,18 @@ class FileCollection {
 	 */
 	async init() {
 		return new Promise((resolve) => {
-			this.getFiles().then(() => {
-				this.loadFiles().then(() => {
+			this.getFilesByServer()
+				.then(() => {
 					resolve();
+				})
+				.catch(() => {
+					// Try the slow method of scanning for directory listings
+					this.getFiles().then(() => {
+						this.loadFiles().then(() => {
+							resolve();
+						});
+					});
 				});
-			});
 		});
 	}
 
@@ -125,6 +160,39 @@ class FileCollection {
 						// No additional directories found, resolve immediately.
 						resolve();
 					}
+				});
+		});
+	}
+
+	/**
+	 * Get files from file listing and set to file collection.
+	 * @method
+	 * @async
+	 * @returns {Promise}
+	 */
+	async getFilesByServer() {
+		return new Promise((resolve, reject) => {
+			Log.Debug(this.type, 'Retrieving files metadata from server script meta.json');
+
+			// Try the server-side script first to pull files, this will save on calls
+			_queuedGetMetas(pathJoin(this.config.webpath, 'meta.json'))
+				.then(data => {
+					if (typeof(data[this.type]) === 'undefined') {
+						// Not set
+						reject('No collection matched');
+						return;
+					}
+
+					data[this.type].forEach(file => {
+						Log.Debug(this.type, 'Found valid file, adding to collection', {file});
+						let f = new File(file.path, this.type, this.layout.single, this.config);
+						f.parseFilename();
+						f.parsePermalink();
+						f.parseFrontMatterData(file.meta);
+						f.parseDate();
+						this.files.push(f);
+					});
+					resolve();
 				});
 		});
 	}

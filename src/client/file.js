@@ -181,6 +181,12 @@ class File {
 	 */
 	async loadContent() {
 		return new Promise((resolve, reject) => {
+			if (this.content !== null) {
+				// Already loaded!
+				resolve(this.content);
+				return;
+			}
+
 			fetch(this.url)
 				.then(response => {
 					if (!response.ok) {
@@ -228,26 +234,34 @@ class File {
 
 		if (yaml) {
 			data = jsYaml.load(yaml);
+			this.parseFrontMatterData(data);
+		}
+	}
 
-			for (let [attKey, attVal] of Object.entries(data)) {
-				// For convenience all tags should be lowercase.
-				attKey = attKey.toLowerCase();
+	/**
+	 * Parse the actual metadata located from the frontmatter
+	 *
+	 * @param {object} data
+	 */
+	parseFrontMatterData(data) {
+		for (let [attKey, attVal] of Object.entries(data)) {
+			// For convenience all tags should be lowercase.
+			attKey = attKey.toLowerCase();
 
-				if (File.ProtectedAttributes.indexOf(attKey) !== -1) {
-					// To prevent the user from messing with important parameters, skip a few.
-					// These are calculated and used internally and really shouldn't be modified.
-					Log.Warn(this.type, this.url, 'has a protected key [' + attKey + '], value will NOT be parsed.');
-					continue;
-				}
-
-				if (typeof this[attKey] === 'function') {
-					// Do not allow methods to be overridden
-					Log.Warn(this.type, this.url, 'unable to load key [' + attKey + '], target is a function!');
-					continue;
-				}
-
-				this[attKey] = this._parseFrontMatterKey(attVal);
+			if (File.ProtectedAttributes.indexOf(attKey) !== -1) {
+				// To prevent the user from messing with important parameters, skip a few.
+				// These are calculated and used internally and really shouldn't be modified.
+				Log.Warn(this.type, this.url, 'has a protected key [' + attKey + '], value will NOT be parsed.');
+				continue;
 			}
+
+			if (typeof this[attKey] === 'function') {
+				// Do not allow methods to be overridden
+				Log.Warn(this.type, this.url, 'unable to load key [' + attKey + '], target is a function!');
+				continue;
+			}
+
+			this[attKey] = this._parseFrontMatterKey(attVal);
 		}
 	}
 
@@ -290,30 +304,38 @@ class File {
 	/**
 	 * Parse file body from the markdown content
 	 */
-	parseBody() {
-		if (!this.bodyLoaded) {
-			// Only render content if it hasn't been loaded yet, (allows for repeated calls)
-
-			let html;
-			if (this._checkHasFrontMatter()) {
-				// Trim off the FrontMatter from the content
-				html = this.content
-					.split(this.config.frontMatterSeperator)
-					.splice(2)
-					.join(this.config.frontMatterSeperator);
-			} else {
-				// This file does not contain any valid formatted FrontMatter content
-				html = this.content;
+	async parseBody() {
+		return new Promise(resolve => {
+			if (this.bodyLoaded) {
+				// Only render content if it hasn't been loaded yet, (allows for repeated calls)
+				resolve(this.body);
+				return;
 			}
 
-			if (this.config.markdownEngine) {
-				this.body = this.config.markdownEngine(html);
-			} else {
-				this.body = (new Markdown()).render(html);
-			}
+			this.loadContent()
+				.then(content => {
+					let html;
+					if (this._checkHasFrontMatter()) {
+						// Trim off the FrontMatter from the content
+						html = content
+							.split(this.config.frontMatterSeperator)
+							.splice(2)
+							.join(this.config.frontMatterSeperator);
+					} else {
+						// This file does not contain any valid formatted FrontMatter content
+						html = content;
+					}
 
-			this.bodyLoaded = true;
-		}
+					if (this.config.markdownEngine) {
+						this.body = this.config.markdownEngine(html);
+					} else {
+						this.body = (new Markdown()).render(html);
+					}
+
+					this.bodyLoaded = true;
+					resolve(this.body);
+				});
+		});
 	}
 
 	/**
@@ -423,18 +445,26 @@ class File {
 	 * @throws {Error}
 	 */
 	async render() {
-		this.parseBody();
+		document.title = 'Loading ' + this.url + '...';
 
-		// Rendering a full page will update the page title
-		if (this.seotitle) {
-			document.title = this.seotitle;
-		} else if (this.title) {
-			document.title = this.title;
-		} else {
-			document.title = 'Page';
-		}
+		return new Promise((resolve, reject) => {
+			this.parseBody().then(() => {
+				// Rendering a full page will update the page title
+				if (this.seotitle) {
+					document.title = this.seotitle;
+				} else if (this.title) {
+					document.title = this.title;
+				} else {
+					document.title = 'Page';
+				}
 
-		return renderLayout(this.layout, this);
+				renderLayout(this.layout, this).then(() => {
+					resolve();
+				}).catch(e => {
+					reject(e);
+				});
+			});
+		});
 	}
 
 	/**

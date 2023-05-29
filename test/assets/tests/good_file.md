@@ -12,6 +12,9 @@ image:
   src: https://www.http.cat/200.jpg
 logo:
   src: logo.png
+cta:
+  href: good_file_no_date.html
+  title: This one doesn't have a title
 tags: [Test, Document]
 falsy: false
 truth: true

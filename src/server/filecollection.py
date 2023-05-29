@@ -22,28 +22,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 """
 
 import os
+from typing import Union
 
-from markdownloader import MarkdownLoader
-from siteconfig import SiteConfig
+from .markdownloader import MarkdownLoader
+from .siteconfig import SiteConfig
 
 
 class FileCollection:
     def __init__(self, col_type: str):
+        """
+        Initialize a new collection of files, will scan the filesystem in the given directory for all files
+        :param col_type: Directory to scan, ie: "posts"
+        """
         self.files = []
 
         p_dir = SiteConfig.get_path_root()
-        w_dir = SiteConfig.get_path_web()
-        host = SiteConfig.get_host()
 
         for file in os.listdir(os.path.join(p_dir, col_type)):
             if os.path.isdir(os.path.join(p_dir, col_type, file)):
                 # Iterate once
                 for subfile in os.listdir(os.path.join(p_dir, col_type, file)):
                     if subfile.endswith('.md'):
-                        url = host + os.path.join(w_dir, col_type, file, subfile.replace('.md', '.html'))
+                        # Files like to be fully resolved
                         path = os.path.join(p_dir, col_type, file, subfile)
-                        self.files.append(MarkdownLoader(url, path))
+                        self.files.append(MarkdownLoader(path))
             elif file.endswith('.md'):
-                url = host + os.path.join(w_dir, col_type, file.replace('.md', '.html'))
+                # Files like to be fully resolved
                 path = os.path.join(p_dir, col_type, file)
-                self.files.append(MarkdownLoader(url, path))
+                self.files.append(MarkdownLoader(path))
+
+    def get_by_path(self, file_path: str) -> Union[MarkdownLoader, None]:
+        """
+        Get a file by its relative path or None if not found
+        :param file_path: File path, relative to the application, ie: "/posts/my_post.md"
+        """
+        for file in self.files:
+            if file.path == file_path:
+                return file
+
+        return None

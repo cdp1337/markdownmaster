@@ -36,7 +36,7 @@ Sync/
 SSH to your NextCloud instance and run the auto-install script as sudo or root
 
 ```bash
-curl -sL https://raw.githubusercontent.com/cdp1337/markdownmaster/main/scripts/install.nextcloud-nginx.sh | sudo -E bash -
+sudo bash -c "$(curl -sL https://raw.githubusercontent.com/cdp1337/markdownmaster/main/scripts/install.nextcloud-nginx.sh)"
 ```
 
 **Disclaimer**, it's a security risk to run unknown code from the internet as sudo!

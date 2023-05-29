@@ -29,34 +29,21 @@ from .simplesite import SimpleSite
 from .filecollection import FileCollection
 from .siteconfig import SiteConfig
 
-SimpleSite.type = SimpleSite.TYPE_XML
-urls = []
-comments = []
+SimpleSite.type = SimpleSite.TYPE_JSON
+payload = {}
 
 for collection_type in SiteConfig.get_types():
     try:
         collection = FileCollection(collection_type)
+        payload[collection_type] = []
         for file in collection.files:
             if not file.get_meta(['draft'], False):
-                urls.append(file.url)
+                payload[collection_type].append({
+                    'url': file.url,
+                    'path': file.path,
+                    'meta': file.get_metas()
+                })
     except FileNotFoundError:
-        comments.append('Unable to read directory ' + collection_type)
+        pass
 
-header = '''<?xml version="1.0" encoding="UTF-8"?>
-<urlset 
-    xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
-    xmlns:xhtml="http://www.w3.org/1999/xhtml" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-'''
-
-body = ''
-for c in comments:
-    body += '\t<!-- ' + c + '-->\n'
-
-for u in urls:
-    body += '\t<url>\n\t\t<loc>' + u + '</loc>\n\t</url>\n'
-
-footer = '</urlset>'
-
-SimpleSite.render(header + body + footer)
+SimpleSite.render(payload)

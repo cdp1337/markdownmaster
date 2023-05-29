@@ -226,11 +226,11 @@ images:
     });
     it('date is not yesterday', () => {
       let f = new File('test.md', 'test', 'test', new Config());
-      f.content = `---
-title: Testing SEO Features
-date: 2023-04-10
----
-`;
+      f.content = fs.readFileSync(
+        dirname(fileURLToPath(import.meta.url)) + '/../assets/tests/dates_are_difficult.md',
+        'utf8'
+      );
+
       f.parseFrontMatter();
       expect(f.date).toBeInstanceOf(Date);
       assert.equal(f.date.getFullYear(), 2023);
@@ -274,10 +274,10 @@ date: '2023-03-14'
     });
     it('2023-03-14 url', () => {
       let f = new File('/posts/topic/2023-03-14-test.md', 'test', 'test', new Config());
-      f.content = `---
-title: Testing Bug Features
----
-`;
+      f.content = fs.readFileSync(
+        dirname(fileURLToPath(import.meta.url)) + '/../assets/tests/topic/2023-03-14-test.md',
+        'utf8'
+      );
       f.parseFrontMatter();
       expect(f.url).toContain('2023-03-14');
       expect(f.date).toBeNull();
@@ -345,9 +345,10 @@ date: 2023-04-10
       f.content = generic_contents;
       expect(f.bodyLoaded).toEqual(false);
       expect(f.body).toBeNull();
-      f.parseBody();
-      expect(f.bodyLoaded).toEqual(true);
-      expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
+      f.parseBody().then(() => {
+        expect(f.bodyLoaded).toEqual(true);
+        expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
+      });
     });
     it('embedded', () => {
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
@@ -355,9 +356,10 @@ date: 2023-04-10
       f.content = generic_contents;
       expect(f.bodyLoaded).toEqual(false);
       expect(f.body).toBeNull();
-      f.parseBody();
-      expect(f.bodyLoaded).toEqual(true);
-      expect(f.body).toEqual('<h1>Test Page</h1>\n\n<p>This is test content about Zebras</p>');
+      f.parseBody().then(() => {
+        expect(f.bodyLoaded).toEqual(true);
+        expect(f.body).toEqual('<h1>Test Page</h1>\n\n<p>This is test content about Zebras</p>');
+      });
     });
     /**
      * Test if the Markdown page has no FrontMatter content, it should still render
@@ -367,16 +369,18 @@ date: 2023-04-10
       f.content = `# Test Page
 
 This is test content about Zebras`;
-      f.parseBody();
-      expect(f.bodyLoaded).toEqual(true);
-      expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
+      f.parseBody().then(() => {
+        expect(f.bodyLoaded).toEqual(true);
+        expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
+      });
     });
     it('no content', () => {
       let f = new File('/posts/topic/test.md', 'test', 'test', new Config());
       f.content = '';
-      f.parseBody();
-      expect(f.bodyLoaded).toEqual(true);
-      expect(f.body).toEqual('');
+      f.parseBody().then(() => {
+        expect(f.bodyLoaded).toEqual(true);
+        expect(f.body).toEqual('');
+      });
     });
   });
 

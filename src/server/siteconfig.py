@@ -21,7 +21,7 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from simplesite import SimpleSite
+from .simplesite import SimpleSite
 import configparser
 import os
 
@@ -34,6 +34,13 @@ class SiteConfig:
         self.path_root = os.path.realpath(os.path.join(os.path.realpath(__file__), '../../'))
         self.path_cgi = os.path.join(self.path_root, 'cgi-bin')
         self.path_config = os.path.join(self.path_cgi, 'config.ini')
+        self.host = None
+        self.path_web = None
+        self.default_view = None
+        self.types = []
+        self.debug = False
+
+    def load(self):
 
         try:
             config = configparser.ConfigParser()
@@ -111,6 +118,19 @@ class SiteConfig:
 
 
 def get_config() -> SiteConfig:
+    global _config
+    if _config is None:
+        _config = SiteConfig()
+        _config.load()
+
+    return _config
+
+
+def get_config_for_tests() -> SiteConfig:
+    """
+    Get the system configuration, BUT DO NOT LOAD IT!
+    This is useful for test cases where the configuration needs edited prior to loading.
+    """
     global _config
     if _config is None:
         _config = SiteConfig()

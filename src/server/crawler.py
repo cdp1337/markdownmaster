@@ -25,11 +25,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 import cgi
 import re
 import os
-from simplesite import SimpleSite
-from filecollection import FileCollection
-from templater import Templater
-from markdownloader import MarkdownLoader
-from siteconfig import SiteConfig
+from .simplesite import SimpleSite
+from .filecollection import FileCollection
+from .templater import Templater
+from .markdownloader import MarkdownLoader
+from .siteconfig import SiteConfig
 
 # Create instance of FieldStorage 
 form = cgi.FieldStorage()
@@ -52,7 +52,7 @@ page = page.replace('.html', '')
 doc = os.path.join(SiteConfig.get_path_root(), page + '.md')
 
 if os.path.exists(doc) and os.path.isfile(doc):
-    loader = MarkdownLoader(SiteConfig.get_host() + os.path.join(SiteConfig.get_path_web(), page + '.html'), doc)
+    loader = MarkdownLoader(doc)
 
     # Pull in the meta fields useful for spiders
     seotitle = loader.get_meta(['seotitle', 'title'], page)

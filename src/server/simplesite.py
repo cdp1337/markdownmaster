@@ -21,17 +21,23 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import json
+from typing import Union
+
 
 class SimpleSite:
-
     TYPE_HTML = 'text/html'
     TYPE_XML = 'text/xml'
+    TYPE_JSON = 'application/json'
 
     type: str = ''
 
     @classmethod
     def _pre_render(cls) -> None:
-        if cls.type not in [SimpleSite.TYPE_HTML, SimpleSite.TYPE_XML]:
+        """
+        Perform checks and any work necessary prior to rendering a page, called automatically
+        """
+        if cls.type not in [SimpleSite.TYPE_HTML, SimpleSite.TYPE_XML, SimpleSite.TYPE_JSON]:
             # Type not one of the supported registered types, remap to a supported one
             cls.type = cls.TYPE_HTML
 
@@ -52,7 +58,7 @@ class SimpleSite:
             text = code_names[code]
         except KeyError:
             cls.error('Unsupported redirect code requested, ' + str(code))
-        
+
         if cls.type == SimpleSite.TYPE_XML:
             template = '''
             <?xml version="1.0"?>
@@ -96,14 +102,14 @@ class SimpleSite:
             text = code_names[code]
         except KeyError:
             cls.error('Unsupported redirect code requested, ' + str(code))
-        
+
         if cls.type == SimpleSite.TYPE_XML:
             template = '''
             <?xml version="1.0"?>
             <xml><redirect type="%s">%s</redirect></xml>
             '''
         else:
-             template = '''
+            template = '''
             <!DOCTYPE html>
             <html>
             <head>
@@ -122,14 +128,18 @@ class SimpleSite:
         exit()
 
     @classmethod
-    def render(cls, payload: str) -> None:
+    def render(cls, payload: Union[str, dict, list]) -> None:
         """
         Render a full page
+        :param payload: str | dict | list
         """
         cls._pre_render()
 
         print('HTTP/1.1 200 OK')
         print('Content-Type: ' + cls.type)
         print()
-        print(payload)
+        if cls.type == cls.TYPE_JSON:
+            print(json.dumps(payload))
+        else:
+            print(payload)
         exit()

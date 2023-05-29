@@ -292,6 +292,7 @@ class CMS {
 
 			if (renderer) {
 				renderer.then(() => {
+					Log.Debug('CMS', 'Page render complete, dispatching user-attachable event cms:route');
 					document.dispatchEvent(
 						new CustomEvent(
 							'cms:route',
@@ -306,6 +307,7 @@ class CMS {
 				}).catch(e => {
 					// Try to render the error instead
 					renderError(e).then(() => {
+						Log.Debug('CMS', 'Page render failed, dispatching user-attachable event cms:route');
 						mode = 'error';
 						document.dispatchEvent(
 							new CustomEvent(

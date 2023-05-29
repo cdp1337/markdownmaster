@@ -26,12 +26,19 @@ import re
 
 import markdown
 import frontmatter
+from datetime import date
+from .siteconfig import SiteConfig
 
 
 class MarkdownLoader:
-    def __init__(self, url: str, filename: str):
-        self.url = url
-        self.dir = os.path.dirname(url)
+    def __init__(self, filename: str):
+        """
+        Initialize and load a Markdown file from the filesystem
+        :param filename: Fully resolved path, ie: "/var/www/posts/my_post.md"
+        """
+        self.path = filename[len(SiteConfig.get_path_root()):]
+        self.url = SiteConfig.get_host() + self.path.replace('.md', '.html')
+        self.dir = os.path.dirname(self.path)
         self.post = frontmatter.load(filename)
 
         # Parse attributes for src and href tags,
@@ -43,6 +50,7 @@ class MarkdownLoader:
             if re.match('.*[A-Z].*', key) is not None:
                 l_key = key.lower()
                 self.post[l_key] = self.post[key]
+                del(self.post[key])
                 key = l_key
 
             try:
@@ -59,11 +67,31 @@ class MarkdownLoader:
                 except (KeyError, TypeError):
                     pass
 
+            if type(self.post[key]) == date:
+                # Convert these to a simple string instead for easier passing of data
+                self.post[key] = date.isoformat(self.post[key])
+
+        # Expected values
+        if 'date' not in self.post:
+            if re.match('.+([0-9]{4})[-/]([0-9]{2})[-/]([0-9]{2}).+', self.path):
+                # Load the date from the URL
+                m = re.match('.+([0-9]{4})[-/]([0-9]{2})[-/]([0-9]{2}).+', self.path)
+                self.post['date'] = '-'.join([m.group(1), m.group(2), m.group(3)])
+            else:
+                # Load the date from the last-modified flag
+                self.post['date'] = date.fromtimestamp(os.path.getmtime(filename)).isoformat()
+
+        if 'draft' not in self.post:
+            self.post['draft'] = False
+
     def get_meta(self, lookup: list, default: str = ''):
         """
         Get a specific tag name from the list of meta fields located within document
 
         Will iterate through list of preferred tags (useful for SEO title)
+
+        :param lookup: List of tags to search, ie: ["title", "seotitle"]
+        :param default: Default return value if no tags were located
         """
         for tag in lookup:
             try:
@@ -75,6 +103,15 @@ class MarkdownLoader:
         # If nothing returned, return the default.
         return default
 
+    def get_metas(self) -> dict:
+        """
+        Get all meta values as a simple dictionary
+        """
+        ret = {}
+        for key in sorted(self.post.keys()):
+            ret[key] = self.post[key]
+        return ret
+
     def __str__(self) -> str:
         """
         Get this file in its full HTML version
@@ -83,6 +120,9 @@ class MarkdownLoader:
         return md.convert(self.post.content)
 
     def get_listing(self) -> str:
+        """
+        Get the listing page representation for this file as HTML
+        """
         title = self.get_meta(['title', 'seotitle'], os.path.basename(self.url))
         excerpt = self.get_meta(['excerpt', 'description'], '')
         image = self.get_meta(['image'], None)
