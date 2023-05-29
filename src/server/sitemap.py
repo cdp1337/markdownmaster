@@ -36,6 +36,7 @@ comments = []
 for collection_type in SiteConfig.get_types():
     try:
         collection = FileCollection(collection_type)
+        urls.append(collection.url)
         for file in collection.files:
             if not file.get_meta(['draft'], False):
                 urls.append(file.url)

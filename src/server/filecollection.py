@@ -35,6 +35,7 @@ class FileCollection:
         :param col_type: Directory to scan, ie: "posts"
         """
         self.files = []
+        self.url = SiteConfig.get_host() + os.path.join(SiteConfig.get_path_web(), col_type + '.html')
 
         p_dir = SiteConfig.get_path_root()
 

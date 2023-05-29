@@ -16,6 +16,7 @@ class TestFileCollection(TestCase):
     def test_init(self):
         collection = FileCollection('tests')
         self.assertGreaterEqual(len(collection.files), 2)
+        self.assertEqual('https://markdownmaster.test/tests.html', collection.url)
 
         file = collection.get_by_path('/tests/good_file.md')
         self.assertIsInstance(file, MarkdownLoader)
