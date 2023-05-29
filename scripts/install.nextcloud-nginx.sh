@@ -138,6 +138,7 @@ python3 -m venv /opt/markdownmaster
 /opt/markdownmaster/bin/pip3 install Markdown beautifulsoup4 python-frontmatter lxml
 chmod +x "${SITEPATH}/cgi-bin/crawler.py"
 chmod +x "${SITEPATH}/cgi-bin/sitemap.py"
+chmod +x "${SITEPATH}/cgi-bin/meta.py"
 
 debug "Installing config to /etc/nginx/sites-enabled/${DOMAIN}.conf"
 sleep 1
