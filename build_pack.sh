@@ -27,7 +27,7 @@ getTagVersion() {
 # Create the archive
 TGZ_FILE="markdownmaster-$(getTagVersion).tgz"
 echo "Creating tarball ${TGZ_FILE}..."
-tar -czf release/$TGZ_FILE dist/cms.min.js dist/cms.es.js dist/cms.js examples/ RELEASE.md LICENSE.md README.md INSTALL.apache.md INSTALL.mailinabox.md
+tar -czf release/$TGZ_FILE dist/ examples/ RELEASE.md LICENSE.md README.md docs/*.md
 
 if [ $? -eq 0 ]; then
   # archiving was successful
