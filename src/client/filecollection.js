@@ -424,11 +424,14 @@ class FileCollection {
 	 *
 	 * Each set will contain the properties `name`, `count`, and `url`
 	 *
+	 * @param {null|string} sort Key ['name', 'count', 'url'] to sort results
+	 * @param {number} weightMax Max weight
 	 * @returns {{name: string, count: number, url: string}[]}
 	 */
-	getTags() {
+	getTags(sort = null, weightMax = 10) {
 		let tags = [],
-			tagNames = [];
+			tagNames = [],
+			maxPages = 1;
 
 		this.files.forEach(file => {
 			if (!file.draft && file.tags && Array.isArray(file.tags)) {
@@ -445,10 +448,20 @@ class FileCollection {
 					} else {
 						// Existing tag
 						tags[pos].count++;
+						maxPages = Math.max(maxPages, tags[pos].count);
 					}
 				});
 			}
 		});
+
+		// To assist with CSS, assign a relative weight to each entry based on the count and total count discovered
+		for(let i = 0; i < tags.length; i++) {
+			tags[i]['weight'] = Math.ceil(tags[i].count / maxPages * weightMax);
+		}
+
+		if (sort) {
+			tags.sort((a, b) => { return a[sort] > b[sort]; });
+		}
 
 		return tags;
 	}

@@ -1,7 +1,7 @@
 # _Promise_ it's 2023?
 
 Completely overhaul the entire CMS to implement a modern and more 
-powerful asynchronous system for everything, Promises.
+powerful asynchronous system for everything, Promises!
 This removes the need to keep track of callback functions everywhere
 and offloads that work to the browser instead.
 
@@ -27,6 +27,10 @@ Support CSS-style selectors and any valid HTML attribute,
 * URLs in FrontMatter now support multiple values
 * New support for sticky pages
 * New support for multiple sort keys
+* Include listing pages in sitemap.xml
+* New server-side support for loading page metadata
+* New debug parameters for DEBUG and crawlers
+* Filecollection getTags now can sort and provide weighted values
 
 
 ## Fixes
@@ -36,7 +40,11 @@ Support CSS-style selectors and any valid HTML attribute,
 * Fix for FrontMatter overwriting functions
 * Fix parsing of files with no FrontMatter
 * Fix bug where images inside anchors were not dispatching the router
-* FrontMatter now correctly handles YAML parsing 
+* FrontMatter now correctly handles YAML parsing
+* Fix listing pages for crawlers
+* Fix draft pages from showing in sitemap.xml
+* Add canonical URL to crawler pages
+* Crawler pages now render the template to provide full links and previews
 
 
 ## Changes
