@@ -41,6 +41,16 @@ class TestMarkdownLoader(unittest.TestCase):
         self.assertIsInstance(md, MarkdownLoader)
         self.assertEqual('2023-03-14', md.get_meta(['date']))
 
+    def test_init_auto_excerpt(self):
+        """
+        Test for automatic excerpts
+        """
+        md = _get_file('auto_excerpt.md')
+        self.assertIsInstance(md, MarkdownLoader)
+        self.assertEqual('This sentence should come through as the excerpt since it does not have one '
+                         'assigned. However, links, italics, and other formatting should not be '
+                         'included.', md.get_meta(['excerpt']))
+
     def test_get_meta(self):
         md = _get_file('good_file.md')
         self.assertEqual('2023-03-14', md.get_meta(['date']))

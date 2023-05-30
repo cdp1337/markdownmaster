@@ -30,6 +30,38 @@ from datetime import date
 from siteconfig import SiteConfig
 
 
+def _get_excerpt(content: str) -> str:
+    text = ''
+    for line in content.split('\n'):
+        if line.strip() == '' and text != '':
+            # Stop after the first paragraph
+            break
+
+        if line.strip() == '':
+            continue
+
+        if re.match(r'^[a-zA-Z].*', line) and text == '':
+            # Line starts with a word and text is empty; trigger this to start the paragraph
+            text += line.strip() + ' '
+        elif text != '':
+            # If the text has been started, then just add whatever text to the detected string
+            # This provides for an easy chance to skip any H# tags, images, and other tags
+            # which are commonly at the top of pages, while still allowing some inside the paragraph
+            text += line.strip() + ' '
+
+    # Strip any tags inside the loaded text, this will just be a plain text excerpt.
+    # Strip {...} HTML attribute tags from the text
+    text = re.sub(r'\{.*?}', '', text)
+    # Strip images from the text
+    text = re.sub(r'!\[.*?]\(.*?\)', '', text)
+    # Drop the link from links
+    text = re.sub(r'\[(.*?)]\(.*?\)', '\\1', text)
+    # Drop italic and bold
+    text = re.sub(r'[*_]', '', text)
+
+    return text.strip()
+
+
 class MarkdownLoader:
     def __init__(self, filename: str):
         """
@@ -83,6 +115,9 @@ class MarkdownLoader:
 
         if 'draft' not in self.post:
             self.post['draft'] = False
+
+        if 'excerpt' not in self.post:
+            self.post['excerpt'] = _get_excerpt(self.post.content)
 
     def get_meta(self, lookup: list, default: str = ''):
         """
