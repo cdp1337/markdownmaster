@@ -37,12 +37,11 @@ for collection_type in SiteConfig.get_types():
         collection = FileCollection(collection_type)
         payload[collection_type] = []
         for file in collection.files:
-            if not file.get_meta(['draft'], False):
-                payload[collection_type].append({
-                    'url': file.url,
-                    'path': file.path,
-                    'meta': file.get_metas()
-                })
+            payload[collection_type].append({
+                'url': file.url,
+                'path': file.path,
+                'meta': file.get_metas()
+            })
     except FileNotFoundError:
         pass
 
