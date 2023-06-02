@@ -2,9 +2,6 @@
  * MarkdownMaster CMS
  *
  * The MIT License (MIT)
- * Copyright (c) 2021 Chris Diana
- * https://chrisdiana.github.io/cms.js
- *
  * Copyright (c) 2023 Charlie Powell
  * https://github.com/cdp1337/markdownmaster
  *
@@ -24,37 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Import base CMS
-import CMS from './cms';
-
-// Import CMS plugins
-import MastodonShare from './addons/mastodon_share';
-import PageBodyClass from './addons/pagebodyclass';
-import CMSSearchElement from './addons/cms-search';
-import CMSAuthorElement from './addons/cms-author';
-import CMSPagelistElement from './addons/cms-pagelist';
-import CMSButtonElement from './addons/cms-button';
-
-// Import specific MD renderer system
-import remarkable from './addons/loader-remarkable';
+import {describe, expect, it, jest, test} from '@jest/globals';
+import renderer from '../../src/client/addons/loader-remarkable';
 
 
-// Load custom elements
-customElements.define('cms-author', CMSAuthorElement);
-customElements.define('cms-pagelist', CMSPagelistElement);
-customElements.define('cms-search', CMSSearchElement, { extends: 'input' });
-customElements.define('cms-button', CMSButtonElement, {extends: 'a'});
+describe('markdown-paragraph', () => {
+	it('basic', () => {
+		let txt = 'This is a simple paragraph',
+			html = renderer(txt);
+		expect(html.trim()).toEqual('<p>This is a simple paragraph</p>');
+	});
+	it('embedded tokens', () => {
+		let txt = 'Check out [this thing](https://example.tld) for examples',
+			html = renderer(txt);
+		expect(html.trim()).toEqual('<p>Check out <a href="https://example.tld">this thing</a> for examples</p>');
+	});
+	it('extended attributes', () => {
+		let txt = 'I should be centered {.center}',
+			html = renderer(txt);
+		expect(html.trim()).toEqual('<p class="center">I should be centered</p>');
+	});
+	it('only paragraphs are paragraphs', () => {
+		let txt = `# Test Suite
 
+I should be centered {.center}
 
-// Load addons
-let systemPlugins = {
-	mastodon_share: new MastodonShare(),
-	pagebodyclass: new PageBodyClass(),
-	remarkable: {
-		init: (cms) => {
-			cms.config.markdownEngine = remarkable;
-		}
-	}
-};
-
-export default (options) => new CMS(window, options, systemPlugins);
+* key
+* blah
+`,
+			html = renderer(txt);
+		expect(html.trim()).toEqual(`<h1 id="test-suite">Test Suite</h1>
+<p class="center">I should be centered</p>
+<ul>
+<li>key</li>
+<li>blah</li>
+</ul>`);
+	});
+});

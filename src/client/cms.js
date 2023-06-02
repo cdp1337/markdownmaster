@@ -364,7 +364,7 @@ class CMS {
 			} else {
 				// Initialize the plugin, it'll handle whatever logic necessary.
 				try {
-					this.plugins[name].init();
+					this.plugins[name].init(this);
 					this.pluginsInitialized.push(name);
 					Log.Debug('CMS', 'Initialized plugin [' + name + ']');
 				} catch (e) {

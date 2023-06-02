@@ -45,6 +45,7 @@ Support CSS-style selectors and any valid HTML attribute,
 * Fix draft pages from showing in sitemap.xml
 * Add canonical URL to crawler pages
 * Crawler pages now render the template to provide full links and previews
+* Fix support for abbr tags in markdown
 
 
 ## Changes
@@ -56,6 +57,7 @@ Support CSS-style selectors and any valid HTML attribute,
 * Move CMS-Search to a standardized customElement
 * URL-type properties now require `src` or `href` subattributes
 * The date formatting by default is now locale-aware
+* Switched default markdown renderer from marked to remarkable
 
 
 

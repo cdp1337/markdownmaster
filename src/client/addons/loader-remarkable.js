@@ -2,9 +2,6 @@
  * MarkdownMaster CMS
  *
  * The MIT License (MIT)
- * Copyright (c) 2021 Chris Diana
- * https://chrisdiana.github.io/cms.js
- *
  * Copyright (c) 2023 Charlie Powell
  * https://github.com/cdp1337/markdownmaster
  *
@@ -24,37 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Import base CMS
-import CMS from './cms';
+import {Remarkable} from 'remarkable';
+import p from './remarkable.paragraph';
+import link from './remarkable.links';
+import heading from './remarkable.heading';
+import html from './remarkable.html';
 
-// Import CMS plugins
-import MastodonShare from './addons/mastodon_share';
-import PageBodyClass from './addons/pagebodyclass';
-import CMSSearchElement from './addons/cms-search';
-import CMSAuthorElement from './addons/cms-author';
-import CMSPagelistElement from './addons/cms-pagelist';
-import CMSButtonElement from './addons/cms-button';
+let lib = new Remarkable('full', {
+	html: true,        // Enable HTML tags in source
+	xhtmlOut: true,    // Use '/' to close single tags (<br />)
+	typographer: true  // Enable some language-neutral replacement + quotes beautification
+});
 
-// Import specific MD renderer system
-import remarkable from './addons/loader-remarkable';
+lib.core.ruler.enable([
+	'abbr'
+]);
+lib.block.ruler.enable([
+	'footnote',
+	'deflist'
+]);
+lib.inline.ruler.enable([
+	'footnote_inline',
+	'ins',
+	'mark',
+	'sub',
+	'sup'
+]);
+
+lib.use(p);
+lib.use(link);
+lib.use(heading);
+lib.use(html);
 
 
-// Load custom elements
-customElements.define('cms-author', CMSAuthorElement);
-customElements.define('cms-pagelist', CMSPagelistElement);
-customElements.define('cms-search', CMSSearchElement, { extends: 'input' });
-customElements.define('cms-button', CMSButtonElement, {extends: 'a'});
+// Export the renderer function
+export default (markdown) => { return lib.render(markdown); };
 
-
-// Load addons
-let systemPlugins = {
-	mastodon_share: new MastodonShare(),
-	pagebodyclass: new PageBodyClass(),
-	remarkable: {
-		init: (cms) => {
-			cms.config.markdownEngine = remarkable;
-		}
-	}
-};
-
-export default (options) => new CMS(window, options, systemPlugins);
+// Export the core library for reference if needed
+export {lib};

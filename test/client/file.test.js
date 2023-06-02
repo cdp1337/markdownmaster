@@ -347,7 +347,7 @@ date: 2023-04-10
       expect(f.body).toBeNull();
       f.parseBody().then(() => {
         expect(f.bodyLoaded).toEqual(true);
-        expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
+        expect(f.body).toEqual('<h1>Test Page</h1>\n\n<p>This is test content about Zebras</p>');
       });
     });
     it('embedded', () => {
@@ -371,7 +371,7 @@ date: 2023-04-10
 This is test content about Zebras`;
       f.parseBody().then(() => {
         expect(f.bodyLoaded).toEqual(true);
-        expect(f.body).toEqual('<h1 id="test-page">Test Page</h1>\n<p>This is test content about Zebras</p>\n');
+        expect(f.body).toEqual('<h1>Test Page</h1>\n\n<p>This is test content about Zebras</p>');
       });
     });
     it('no content', () => {

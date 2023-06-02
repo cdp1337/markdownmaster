@@ -20,7 +20,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import {marked} from 'marked';
 
 /**
  * Configuration handler for the CMS
@@ -47,9 +46,9 @@ export class Config extends Object {
 
 		/**
 		 * Markdown engine to use for parsing into HTML
-		 * @type {function}
+		 * @type {function|null}
 		 */
-		this.markdownEngine = marked.parse;
+		this.markdownEngine = null;
 
 		/**
 		 * Name of the layouts directory on the filesystem

@@ -12,3 +12,5 @@ tags: [Bug Test, Image, Cat]
 This should have an image of a cat in both the excerpt and page
 
 ![Everything is OK cat](https://httpcats.com/200.jpg)
+
+*[cat]: Feline, domesticated cat, common household asshole

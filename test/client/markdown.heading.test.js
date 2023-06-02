@@ -2,9 +2,6 @@
  * MarkdownMaster CMS
  *
  * The MIT License (MIT)
- * Copyright (c) 2021 Chris Diana
- * https://chrisdiana.github.io/cms.js
- *
  * Copyright (c) 2023 Charlie Powell
  * https://github.com/cdp1337/markdownmaster
  *
@@ -24,37 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// Import base CMS
-import CMS from './cms';
-
-// Import CMS plugins
-import MastodonShare from './addons/mastodon_share';
-import PageBodyClass from './addons/pagebodyclass';
-import CMSSearchElement from './addons/cms-search';
-import CMSAuthorElement from './addons/cms-author';
-import CMSPagelistElement from './addons/cms-pagelist';
-import CMSButtonElement from './addons/cms-button';
-
-// Import specific MD renderer system
-import remarkable from './addons/loader-remarkable';
+import {describe, expect, it, jest, test} from '@jest/globals';
+import renderer from '../../src/client/addons/loader-remarkable';
 
 
-// Load custom elements
-customElements.define('cms-author', CMSAuthorElement);
-customElements.define('cms-pagelist', CMSPagelistElement);
-customElements.define('cms-search', CMSSearchElement, { extends: 'input' });
-customElements.define('cms-button', CMSButtonElement, {extends: 'a'});
+describe('markdown-heading', () => {
+	it('basic', () => {
+		let md = `# Primary Heading
 
+## secondary'
 
-// Load addons
-let systemPlugins = {
-	mastodon_share: new MastodonShare(),
-	pagebodyclass: new PageBodyClass(),
-	remarkable: {
-		init: (cms) => {
-			cms.config.markdownEngine = remarkable;
-		}
-	}
-};
+### h3 something
 
-export default (options) => new CMS(window, options, systemPlugins);
+#### 4th detail block
+`,
+			html = renderer(md);
+
+		expect(html.trim()).toEqual(`<h1 id="primary-heading">Primary Heading</h1>
+<h2 id="secondary">secondary’</h2>
+<h3 id="h3-something">h3 something</h3>
+<h4 id="id-4th-detail-block">4th detail block</h4>`);
+	});
+});

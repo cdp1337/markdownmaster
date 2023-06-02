@@ -12,7 +12,7 @@ var config = {
 
   // Customize the markdown engine here. For example, if you choose to use the
   // Marked library just specify the marked function.
-  markdownEngine: marked.parse,
+  markdownEngine: null,
 
   // The name of the layouts directory.
   layoutDirectory: 'layouts',
@@ -141,4 +141,4 @@ document.addEventListener('cms:route', event => {
 site.init();
 
 // Load some plugins
-site.enablePlugin(['pagebodyclass']);
+site.enablePlugin(['pagebodyclass', 'remarkable']);
