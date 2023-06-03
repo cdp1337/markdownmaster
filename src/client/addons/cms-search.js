@@ -42,6 +42,12 @@ export default class CMSSearchElement extends HTMLInputElement {
 				e.preventDefault();
 			}
 		});
+
+		// Enable support to preserve the search query
+		let u = new URLSearchParams(window.location.search);
+		if (u.has('s')) {
+			this.value = u.get('s');
+		}
 	}
 
 	search() {
