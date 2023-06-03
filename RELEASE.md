@@ -1,114 +1,39 @@
-# _Promise_ it's 2023?
+# (Next Version Tagline / Name)
 
-Completely overhaul the entire CMS to implement a modern and more 
-powerful asynchronous system for everything, Promises!
-This removes the need to keep track of callback functions everywhere
-and offloads that work to the browser instead.
 
 ## New Features
 
-Images, links, and paragraphs now support {...} format of inline text
-to define custom HTML parameters for rendered elements.
-Support CSS-style selectors and any valid HTML attribute,
-(including quoted text).
-
-* New support for HTML attributes inline
-* Include Prism.JS as an extra for sites
-* Include FontAwesome as an extra for sites
-* Better error management
-* Better logging support
-* Better support for external scripts
-* Add fetchLayout and renderLayout
-* Add support for filtering files by date published
-* New convenience method CMS.getCollection
-* New support for complex filtering of files 
-* Add CMS-Author tag for embedded author snippet
-* Add CMS-Button tag for stylized buttons from a-elements
-* URLs in FrontMatter now support multiple values
-* New support for sticky pages
-* New support for multiple sort keys
-* Include listing pages in sitemap.xml
-* New server-side support for loading page metadata
-* New debug parameters for DEBUG and crawlers
-* Filecollection getTags now can sort and provide weighted values
+* #18 support pagination for listing pages
 
 
 ## Fixes
 
-* Do not include DRAFT pages in taglist
-* Fix beginning newline on sitemap
-* Fix for FrontMatter overwriting functions
-* Fix parsing of files with no FrontMatter
-* Fix bug where images inside anchors were not dispatching the router
-* FrontMatter now correctly handles YAML parsing
-* Fix listing pages for crawlers
-* Fix draft pages from showing in sitemap.xml
-* Add canonical URL to crawler pages
-* Crawler pages now render the template to provide full links and previews
-* Fix support for abbr tags in markdown
-
 
 ## Changes
 
-* Removed Github support (it was broken anyway on this fork)
-* Switch to new Configuration system
-* Switch to Promises for async operations
-* Move CMS-Pagelist to a standardized customElement
-* Move CMS-Search to a standardized customElement
-* URL-type properties now require `src` or `href` subattributes
-* The date formatting by default is now locale-aware
-* Switched default markdown renderer from marked to remarkable
 
 
 
-## Upgrade from 3.1.x to 4.0.x
+## Upgrade from 2.x
 
----
-
-Tags and other lists in Markdown files now expect to be YAML-compatible lists
-
-* `tags: blah, foo` => `tags: [blah, foo]`
-
----
-
-Banners and images no longer auto-resolve as URLs, instead `src` or `href` needs to be 
-used in YAML data
-
-* `banner: somefile.jpg` => `banner: { src: somefile.jpg }` 
-
----
-
-Moved some plugins to built-in
-
-* `site.enablePlugin(['pagelist'])` => N/A (built-in)
-* `site.enablePlugin(['search'])` => N/A (built-in)
-
----
-
-## Upgrade from 3.0.x to 3.1.x
-
-1. Install the fast CGI wrapper on your server, `sudo apt install fcgiwrap`
-2. Configure `cgi-bin/config.ini` with values that mimic `js/config.js`
-3. Upload `cgi-bin` to your server
-4. If necessary, ensure the scripts are executable, `chmod +x cgi-bin/{crawler,sitemap}.py`
-5. Add new directives from `nginx.conf` into your site config (new version has some configurable parameters at the top)
-
-
-## Upgrade from 2.x to 3.x
-
-Since this has been a substantial rewrite, some features will require updating, (depending on what is used on your specific site).
+Since this has been a substantial rewrite, some features will require updating, 
+(depending on what is used on your specific site).
 
 ### URLs
 
-Page URLs have been changed from query hashes to full standard URLs via the History API.  This requires a new `.htaccess` or `nginx.conf` to be installed (depending on the server you chose).  Consult the respective file within `examples/`.
+Page URLs have been changed from query hashes to full standard URLs via the History API. 
+This requires a new `.htaccess` or `nginx.conf` to be installed 
+(depending on the server you chose).  Consult the respective file within `examples/`.
 
 ### Plugins
 
-Plugins have been retooled and need refactored to work correctly.  Given the default example plugin:
+Plugins have been retooled and need refactored to work correctly. 
+Given the default example plugin:
 
-```.js
-// Example plugin
+```js
+// 2.x Example plugin
 function myPlugin() {
+	// Do some code
 	console.log('loading test plugin');
 }
 
@@ -137,11 +62,13 @@ var config = {
 
 This example plugin would need to be rewritten to:
 
-```.js
+```js
+// 3.x+ plugin
 blog.registerPlugin(
   'myPlugin', 
   {
-    init = () => {
+    init: () => {
+      // Do some code
       console.log('loading test plugin');
     }
   }
@@ -153,9 +80,10 @@ blog.getPlugin('myPlugin');
 
 ### onload/onroute
 
-The configurable options `onload` and `onroute` are still supported, but this functionality has been ported to the following code:
+The configurable options `onload` and `onroute` are still supported, 
+but this functionality has been ported to the following code:
 
-```.js
+```js
 /**
  * Called immediately upon successful initialization of the CMS
  * 
@@ -180,3 +108,48 @@ document.addEventListener('cms:route', event => {
   event.detail.cms.debuglog('Page being displayed', event.detail);
 });
 ```
+
+
+## Upgrade from 3.0.x
+
+1. Configure `cgi-bin/config.ini` with values that mimic `js/config.js`
+2. Upload `cgi-bin` to your server
+3. Add new directives from `nginx.conf` into your site config
+4. Run the following code (with the appropriate SITEPATH)
+
+```bash
+apt install fcgiwrap python3 python3-venv
+python3 -m venv /opt/markdownmaster
+/opt/markdownmaster/bin/pip3 install Markdown beautifulsoup4 python-frontmatter lxml
+chmod +x "${SITEPATH}/cgi-bin/crawler.py"
+chmod +x "${SITEPATH}/cgi-bin/sitemap.py"
+chmod +x "${SITEPATH}/cgi-bin/meta.py"
+```
+
+
+## Upgrade from 3.1.x
+
+---
+
+Tags and other lists in Markdown files now expect to be YAML-compatible lists
+
+* `tags: blah, foo` => `tags: [blah, foo]`
+* Dates listed as `date: 2023-01-01` will be rendered as Date objects,
+switch to `date: '2023-01-01'` (with quotes) for best results
+
+---
+
+Banners and images no longer auto-resolve as URLs, instead `src` or `href` needs to be
+used in YAML data
+
+* `banner: somefile.jpg` => `banner: { src: somefile.jpg }`
+
+---
+
+Moved some plugins to built-in
+
+* `site.enablePlugin(['pagelist'])` => N/A (built-in)
+* `site.enablePlugin(['search'])` => N/A (built-in)
+* `site.enablePlugin(['remarkable'])` NEW RENDERER
+
+---

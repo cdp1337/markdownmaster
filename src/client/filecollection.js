@@ -92,6 +92,23 @@ class FileCollection {
 		this.files = [];
 		this.directories = [];
 		this[type] = this.files;
+
+		/**
+		 * @type {null|number}
+		 */
+		this.page = null;
+		/**
+		 * @type {null|number}
+		 */
+		this.totalPages = null;
+		/**
+		 * @type {null|number}
+		 */
+		this.resultsPerPage = null;
+		/**
+		 * @type {null|number}
+		 */
+		this.totalResults = null;
 	}
 
 	/**
@@ -124,6 +141,49 @@ class FileCollection {
 	 */
 	getFileListUrl() {
 		return pathJoin(this.config.webpath, this.type);
+	}
+
+	/**
+	 * Get the URL for the previous page (when pagination is enabled)
+	 *
+	 * @returns {string}
+	 */
+	getPreviousPageUrl() {
+		let url = this.getFileListUrl() + '.html',
+			u = new URLSearchParams(window.location.search);
+		if (this.page !== null && this.page > 1) {
+			u.set('page', (this.page - 1).toString());
+		}
+		return url + '?' + u.toString();
+	}
+
+	/**
+	 * Get the URL for the next page (when pagination is enabled)
+	 *
+	 * @returns {string}
+	 */
+	getNextPageUrl() {
+		let url = this.getFileListUrl() + '.html',
+			u = new URLSearchParams(window.location.search);
+		if (this.page !== null && this.page < this.totalPages) {
+			u.set('page', (this.page + 1).toString());
+		}
+		return url + '?' + u.toString();
+	}
+
+	/**
+	 * Get the URL for the requested page (when pagination is enabled)
+	 *
+	 * @param {number} page
+	 * @returns {string}
+	 */
+	getPageUrl(page) {
+		let url = this.getFileListUrl() + '.html',
+			u = new URLSearchParams(window.location.search);
+		if (page >= 1 && page <= this.totalPages) {
+			u.set('page', (page).toString());
+		}
+		return url + '?' + u.toString();
 	}
 
 	/**
@@ -487,6 +547,32 @@ class FileCollection {
 		}
 
 		return foundFiles[0];
+	}
+
+	/**
+	 * Set pagination (total number of results) for this collection
+	 *
+	 * @param {number} results
+	 */
+	paginate(results) {
+		results = results || 20;
+		let u = new URLSearchParams(window.location.search),
+			start, end;
+
+		this.resultsPerPage = results;
+		this.page = u.has('page') ? parseInt(u.get('page')) : 1;
+		this.totalResults = this[this.type].length;
+		this.totalPages = Math.ceil(this.totalResults / this.resultsPerPage);
+
+		if (this.page > this.totalPages) {
+			// Sanity check to limit to number of pages
+			this.page = this.totalPages;
+		}
+
+		start = (this.page - 1) * this.resultsPerPage;
+		end = Math.min(this.page * this.resultsPerPage, this.totalResults);
+
+		this[this.type] = this[this.type].slice(start, end);
 	}
 
 	/**

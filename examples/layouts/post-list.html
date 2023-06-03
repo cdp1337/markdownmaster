@@ -1,5 +1,6 @@
 <!-- Post List Template -->
 <main class="posts-list fade-in">
+  <% data.paginate(10) %>
   <% data.posts.forEach(function(post) { %>
     <% if(!post.draft) { %>
       <article class="post">
@@ -22,6 +23,20 @@
       </article>
     <% } %>
   <% }) %>
+
+  <% if (data.totalPages > 1) { %>
+    <% if (data.page > 1) { %>
+      <a href="<%= data.getPreviousPageUrl() %>" title="Previous Page">
+        &laquo;
+      </a>
+    <% } %>
+    Page <%= data.page %> of <%= data.totalPages %>
+    <% if (data.page < data.totalPages) { %>
+      <a href="<%= data.getNextPageUrl() %>" title="Next Page">
+        &raquo;
+      </a>
+    <% } %>
+  <% } %>
 </main>
 <aside>
   <input type="search" id="search" is="cms-search" data-type="posts" placeholder="Search for Post..."/>
