@@ -33,6 +33,7 @@ export default class CMSSearchElement extends HTMLElement {
 		let icon = this.getAttribute('icon'),
 			prefix = '',
 			identifier = '',
+			loaded = false,
 			brands = [
 				'42-group', '500px',
 				'accessible-icon', 'accusoft', 'address-book', 'adn', 'adversal', 'affiliatetheme', 'airbnb', 'algolia', 'alipay', 'amazon', 'amazon-pay', 'amilia', 'android', 'angellist', 'angrycreative', 'angular', 'app-store', 'app-store-ios', 'apper', 'apple', 'apple-pay', 'artstation', 'asymmetrik', 'atlassian', 'audible', 'autoprefixer', 'avianex', 'aviato', 'aws',
@@ -68,6 +69,21 @@ export default class CMSSearchElement extends HTMLElement {
 		} else {
 			identifier = 'fa';
 			prefix = 'fa-';
+		}
+
+		// Check if fontawesome needs to be loaded.
+		document.querySelectorAll('link').forEach(el => {
+			if (el.href.indexOf('fontawesome.') !== -1) {
+				loaded = true;
+				return false;
+			}
+		});
+
+		if (!loaded) {
+			let link = document.createElement('link');
+			link.href = '/extras/fontawesome/css/fontawesome.min.css';
+			link.rel = 'stylesheet';
+			document.head.appendChild(link);
 		}
 
 		if (identifier) {
