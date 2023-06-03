@@ -58,6 +58,7 @@ class CMS {
 		this.config = new Config(options);
 		this.plugins = plugins;
 		this.pluginsInitialized = [];
+		this.lastPage = null;
 
 		// Link to window for global functions
 		view.CMS = this;
@@ -107,11 +108,12 @@ class CMS {
 				this.initFileCollections().then(() => {
 					Log.Debug('CMS', 'File collections initialized');
 
-					// check for hash changes
-					this.view.addEventListener('hashchange', this.route.bind(this), false);
 					// AND check for location.history changes (for SEO reasons)
 					this.view.addEventListener('popstate', () => {
-						this.route();
+						// Skip hash-only changes.  The browser will handle these itself.
+						if (this.lastPage !== window.location.pathname) {
+							this.route();
+						}
 					});
 					// start router by manually triggering hash change
 					//this.view.dispatchEvent(new HashChangeEvent('hashchange'));
@@ -239,6 +241,7 @@ class CMS {
 
 	route() {
 		Log.Debug('CMS', 'Running routing');
+		this.lastPage = window.location.pathname;
 
 		let paths = this.getPathsFromURL(),
 			type = paths[0],
