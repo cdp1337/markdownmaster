@@ -1,4 +1,4 @@
-## 4.0.0 - UNRELEASED
+## 4.0.0 - 2023-06-03
 
 ### New Features
 
