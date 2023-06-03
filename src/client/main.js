@@ -34,6 +34,7 @@ import CMSSearchElement from './addons/cms-search';
 import CMSAuthorElement from './addons/cms-author';
 import CMSPagelistElement from './addons/cms-pagelist';
 import CMSButtonElement from './addons/cms-button';
+import CMSIconElement from './addons/cms-icon';
 
 // Import specific MD renderer system
 import remarkable from './addons/loader-remarkable';
@@ -44,6 +45,7 @@ customElements.define('cms-author', CMSAuthorElement);
 customElements.define('cms-pagelist', CMSPagelistElement);
 customElements.define('cms-search', CMSSearchElement, { extends: 'input' });
 customElements.define('cms-button', CMSButtonElement, {extends: 'a'});
+customElements.define('cms-icon', CMSIconElement, {extends: 'i'});
 
 
 // Load addons
