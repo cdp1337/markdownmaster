@@ -1,3 +1,16 @@
+## 4.0.1 - 2023-06-03
+
+### New Features
+
+* #18 support pagination for listing pages
+* #19 support for cms-icon (convenience helper)
+
+### Fixes
+
+* #20 cms-search preserves search query
+* #21 hash URLs were taking over route events
+
+
 ## 4.0.0 - 2023-06-03
 
 ### New Features
