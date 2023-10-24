@@ -31,7 +31,7 @@ from templater import Templater
 from markdownloader import MarkdownLoader
 from siteconfig import SiteConfig
 
-# Create instance of FieldStorage 
+# Create instance of FieldStorage
 form = cgi.FieldStorage()
 
 try:
@@ -47,12 +47,21 @@ page = page.replace('../', '')
 page = re.sub(r'\?.*$', '', page)
 # Trim .html, we'll look up the source markdown files instead.
 page = page.replace('.html', '')
+# Trim starting '/' if present
+if page.startswith('/'):
+    page = page[1:]
 
 # Check if the page is present
-doc = os.path.join(SiteConfig.get_path_root(), page + '.md')
+md_doc = os.path.join(SiteConfig.get_path_root(), page + '.md')
+orig_doc = os.path.join(SiteConfig.get_path_root(), page + '.html')
 
-if os.path.exists(doc) and os.path.isfile(doc):
-    loader = MarkdownLoader(doc)
+if os.path.exists(orig_doc) and os.path.isfile(orig_doc):
+    # Original page requested exists, just return that original page
+    file = open(orig_doc, 'r')
+    lines = file.readlines()
+    SimpleSite.render(lines)
+elif os.path.exists(md_doc) and os.path.isfile(md_doc):
+    loader = MarkdownLoader(md_doc)
 
     # Pull in the meta fields useful for spiders
     seotitle = loader.get_meta(['seotitle', 'title'], page)

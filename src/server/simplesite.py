@@ -30,6 +30,71 @@ class SimpleSite:
     TYPE_XML = 'text/xml'
     TYPE_JSON = 'application/json'
 
+    STATUS_CODES = {
+        100: 'Continue',
+        101: 'Switching Protocols',
+        102: 'Processing',
+        103: 'Early Hints',
+        200: 'OK',
+        201: 'Created',
+        202: 'Accepted',
+        203: 'Non-Authoritative Information',
+        204: 'No Content',
+        205: 'Reset Content',
+        206: 'Partial Content',
+        207: 'Multi-Status',
+        208: 'Already Reported',
+        226: 'IM Used',
+        300: 'Multiple Choices',
+        301: 'Moved Permanently',
+        302: 'Found',
+        303: 'See Other',
+        304: 'Not Modified',
+        305: 'Use Proxy Deprecated',
+        307: 'Temporary Redirect',
+        308: 'Permanent Redirect',
+        400: 'Bad Request',
+        401: 'Unauthorized',
+        402: 'Payment Required',
+        403: 'Forbidden',
+        404: 'Not Found',
+        405: 'Method Not Allowed',
+        406: 'Not Acceptable',
+        407: 'Proxy Authentication Required',
+        408: 'Request Timeout',
+        409: 'Conflict',
+        410: 'Gone',
+        411: 'Length Required',
+        412: 'Precondition Failed',
+        413: 'Payload Too Large',
+        414: 'URI Too Long',
+        415: 'Unsupported Media Type',
+        416: 'Range Not Satisfiable',
+        417: 'Expectation Failed',
+        418: 'I\'m a teapot',
+        421: 'Misdirected Request',
+        422: 'Unprocessable Content',
+        423: 'Locked',
+        424: 'Failed Dependency',
+        425: 'Too Early',
+        426: 'Upgrade Required',
+        428: 'Precondition Required',
+        429: 'Too Many Requests',
+        431: 'Request Header Fields Too Large',
+        451: 'Unavailable For Legal Reasons',
+        500: 'Internal Server Error',
+        501: 'Not Implemented',
+        502: 'Bad Gateway',
+        503: 'Service Unavailable',
+        504: 'Gateway Timeout',
+        505: 'HTTP Version Not Supported',
+        506: 'Variant Also Negotiates',
+        507: 'Insufficient Storage',
+        508: 'Loop Detected',
+        510: 'Not Extended',
+        511: 'Network Authentication Required'
+    }
+
     type: str = ''
 
     @classmethod
@@ -42,23 +107,21 @@ class SimpleSite:
             cls.type = cls.TYPE_HTML
 
     @classmethod
+    def _header(cls, code: int = 200, headers: dict = {}) -> None:
+
+        cls._pre_render()
+
+        print('Content-Type: ' + cls.type)
+        print('Status: ' + str(code))
+        for h in headers:
+            print(h + ': ' + headers[h])
+        print()
+
+    @classmethod
     def error(cls, message: str, code: int = 500) -> None:
         """
         Render an error to the user to indicate something happened
         """
-
-        cls._pre_render()
-
-        code_names = {
-            404: 'Not Found',
-            500: 'Server Error',
-        }
-
-        try:
-            text = code_names[code]
-        except KeyError:
-            cls.error('Unsupported redirect code requested, ' + str(code))
-
         if cls.type == SimpleSite.TYPE_XML:
             template = '''
             <?xml version="1.0"?>
@@ -75,10 +138,7 @@ class SimpleSite:
             </html>
             '''
 
-        print('HTTP/1.1 ' + str(code) + ' ' + text)
-        print('Content-Type: ' + cls.type)
-        print('Status: ' + str(code))
-        print()
+        cls._header(code)
         print(template % message)
         exit()
 
@@ -87,21 +147,10 @@ class SimpleSite:
         """
         Render a crawler-compliant redirect along with the requested redirect type
         """
-
-        cls._pre_render()
-
-        code_names = {
-            301: 'Moved Permanently',
-            302: 'Found',
-            303: 'See Other',
-            307: 'Temporary Redirect',
-            308: 'Permanent Redirect',
-        }
-
         try:
-            text = code_names[code]
+            text = cls.STATUS_CODES[code]
         except KeyError:
-            cls.error('Unsupported redirect code requested, ' + str(code))
+            text = 'Redirect'
 
         if cls.type == SimpleSite.TYPE_XML:
             template = '''
@@ -119,11 +168,7 @@ class SimpleSite:
             </html>
             '''
 
-        print('HTTP/1.1 ' + str(code) + ' ' + text)
-        print('Content-Type: ' + cls.type)
-        print('Status: ' + str(code))
-        print('Location: ' + path)
-        print()
+        cls._header(code, {'Location': path})
         print(template % (text, path))
         exit()
 
@@ -133,11 +178,7 @@ class SimpleSite:
         Render a full page
         :param payload: str | dict | list
         """
-        cls._pre_render()
-
-        print('HTTP/1.1 200 OK')
-        print('Content-Type: ' + cls.type)
-        print()
+        cls._header(200)
         if cls.type == cls.TYPE_JSON:
             print(json.dumps(payload))
         else:
