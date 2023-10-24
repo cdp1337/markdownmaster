@@ -1,21 +1,32 @@
 <IfModule mod_rewrite.c>
-	Options Indexes FollowSymLinks SymLinksIfOwnerMatch
+	Options Indexes SymLinksIfOwnerMatch
 	RewriteEngine On
 
 	# Set this line to the value of config.webpath
 	RewriteBase /
 
-	# Required for SEO and crawler access to the source content of the various pages.
-	# will redirect the request to the source file so content can be provided
-	RewriteCond %{HTTP_USER_AGENT} ^.*(craftbot|download|extract|stripper|sucker|ninja|clshttp|webspider|leacher|collector|grabber|webpictures|curl|GoogleBot|bingbot|linkedinbot|mediapartners-google|GoogleImageProxy|ysearch/slurp|Baiduspider).*$ [NC]
-	RewriteCond %{REQUEST_URI} /[a-z_0-9]+/.+\.html
-	RewriteCond %{SCRIPT_FILENAME} !-f
-	RewriteCond %{SCRIPT_FILENAME} !-d
-	RewriteRule ([a-z_0-9]+)/(.+)\.html $1/$2.md [L]
+    ## Uncomment to enforce www. subdomain redirect for site
+	# RewriteCond %{HTTP_HOST} !^www\.
+    # RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
+
+	# Sitemap
+	RewriteCond %{REQUEST_URI} ^/sitemap\.xml
+	RewriteRule ^(.*) /cgi-bin/sitemap.py [L]
+
+	# Meta Feed
+	RewriteCond %{REQUEST_URI} ^/meta\.json
+	RewriteRule ^(.*) /cgi-bin/meta.py [L]
+
+    # Catch empty URLs (otherwise they get picked up by index.html)
+	RewriteCond %{REQUEST_URI} ^/$
+	RewriteRule ^(.*) /cgi-bin/crawler.py [L]
 
 	# Required for path translation,
 	# will resolve /posts/blah.html to the application index
 	RewriteCond %{SCRIPT_FILENAME} !-f
 	RewriteCond %{SCRIPT_FILENAME} !-d
-	RewriteRule ^(.*) index.html?path=%{REQUEST_URI}
+	RewriteRule ^(.*) /cgi-bin/crawler.py?page=%{REQUEST_URI} [L]
+	# Use the following Rule instead to disable server-side processing, (will have negative effects on SEO)
+	# RewriteRule ^(.*) index.html?path=%{REQUEST_URI} [L]
+
 </IfModule>
