@@ -23,27 +23,75 @@ error () {
 
 
 
-heading 'Configuration 1 of 3'
-# Prompt the user to enter their domain name
-DOMAIN=''
-while [ "$DOMAIN" == "" ]; do
-	echo -n 'Enter the domain name for your site ex "mysite.com": '
-	read DOMAIN
+STEPS=5
 
-	if [ "$DOMAIN" == "" ]; then
-		echo "ERROR, you must enter a domain name"
+
+heading "Configuration 1 of ${STEPS}"
+echo 'This should match your directory name containing the site and nginx.conf file'
+echo ''
+# Prompt the user to enter their domain name
+DIRECTORY=''
+while [ "$DIRECTORY" == "" ]; do
+	echo -n 'Enter the domain name for your site ex "mysite.com": '
+	read DIRECTORY
+
+	if [ "$DIRECTORY" == "" ]; then
+		echo 'ERROR, you must enter a domain name'
 	fi
 done
 
-if [[ $DOMAIN == www.* ]]; then
-	WWWALIAS=0
-	SERVERLINE="${DOMAIN}"
+
+heading "Configuration 2 of ${STEPS}"
+echo '"www" aliasing'
+echo ''
+if [[ $DIRECTORY == www.* ]]; then
+  # Site starts with "www.", ask if the user wants to include the naked domain too.
+  DOMAINALIAS="${DIRECTORY:4}"
 else
-	WWWALIAS=1
-	SERVERLINE="${DOMAIN} www.${DOMAIN}"
+  # Site does not start with 'www', so prompt the user if they want to use it.
+	DOMAINALIAS="www.${DIRECTORY}"
 fi
 
-heading 'Configuration 2 of 3'
+echo -n "Enable listening for ${DOMAINALIAS} also? (Y/n): "
+read Q
+case "$Q" in
+  n*|N* )
+    DOMAINALIAS="";;
+esac
+
+
+heading "Configuration 3 of ${STEPS}"
+echo 'Default domain'
+echo ''
+if [ -n "$DOMAINALIAS" ]; then
+  # Allow the user to pick which the primary domain should be,
+  # ie: they may have example.com as the directory but prefer www.example.com to be used
+  # or www.example.com as domain but prefer example.com for the public URL.
+  echo 'Which is the primary domain, ie: the URL users should get?'
+  echo "1) $DIRECTORY"
+  echo "2) $DOMAINALIAS"
+  echo -n 'Enter 1-2: '
+  read Q
+
+  if [ "$Q" == "2" ]; then
+    DOMAIN="$DOMAINALIAS"
+    DOMAINALIAS="$DIRECTORY"
+  else
+    DOMAIN="$DIRECTORY"
+  fi
+
+  # Server listen has multiple entries
+  SERVERLINE="$DOMAIN $DOMAINALIAS"
+else
+  # No alias requested, just use the primary.
+  echo '(skipping, only one domain being used)'
+  DOMAIN="$DIRECTORY"
+  # Server listen only has a single entry
+  SERVERLINE="$DOMAIN"
+fi
+
+
+heading "Configuration 4 of ${STEPS}"
 # Ask of https should be enabled
 echo -n 'Enable HTTPS? (Y/n): '
 read HTTPS
@@ -56,12 +104,13 @@ case "$HTTPS" in
 		PROTO="https://";;
 esac
 
-heading 'Configuration 3 of 3'
+
+heading "Configuration 5 of ${STEPS}"
 # Lookup if we can find the path automatically
-debug "Searching for ${DOMAIN}/nginx.conf..."
-MATCHES=$(find / -path "*/${DOMAIN}/nginx.conf" | wc -l)
+debug "Searching for ${DIRECTORY}/nginx.conf..."
+MATCHES=$(find / -path "*/${DIRECTORY}/nginx.conf" | wc -l)
 if [ "$MATCHES" -eq 1 ]; then
-	SITEPATH="$(find / -path "*/${DOMAIN}/nginx.conf" | xargs dirname)"
+	SITEPATH="$(find / -path "*/${DIRECTORY}/nginx.conf" | xargs dirname)"
 
 	echo "Found site at ${SITEPATH}"
 	echo -n 'Press [ENTER] to use detected path or enter a new one if incorrect: '
@@ -84,23 +133,7 @@ fi
 
 
 heading 'Install Configuration 1 of 1'
-if [ $WWWALIAS -eq 1 ]; then
-  cat << EOT
-Edit cgi-bin/config.ini and set EITHER line under "[site]"
-(replacing the current values):
-
-
-host = ${PROTO}${DOMAIN}
-
-OR (if you prefer www.${DOMAIN} to be used)
-
-host = ${PROTO}www.${DOMAIN}
-
-
-Save the file and this script will automatically resume when synced.
-EOT
-else
-  cat << EOT
+cat << EOT
 Edit cgi-bin/config.ini and set the following line under "[site]"
 (replacing the current values):
 
@@ -110,7 +143,6 @@ host = ${PROTO}${DOMAIN}
 
 Save the file and this script will automatically resume when synced.
 EOT
-fi
 
 READY=0
 while [ $READY -eq 0 ]; do
@@ -119,12 +151,6 @@ while [ $READY -eq 0 ]; do
     READY=1
     success 'config.ini configuration detected'
 	fi
-	if [ $WWWALIAS -eq 1 ]; then
-    if grep -q "host = ${PROTO}www.${DOMAIN}" "${SITEPATH}/cgi-bin/config.ini"; then
-      READY=1
-      success 'config.ini configuration detected'
-    fi
-  fi
 done
 
 
@@ -140,14 +166,14 @@ chmod +x "${SITEPATH}/cgi-bin/crawler.py"
 chmod +x "${SITEPATH}/cgi-bin/sitemap.py"
 chmod +x "${SITEPATH}/cgi-bin/meta.py"
 
-debug "Installing config to /etc/nginx/sites-enabled/${DOMAIN}.conf"
+debug "Installing config to /etc/nginx/sites-enabled/${DIRECTORY}.conf"
 sleep 1
-if [ -e "/etc/nginx/sites-enabled/${DOMAIN}.conf" ]; then
-  error "${DOMAIN}.conf already exists, NOT overwriting (but resuming install)"
+if [ -e "/etc/nginx/sites-enabled/${DIRECTORY}.conf" ]; then
+  error "${DIRECTORY}.conf already exists, NOT overwriting (but resuming install)"
 else
   # Setup nginx
   if [ $HTTPS -eq 0 ]; then
-    cat > /etc/nginx/sites-enabled/${DOMAIN}.conf << EOD
+    cat > /etc/nginx/sites-enabled/${DIRECTORY}.conf << EOD
 # Virtual host configuration for ${DOMAIN}
 
 server {
@@ -160,7 +186,7 @@ server {
 
 EOD
   else
-    cat > /etc/nginx/sites-enabled/${DOMAIN}.conf << EOD
+    cat > /etc/nginx/sites-enabled/${DIRECTORY}.conf << EOD
 # Virtual host configuration for ${DOMAIN}
 
 server {
@@ -168,7 +194,7 @@ server {
 	listen [::]:80;
 	server_name ${SERVERLINE};
 	# enforce https
-	return 301 https://\$server_name:443\$request_uri;
+	return 301 https://${DOMAIN}\$request_uri;
 }
 
 server {
