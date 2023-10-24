@@ -27,9 +27,9 @@ like to have the slider available.  (For example `layouts/page.html`):
 
 ```html
 <% if( data.backgrounds ){ %>
-    <div class="page-backgrounds">
+    <div class="page-backgrounds" data-timeout="10000">
         <% data.backgrounds.forEach(function(img) { %>
-            <img src="<%= img %>"/>
+            <img src="<%= img %>" alt=""/>
         <% }) %>
     </div>
 <% } %>
