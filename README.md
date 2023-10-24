@@ -72,6 +72,7 @@ For advanced usage of this framework,
 take a look through the other [post examples](examples/posts/) and the various
 [documentation available](docs/).
 
+* [Using extras](docs/extras-overview.md)
 * [Using plugins](docs/plugins-overview.md)
 * [Hooking into native events](docs/document-events.md)
 * [Authoring content](docs/authoring-pages.md)

@@ -1,8 +1,9 @@
 {
   "name": "markdownmaster",
-  "version": "4.0.0",
+  "title": "MarkdownMaster CMS",
+  "version": "4.0.2",
   "type": "module",
-  "description": "The JavaScript Site Generator, forked from Chris Diana's CMS.js",
+  "description": "Client-sided javascript static site framework, forked from Chris Diana's CMS.js",
   "keywords": [
     "client-side, javascript, site-generator, cms, markdown"
   ],

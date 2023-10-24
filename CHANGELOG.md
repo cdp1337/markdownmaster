@@ -1,3 +1,15 @@
+## 4.0.2 - 2023-10-23
+
+### New Features
+
+* Include a simple background-slider plugin
+* Include fslightbox-basic for a simple lightbox
+
+### Fixes
+
+* Fix support for Apache web servers
+
+
 ## 4.0.1 - 2023-06-03
 
 ### New Features

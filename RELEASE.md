@@ -3,13 +3,12 @@
 
 ## New Features
 
-* #18 support pagination for listing pages
-* #19 support for cms-icon (convenience helper) 
+* Include a simple background-slider plugin
+* Include fslightbox-basic for a simple lightbox
 
 ## Fixes
 
-* #20 cms-search preserves search query
-* #21 hash URLs were taking over route events
+* Fix support for Apache web servers
 
 
 ## Changes
