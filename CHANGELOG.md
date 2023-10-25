@@ -11,6 +11,10 @@
 * Switch example site to use minified version of app by default
 * Include default config for Apache expiry headers (for caching)
 
+### Changes
+
+* Mastodon Share is now an element as opposed to a plugin
+
 
 ## 4.0.2 - 2023-10-23
 
