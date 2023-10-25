@@ -374,7 +374,13 @@ class FileCollection {
 		}
 
 		if (typeof (param) === 'function') {
+			// Allow user to define their own function for sorting
 			this[this.type].sort(param);
+		} else if (param === 'random') {
+			// Allow convenience method for randomizing results
+			this[this.type].sort(() => {
+				return 0.5 - Math.random();
+			});
 		} else {
 			let params = [];
 

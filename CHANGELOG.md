@@ -2,11 +2,14 @@
 
 ### New Features
 
+* Add 'random' as supported sort parameter
+
 ### Fixes
 
 * Fix cms-* plugins trying to run before CMS was initialized
 * Switch example site to use minified version of app by default
 * Include default config for Apache expiry headers (for caching)
+
 
 ## 4.0.2 - 2023-10-23
 

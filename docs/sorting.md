@@ -11,6 +11,7 @@ Version 3.1.0 introduces new sorting parameters for use in site configuration an
 
 | Sort Key    | Sort Description               |
 |-------------|--------------------------------|
+| random      | Randomized order               |
 | title       | Page Title A -> Z              |
 | title-r     | Page Title Z -> A              |
 | datetime    | Date Modified Oldest -> Newest |
