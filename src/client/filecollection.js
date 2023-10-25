@@ -560,13 +560,13 @@ class FileCollection {
 	 *
 	 * @param {number} results
 	 */
-	paginate(results) {
+	paginate(results, page) {
 		results = results || 20;
 		let u = new URLSearchParams(window.location.search),
 			start, end;
 
 		this.resultsPerPage = results;
-		this.page = u.has('page') ? parseInt(u.get('page')) : 1;
+		this.page = page || (u.has('page') ? parseInt(u.get('page')) : 1);
 		this.totalResults = this[this.type].length;
 		this.totalPages = Math.ceil(this.totalResults / this.resultsPerPage);
 

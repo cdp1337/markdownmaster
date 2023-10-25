@@ -3,6 +3,7 @@
 ### New Features
 
 * Add 'random' as supported sort parameter
+* Paginate now supports 'page' parameter
 
 ### Fixes
 
