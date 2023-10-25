@@ -68,6 +68,11 @@ export default class CMSAuthorElement extends HTMLElement {
 			return;
 		}
 
+		if (!(Object.hasOwn(window, 'CMS') && window.CMS != null)) {
+			// Only run once the CMS is loaded
+			return;
+		}
+
 		// Load the collection from the CMS
 		collection = window.CMS.getCollection('authors');
 		if (!collection) {

@@ -51,7 +51,10 @@ export default class CMSSearchElement extends HTMLInputElement {
 	}
 
 	search() {
-		window.CMS.search(this.dataset.type, this.value);
+		if (Object.hasOwn(window, 'CMS') && window.CMS != null) {
+			// Only run once the CMS is loaded
+			window.CMS.search(this.dataset.type, this.value);
+		}
 	}
 }
 

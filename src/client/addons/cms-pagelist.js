@@ -61,8 +61,14 @@ export default class CMSPagelistElement extends HTMLElement {
 			return;
 		}
 
+		if (!(Object.hasOwn(window, 'CMS') && window.CMS != null)) {
+			// Only run once the CMS is loaded
+			return;
+		}
+
 		collection = window.CMS.getCollection(type);
 		if (collection === null) {
+			// Collection not found
 			return;
 		}
 

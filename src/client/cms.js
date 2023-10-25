@@ -60,7 +60,9 @@ class CMS {
 		this.pluginsInitialized = [];
 		this.lastPage = null;
 
-		// Link to window for global functions
+		// Register the CMS object as a global variable
+		// This is useful for plugins which tap into internal functional for features such as
+		// loading pages, searching, etc.
 		view.CMS = this;
 
 		// Allow the user to switch to debug mode, this will generate additional messages in the console
