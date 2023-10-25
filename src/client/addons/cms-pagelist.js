@@ -53,6 +53,7 @@ export default class CMSPagelistElement extends HTMLElement {
 		let type = this.getAttribute('type'),
 			layout = this.getAttribute('layout'),
 			sort = this.getAttribute('sort'),
+			limit = this.getAttribute('limit'),
 			filters = {},
 			has_filters = false,
 			collection;
@@ -111,6 +112,9 @@ export default class CMSPagelistElement extends HTMLElement {
 		}
 		if (has_filters) {
 			collection.filterAttributeSearch(filters);
+		}
+		if (limit !== null) {
+			collection.paginate(parseInt(limit), 1);
 		}
 
 		window.CMS.fetchLayout(layout, collection)

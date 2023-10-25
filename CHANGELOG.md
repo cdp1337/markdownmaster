@@ -4,6 +4,7 @@
 
 * Add 'random' as supported sort parameter
 * Paginate now supports 'page' parameter
+* Page-list now supports 'limit' parameter
 
 ### Fixes
 
