@@ -25,7 +25,7 @@
  * Simple icon to help with fontawesome's difference between fa and fab.
  *
  */
-export default class CMSSearchElement extends HTMLElement {
+export default class CMSIconElement extends HTMLElement {
 
 	constructor() {
 		super();
