@@ -19,7 +19,7 @@
     <a itemprop="url" href="<%= data.mastodon %>"><%= data.title %> on Mastodon</a>
   <% } %>
 
-  <cms-pagelist
+  <div is="cms-pagelist"
     type="posts"
     layout="post-list-embed"
     sort="datetime-r"
@@ -28,5 +28,5 @@
     filter-tags="Configuration"
   >
     Loading Content...
-  </cms-pagelist>
+  </div>
 </article>
