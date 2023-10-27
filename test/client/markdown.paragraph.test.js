@@ -57,4 +57,23 @@ I should be centered {.center}
 <li>blah</li>
 </ul>`);
 	});
+
+	/**
+	 * Test that short paragraphs with a single element (such as a button), send the extended attributes
+	 * to the correct element.
+	 */
+	it('short snippets with extended attributes', () => {
+		let txt = '[this thing](https://example.tld){.purple .large is=cms-button title="Goes somewhere"}',
+			html = renderer(txt);
+		expect(html.trim()).toEqual('<p><a class="purple large" is="cms-button" title="Goes somewhere" href="https://example.tld">this thing</a></p>');
+	});
+
+	/**
+	 * Both short snippet xattrs and paragraph xattrs
+	 */
+	it('short snippets with extended atts and p atts', () => {
+		let txt = '[this thing](https://example.tld){.purple .large is=cms-button title="Goes somewhere"} {.center}',
+			html = renderer(txt);
+		expect(html.trim()).toEqual('<p class="center"><a class="purple large" is="cms-button" title="Goes somewhere" href="https://example.tld">this thing</a></p>');
+	});
 });

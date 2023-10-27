@@ -59,12 +59,12 @@ export default (remarkable) => {
 
 		state.line = nextLine;
 		if (content.length) {
-			params = content.match(/{[a-zA-Z0-9 #;:=_\-[&\].']+}$/);
+			params = content.match(/[ \n]{[a-zA-Z0-9 #;:=_\-[&\].']+}$/);
 			if (params !== null && params.length >= 1) {
 				// Trim the {...} off the parameters
-				params = params[0].substring(1, params[0].length - 1);
+				params = params[0].substring(2, params[0].length - 1);
 				// Trim the entire string off the end of the text now that we have the parameters
-				content = rtrim(content.substring(0, content.length - params.length - 2));
+				content = rtrim(content.substring(0, content.length - params.length - 3));
 				// Paragraphs will escape quotes, that won't do here. (we actually want them)
 				params = params.replaceAll('&quot;', '"');
 				atts = new AttributeBuilder(params);
