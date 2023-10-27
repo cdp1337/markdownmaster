@@ -1,4 +1,4 @@
-## 4.NEXT - 2023-XX-XX
+## 4.1.0 - 2023-XX-XX
 
 ### New Features
 
@@ -11,10 +11,12 @@
 * Fix cms-* plugins trying to run before CMS was initialized
 * Switch example site to use minified version of app by default
 * Include default config for Apache expiry headers (for caching)
+* Fix paragraph stealing extended attributes for simple blocks
 
 ### Changes
 
 * Mastodon Share is now an element as opposed to a plugin
+* Switch to `is=...` for all custom elements
 
 
 ## 4.0.2 - 2023-10-23

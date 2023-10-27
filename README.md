@@ -15,9 +15,12 @@ the auto-index feature in either
 or [Nginx](https://nginx.org/en/docs/http/ngx_http_autoindex_module.html) and performs 
 all processing of templates and content within the browser.
 
-Note* there _is_ a server-side component written as a Python CGI script to 
-better facilitate crawlers, bots, and search engines.  This component utilizes the 
-same flat files and templates as the client-side application.
+Note* for SEO reasons, there is a server-side Python component
+which will return a generated version of the requested page similar to the
+client-side application.  This is unnecessary for normal users, but is required
+to ensure that crawlers can access the site data.
+
+This feature can be disabled via `.htaccess` or `nginx.conf` if desired.
 
 Because there is no database, registry, or administration of pages, 
 deploying new pages is as simple as just uploading Markdown files to your server.
@@ -45,8 +48,10 @@ This project is originally based from
 * Search, filtering, tagging and sorting
 * Apache, Nginx, Mail-in-a-box, and Nextcloud support
 * Small footprint
-* [marked.js](https://github.com/markedjs/marked) embedded
-* Automatic body classes based on page
+* [marked.js](https://github.com/markedjs/marked) embedded (still included, but not 
+  used by default)
+* [Remarkable](https://github.com/jonschlinkert/remarkable) embedded
+* Automatic body classes based on page (addon)
 * Native JS events
 * Full [History API](https://developer.mozilla.org/en-US/docs/Web/API/History) support
 * Crawler and SEO support for most content
@@ -62,7 +67,9 @@ Check out a [live working site](https://veraciousnetwork.com)!
 
 1. Download the [latest release](https://github.com/cdp1337/markdownmaster/releases/latest)
 2. Setup environment, refer to specific documentation for 
-   [NextCloud](docs/INSTALL.nextcloud-nginx.md) or [Mail-in-a-Box](docs/INSTALL.mailinabox.md)
+   [NextCloud](docs/INSTALL.nextcloud-nginx.md),
+   [Mail-in-a-Box](docs/INSTALL.mailinabox.md),
+   or [Apache](docs/INSTALL.apache.md) for more information.
 3. [Configure config.js and config.ini](docs/site-configuration.md) to your liking
 
 
@@ -76,8 +83,9 @@ take a look through the other [post examples](examples/posts/) and the various
 * [Using plugins](docs/plugins-overview.md)
 * [Hooking into native events](docs/document-events.md)
 * [Authoring content](docs/authoring-pages.md)
-* [Content Sorting](docs/sorting.md)
-* [Development Guide](docs/development.md)
+* [Extended attributes](docs/markdown-extended-attributes.md)
+* [Content sorting](docs/sorting.md)
+* [Development guide & build instructions](docs/development.md)
 
 
 ## How it works

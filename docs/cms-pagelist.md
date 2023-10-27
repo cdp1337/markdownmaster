@@ -18,7 +18,14 @@ Render a list of pages which match given parameters.
 **Example**
 
 ```.html
-<cms-pagelist type="pages" layout="page-list" link="pages/games/" sort="title" limit="5">
+<div 
+    is="cms-pagelist" 
+    type="pages" 
+    layout="page-list" 
+    link="pages/games/" 
+    sort="title" 
+    limit="5"
+>
   Loading Content...
-</cms-pagelist>
+</div>
 ```

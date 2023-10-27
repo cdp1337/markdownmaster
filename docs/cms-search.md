@@ -11,5 +11,5 @@ At the moment no parameters are configurable
 **Example**
 
 ```.html
-<cms-search type="search" placeholder="Search Site"/>
+<input is="cms-search" type="search" placeholder="Search Site"/>
 ```

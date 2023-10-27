@@ -105,6 +105,23 @@ call_to_action:
 | tags      | Comma-separated list of tags for the content on this page             |
 | image     | Fully resolve or relative path to preview image of this page          |
 
+### Protected Attributes
+
+DO NOT USE THESE! 
+These are reserved for internal use only, but are available for use in your templates.
+
+| Attribute   | Description                                                           |
+|-------------|-----------------------------------------------------------------------|
+| body        | The raw markdown content of this page                                 |
+| bodyLoaded  | The rendered HTML content of this page                                |
+| config      | The configuration object for this page                                |
+| content     | The rendered HTML content of this page                                |
+| name        | The filename of this page                                             |
+| permalink   | The permalink of this page                                            |
+| type        | The type of content this is (page, post, etc)                         |
+| url         | The URL of this page                                                  |
+
+
 Other attributes can be used, but will need to be added within your layout templates to make use of them.
 
 
@@ -149,38 +166,3 @@ relative to that file.  Top-level paths (starting with `/`) and absolute request
 (`https://...`) paths are also supported.
 
 
-## Extended Markdown Functionality
-
-All base markdown features will work, and a number of extended features have 
-been added to better support web publishing.
-
-### HTML Attributes
-
-HTML attributes can be set on some elements, including:
-
-* paragraphs
-* links
-* images
-
-To use HTML attributes, append `{...}` to the end of the line with the HTML tags inside.
-As some examples:
-
-Short paragraph with `class="center"` added
-
-```markdown
-This is a short example paragraph {.center}
-```
-
-This link will have a `title` and `target` set
-
-```md
-[Go Search](https://www.duckduckgo.com) {title="Search for something" target=_blank}
-```
-
-This image will have a border
-
-```markdown
-![test image](test.png) {style="border:5px solid pink;"}
-```
-
-Any valid HTML tag can be used and CSS shorthand for class (`.` prefix) and ID (`#` prefix) are also supported.

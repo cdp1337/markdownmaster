@@ -11,8 +11,8 @@ At the moment no parameters are configurable
 **Example**
 
 ```.html
-<cms-mastodon-share href="#" class="mastodon-share-button">
-  <cms-icon icon="mastodon"/>
+<a is="cms-mastodon-share" href="#">
+  <i is="cms-icon" icon="mastodon"/>
   Share on Mastodon
-</cms-mastodon-share>
+</a>
 ```

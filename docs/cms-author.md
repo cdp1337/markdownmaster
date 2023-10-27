@@ -24,6 +24,8 @@ The template to use for rendering the author content
 
 ```html
 <% if(data.author) { %>
-    <cms-author author="<%= data.author %>" layout="author-embed"><%= data.author %></cms-author>
+    <div is="cms-author" author="<%= data.author %>" layout="author-embed">
+        <%= data.author %>
+    </div>
 <% } %>
 ```

@@ -35,5 +35,5 @@ Renders to
 Also usable from within Markdown pages
 
 ```markdown
-[Download this Thing](https://site.tld) {is=cms-button icon=download}
+[Download this Thing](https://site.tld){is=cms-button icon=download}
 ```

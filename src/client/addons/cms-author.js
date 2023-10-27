@@ -21,7 +21,7 @@
  */
 
 /**
- * <cms-author> element definition
+ * <div is=cms-author> element definition
  */
 export default class CMSAuthorElement extends HTMLElement {
 	static get observedAttributes() {

@@ -15,5 +15,5 @@ If a "brand" icon is used, the brand library will be loaded.
 **Example**
 
 ```.html
-<cms-icon icon="gitlab"/>
+<i is="cms-icon" icon="gitlab"/>
 ```
