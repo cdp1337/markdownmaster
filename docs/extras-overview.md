@@ -31,6 +31,14 @@ Basic lightbox plugin for image and video galleries.
 * [Install Guide](../examples/extras/fslightbox-basic/INSTALL.md)
 
 
+## Matomo Analytics
+
+Provides integration with a privacy-focused analytics platform.
+
+* [Self-Hosted Documentation](https://matomo.org/matomo-on-premise/)
+* [Details](../examples/extras/matomo/README.md)
+* [Install Guide](../examples/extras/matomo/INSTALL.md)
+
 ## PrismJS
 
 Provides syntax highlighting for code blocks.
