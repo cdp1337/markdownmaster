@@ -41,8 +41,8 @@ import remarkable from './addons/loader-remarkable';
 
 
 // Load custom elements
-customElements.define('cms-author', CMSAuthorElement, {extends: 'div'});
-customElements.define('cms-pagelist', CMSPagelistElement, {extends: 'div'});
+customElements.define('cms-author', CMSAuthorElement);
+customElements.define('cms-pagelist', CMSPagelistElement);
 customElements.define('cms-search', CMSSearchElement, { extends: 'input' });
 customElements.define('cms-button', CMSButtonElement, {extends: 'a'});
 customElements.define('cms-icon', CMSIconElement, {extends: 'i'});
