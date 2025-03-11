@@ -1,8 +1,10 @@
 # MarkdownMaster CMS
 
-<!-- @todo get a new logo 
-![CMS.js Logo](img/logo-md.png)
--->
+Development has moved to [eVAL-Agency/MarkdownMasterCMS](https://github.com/eVAL-Agency/MarkdownMasterCMS)
+
+With new website at [markdownmaster.com](https://markdownmaster.com)
+
+---
 
 MarkdownMaster CMS is a 100%* client-side, no-database, flat-file framework to 
 render a full HTML site from flat Markdown content files and HTML templates, 
